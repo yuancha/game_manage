@@ -28,6 +28,7 @@ public class GlobalBean {
 	@PostConstruct
 	private void init() {
 		gamePackage = FileUtil.LoadPopertiesFile("config/gamePackage.properties");
+		log.info("game package map -> {}",gamePackage);
 		log.info("============>初始加载properties文件成功");
 	}
 	/**

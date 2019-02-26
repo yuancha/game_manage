@@ -45,7 +45,7 @@ public class OperationController {
 	
 	@GetMapping("/fileManage")
 	public String fileManage() {
-		return "fileManage";
+		return "test2";
 	}
 	
 	//显示列表
