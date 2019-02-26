@@ -1,0 +1,55 @@
+server:
+  port: 9100
+  
+spring:
+  servlet:
+    multipart:
+      max-file-size: 120MB
+      max-request-size: 200MB
+  
+  profiles:
+    active: 154
+  
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    initialSize: 10
+    minIdle: 10
+    maxIdle: 100
+    maxActive: 100
+    maxWait: 6000
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 180000
+    validationQuery: select 1
+    validationInterval: 60000
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+    maxPoolPreparedStatementPerConnectionSize: 20
+    filters: stat,wall,slf4j
+    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+    useGlobalDataSourceStat: true   
+    logAbandoned: true
+    removeAbandoned: true
+    removeAbandonedTimeout: 60
+    jmxEnabled: true
+    
+mybatis:
+  type-aliases-package: com.llmj.oss.model
+  mapper-locations: classpath:mybatis-mappers/*Mapper.xml    
+  
+upload:
+  savepath:
+    android: F:/save/android/
+    ios: F:/save/ios/
+    tmpsave: F:/save/
+    
+logging:
+  config: classpath:logback-admin.xml
+log:
+  level:
+    root: info
+    my: debug
+  file: logs/admin-oss.log
+  maxsize: 30MB
+  maxhistory: 168
