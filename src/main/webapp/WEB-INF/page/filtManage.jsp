@@ -1,4 +1,6 @@
-<!doctype html>
+<%@ page language="java" contentType="text/html; charset=utf-8"
+    pageEncoding="utf-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="en"><head>
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -37,6 +39,7 @@
     
   
         <div class="page-container">
+        	<%@ include file ="nav.jsp" %>
             <div class="sidebar-menu toggle-others fixed" style="">
                 
                 <div class="sidebar-menu-inner ps-container ps-active-y">	

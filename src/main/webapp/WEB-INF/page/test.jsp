@@ -1,3 +1,6 @@
+<%@ page language="java" contentType="text/html; charset=utf-8"
+    pageEncoding="utf-8"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
     <title>some test</title>
@@ -19,7 +22,7 @@
                 type: "POST",//方法类型
                 dataType: "json",//预期服务器返回的数据类型
                 contentType: "application/json; charset=utf-8",
-                url: "/oss/refreshPack" ,//url
+                url: "/oss/getFilesInfo" ,//url
                 data: data,
                 success: function (result) {
                     console.log(result);//打印服务端返回的数据(调试用)
@@ -37,6 +40,7 @@
 </head>
 <body>
 <div id="form-div">
+	<%-- <%@include file = "nav.jsp" %> --%>
     <form id="form1" onsubmit="return false" action="##" method="post">
     	<p>id：<input name="id" type="number" id="id" tabindex="1" size="15" value=""/></p>
         <p>游戏id：<input name="gameId" type="number" id="gameId" tabindex="1" size="15" value="65537"/></p>
