@@ -16,7 +16,10 @@ public class RespEntity {
 	
 	private int code;
 	private String message;
+	private Object online;	//线上版本 
 	private Object data;
+	
+	public RespEntity() {}
 	
 	public RespEntity(int code,String message) {
 		this.code = code;

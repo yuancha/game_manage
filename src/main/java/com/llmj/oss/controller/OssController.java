@@ -59,6 +59,7 @@ public class OssController {
 	@ResponseBody
 	public RespEntity getFilesInfo(@RequestBody FileOperation param) {
 		List<UploadFile> data = null;
+		RespEntity resp = new RespEntity();
 		try {
 			int gameId = param.getGameId();
 			int type = param.getGameType();
@@ -70,12 +71,22 @@ public class OssController {
 				return new RespEntity(RespCode.GAME_PACKAGE);
 			}
 			String tableName = getTableName(state);
+			
+			List<UploadFile> online = uploadDao.selectOnline(tableName,packName, IConsts.UpFileState.online.getState(), type);
+			if (online.size() > 1) {
+				log.error("线上版本数据出错，size : {},packName:{},type:{}",online.size(),packName,type);
+				return new RespEntity(-2,"线上版本数据出错");
+			}
+			if (!online.isEmpty()) {
+				resp.setOnline(online.get(0));
+			}
 			data = uploadDao.getFiles(tableName,packName, IConsts.UpFileState.delete.getState(), type);
+			resp.setData(data);
 		} catch (Exception e) {
 			log.error("getFilesInfo error,Exception -> {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);
 		}
-		return new RespEntity(RespCode.SUCCESS,data);
+		return resp;
 	}
 	
 	//删除文件

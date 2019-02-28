@@ -67,7 +67,7 @@ public class ViewResolverConfiguration {
         @Override
         public void addResourceHandlers(ResourceHandlerRegistry registry) {
             registry.addResourceHandler("/img/**").addResourceLocations("/img/");
-            registry.addResourceHandler("/static/**").addResourceLocations("WEB-INF/static/");
+            registry.addResourceHandler("/static/**").addResourceLocations("/WEB-INF/static/");
         }
     }
 }

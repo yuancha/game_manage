@@ -29,7 +29,7 @@ public interface UploadDao {
 	@Select("select * from ${tableName} where id=#{id}")
 	UploadFile selectById(@Param("id") int id,@Param("tableName") String tableName);
 	
-	@Select("select * from ${tableName} where packName = #{packName} and type = #{type} and state != #{state}")
+	@Select("select * from ${tableName} where packName = #{packName} and type = #{type} and state != #{state} order by upTime desc")
 	List<UploadFile> getFiles(@Param("tableName") String tableName,@Param("packName") String packName,@Param("state") int state,@Param("type") int type);
 	
 	@Update("update ${tableName} set state=#{state},operTime=now(),ossPath=#{ossPath} where id=#{id}")
@@ -40,4 +40,7 @@ public interface UploadDao {
 	
 	@Update("update ${tableName} set state=#{after} where state=#{before} and packName=#{file.packName} and type=#{file.type}")
 	void updateState(@Param("tableName") String tableName,@Param("before") int before,@Param("after") int after,@Param("file") UploadFile file);
+	
+	@Select("select * from ${tableName} where packName = #{packName} and type = #{type} and state = #{state}")
+	List<UploadFile> selectOnline(@Param("tableName") String tableName,@Param("packName") String packName,@Param("state") int state,@Param("type") int type);
 }
