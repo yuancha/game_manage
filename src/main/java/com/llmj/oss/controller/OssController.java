@@ -44,7 +44,7 @@ public class OssController {
 	
 	@GetMapping("/fileManage")
 	public String fileManage() {
-		return "test";
+		return "fileManage";
 	}
 	
 	private String getTableName (int state) {

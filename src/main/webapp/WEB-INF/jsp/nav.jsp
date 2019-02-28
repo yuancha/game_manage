@@ -1,5 +1,4 @@
-<%@ page language="java" contentType="text/html; charset=utf-8"
-    pageEncoding="utf-8"%>
+<%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
 <div class="sidebar-menu toggle-others fixed" style="">
                 
                 <div class="sidebar-menu-inner ps-container ps-active-y">	
@@ -24,7 +23,7 @@
                                 <span class="badge badge-success">7</span>
                             </a>
                             
-                            <a href="#" data-toggle="mobile-menu">
+                            <a href="#" data-toggle="mobile-menu" style="background: #fff;width: 20px;">
                                 <i class="fa-bars"></i>
                             </a>
                         </div>
@@ -35,73 +34,64 @@
                     
                             
                     <ul id="main-menu" class="main-menu">
-                          <li class="has-sub">
-                            <a href="#">
-                                <i class="linecons-cog"></i>
+                          <li>
+                            <a href="#" id='65537'>
                                 <span class="title">内蒙</span>
                             </a>
                           
                         </li>
-                        <li class="has-sub">
-                            <a href="#">
-                                <i class="linecons-desktop"></i>
+                        <li class="active">
+                            <a href="#" id='888888'>
                                 <span class="title">淮北</span>
                             </a>
                           
                         </li>
-                        <li class="opened active expanded has-sub">
+                        <li>
                             <a href="#">
-                                <i class="linecons-note"></i>
+
                                 <span class="title">通辽</span>
                             </a>
                             
                         </li>
                         <li>
                             <a href="#">
-                                <i class="linecons-star"></i>
                                 <span class="title">海南</span>
                             </a>
                         </li>
-                        <li class="has-sub">
+                        <li>
                             <a href="#">
-                                <i class="linecons-mail"></i>
                                 <span class="title">山西</span>
                                 <!-- <span class="label label-success pull-right">5</span> -->
                             </a>
                            
                         </li>
-                        <li class="has-sub">
+                        <li>
                             <a href="#">
-                                <i class="linecons-database"></i>
                                 <span class="title">福建</span>
                             </a>
                         
                         </li>
-                        <li class="has-sub">
+                        <li>
                             <a href="forms-native.html">
-                                <i class="linecons-params"></i>
                                 <span class="title">齐齐哈尔</span>
                             </a>
                         
                         </li>
-                        <li class="has-sub">
+                        <li>
                             <a href="#">
-                                <i class="linecons-beaker"></i>
                                 <span class="title">云南</span>
                                 <!-- <span class="label label-purple pull-right hidden-collapsed">New Items</span> -->
                             </a>
                            
                         </li>
-                        <li class="has-sub">
+                        <li>
                             <a href="#">
-                                <i class="linecons-globe"></i>
                                 <span class="title">我是大A王</span>
                             </a>
                           
                         </li>
-                        <li class="has-sub">
+                        <li>
                             <a href="#">
-                                <i class="linecons-cloud"></i>
                                 <span class="title">发发填大坑</span>
                             </a>
                            
