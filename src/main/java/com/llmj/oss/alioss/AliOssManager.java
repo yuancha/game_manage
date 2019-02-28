@@ -22,9 +22,10 @@ import lombok.extern.slf4j.Slf4j;
 public class AliOssManager {
 	
 	public static void main(String[] args) {
-		/*AliOssManager obj = new AliOssManager();
-		String ossPath = ossBasePath + "123.txt";
-		obj.uploadFileByByte(ossPath,"hello");*/
+		AliOssManager mgr = new AliOssManager();
+		String source = "yctest/test/com.ffylmj.taiding/android/ffylmj_formal_20190215_03.apk";
+		String target = "yctest/online/com.ffylmj.taiding/android/ffylmj_formal_20190215_01.apk";
+		System.out.println(mgr.fileIsExist(source));
 	}
 	
 	private static String endpoint = "http://oss-cn-beijing.aliyuncs.com";
@@ -148,8 +149,27 @@ public class AliOssManager {
 		}
 		return ossOnline;
 	}
-
-    
+	
+	/**
+	 * 复制文件
+	 * @param ossPath
+	 * @return
+	 */
+	public boolean copyFile(String sourcePath,String targetPath) {
+    	OSSClient ossClient = null;
+    	boolean success = false;
+    	try {
+    		ossClient = getClient();
+    		ossClient.copyObject(bucketName, sourcePath, bucketName, targetPath);
+    		success = true;
+    	} catch (Exception e) {
+        	log.error("oss copyFile error,Exception -> {}",e);
+        } finally {
+			if (ossClient != null) 
+				ossClient.shutdown();
+		}
+    	return success;
+    }
     
 	/**
 	 * 替换plist指定内容

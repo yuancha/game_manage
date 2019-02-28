@@ -22,7 +22,7 @@
                 type: "POST",//方法类型
                 dataType: "json",//预期服务器返回的数据类型
                 contentType: "application/json; charset=utf-8",
-                url: "/oss/getFilesInfo" ,//url
+                url: "/oss/copyFile" ,//url
                 data: data,
                 success: function (result) {
                     console.log(result);//打印服务端返回的数据(调试用)
@@ -45,6 +45,7 @@
     	<p>id：<input name="id" type="number" id="id" tabindex="1" size="15" value=""/></p>
         <p>游戏id：<input name="gameId" type="number" id="gameId" tabindex="1" size="15" value="65537"/></p>
         <p>游戏类型：<input name="gameType" type="number" id="gameType" tabindex="2" size="16" value="0"/></p>
+        <p>游戏状态：<input name="gameState" type="number" id="gameState" tabindex="2" size="16" value="${gameState}"/></p>
         <p><input type="button" value="测试" onclick="test()">&nbsp;<input type="reset" value="重置"></p>
     </form>
 </div>

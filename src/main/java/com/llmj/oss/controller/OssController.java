@@ -7,7 +7,9 @@ import javax.management.RuntimeErrorException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,9 +44,15 @@ public class OssController {
 	@Value("${upload.local.basePath}")
 	private String localPath;
 	
-	@GetMapping("/fileManage")
-	public String fileManage() {
-		return "fileManage";
+	@GetMapping("/fileManage/{gameState}")
+	public String fileManage(Model model,@PathVariable String gameState) {
+		int state = 0;
+		//flag 为 test online
+		if (gameState.equals("online")) {
+			state = 1;
+		}
+		model.addAttribute("gameState", state);
+		return "test";
 	}
 	
 	private String getTableName (int state) {
@@ -186,14 +194,15 @@ public class OssController {
 		String tableName = getTableName(state);
 		try {
 			UploadFile file = uploadDao.selectById(id,tableName);
+			if (file.getState() == IConsts.UpFileState.delete.getState()) return new RespEntity(RespCode.SERVER_ERROR);
 			//获得oss path
 			String oldOssPath = file.getOssPath();
 			//替换path
 			String newOssPath ="";
-			if (oldOssPath.indexOf("test") > 0) {
-				newOssPath = oldOssPath.replace("test", "online");
-			} else if(oldOssPath.indexOf("online") > 0) {
-				newOssPath = oldOssPath.replace("online", "test");
+			if (oldOssPath.indexOf("/test/") > 0) {
+				newOssPath = oldOssPath.replace("/test/", "/online/");
+			} else if(oldOssPath.indexOf("/online/") > 0) {
+				newOssPath = oldOssPath.replace("/online/", "/test/");
 			} else {
 				return new RespEntity(-2,"初始路径错误，path ："+oldOssPath);
 			}
@@ -202,12 +211,13 @@ public class OssController {
 				return new RespEntity(-2,"文件已存在，path:"+newOssPath);
 			}
 			//oss 复制操作
-			
+			ossMgr.copyFile(oldOssPath, newOssPath);
 			String targetTable = getTableName(Math.abs(state - 1));
 			//insert file
 			file.setOssPath(newOssPath);
 			file.setState(IConsts.UpFileState.up2oss.getState());
 			uploadDao.copyFile(file, targetTable);
+			log.info("copy file success,packageName:{},sourcePath:{},targetPath:{}",file.getPackName(),oldOssPath,newOssPath);
 		} catch (Exception e) {
 			log.error("copyFile error,Exception - > {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);
