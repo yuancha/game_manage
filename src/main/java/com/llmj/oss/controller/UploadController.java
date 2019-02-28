@@ -149,7 +149,8 @@ public class UploadController {
     	info.setType(Integer.parseInt(map.get("type").toString()));
     	info.setLocalPath(map.get("localPath").toString());
     	info.setOssPath(map.get("ossPath").toString());
-    	uploadDao.saveLog(info,IConsts.UpFileTable.test.getTableName());
+    	info.setState(IConsts.UpFileState.up2oss.getState());
+    	uploadDao.saveFile(info,IConsts.UpFileTable.test.getTableName());
     	return info.getId();
     }
     

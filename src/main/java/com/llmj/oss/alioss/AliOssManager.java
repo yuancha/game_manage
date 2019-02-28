@@ -11,6 +11,7 @@ import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.model.GetObjectRequest;
 import com.aliyun.oss.model.ObjectMetadata;
 import com.aliyun.oss.model.PutObjectResult;
+import com.llmj.oss.config.IConsts;
 import com.llmj.oss.model.UploadFile;
 import com.llmj.oss.util.FileUtil;
 
@@ -90,9 +91,12 @@ public class AliOssManager {
     	OSSClient ossClient = getClient();
     	try {
     		ossClient.deleteObject(bucketName, ossPath);
-    		System.out.println("删除文件成功，"+ossPath);
-		} finally {
-			ossClient.shutdown();
+    		log.debug("删除文件成功，path :{}",ossPath);
+		} catch (Exception e) {
+        	log.error("oss removeFile error,Exception -> {}",e);
+        } finally {
+        	if (ossClient != null) 
+				ossClient.shutdown();
 		}
     }
     
@@ -137,6 +141,14 @@ public class AliOssManager {
 		}
     	return success;
     }
+    
+	public String getOssBasePath (int state) {
+		if (state == 0) {//测试
+			return ossTest;
+		}
+		return ossOnline;
+	}
+
     
     
 	/**

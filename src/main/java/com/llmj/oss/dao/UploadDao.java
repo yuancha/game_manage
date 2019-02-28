@@ -19,7 +19,12 @@ public interface UploadDao {
 	@Options(useGeneratedKeys = true, keyProperty = "file.id")
 	@Insert("insert into ${tableName} ( game, packName, vision, type , state, upTime, localPath, ossPath) "
 			+ "values( #{file.game}, #{file.packName}, #{file.vision}, #{file.type}, #{file.state}, now(), #{file.localPath},#{file.ossPath})")
-	int saveLog(@Param("file") UploadFile file,@Param("tableName") String tableName);
+	int saveFile(@Param("file") UploadFile file,@Param("tableName") String tableName);
+	
+	@Options(useGeneratedKeys = true, keyProperty = "file.id")
+	@Insert("insert into ${tableName} ( game, packName, vision, type , state, upTime, localPath, ossPath, operTime) "
+			+ "values( #{file.game}, #{file.packName}, #{file.vision}, #{file.type}, #{file.state}, #{file.upTime}, #{file.localPath},#{file.ossPath},now())")
+	int copyFile(@Param("file") UploadFile file,@Param("tableName") String tableName);
 	
 	@Select("select * from ${tableName} where id=#{id}")
 	UploadFile selectById(@Param("id") int id,@Param("tableName") String tableName);

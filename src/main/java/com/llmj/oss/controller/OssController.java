@@ -2,6 +2,8 @@ package com.llmj.oss.controller;
 
 import java.util.List;
 
+import javax.management.RuntimeErrorException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -27,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 @Controller
 @Slf4j(topic = "ossLogger")
 @RequestMapping("/oss")
-public class OperationController {
+public class OssController {
 	
 	@Autowired
 	private AliOssManager ossMgr;
@@ -90,7 +92,10 @@ public class OperationController {
 		if (file.getState() == IConsts.UpFileState.online.getState()) return new RespEntity(-2,"线上版本不允许删除");
 		
 		if (file.getState() == IConsts.UpFileState.up2oss.getState()) {
-			//TODO 删除oss对应文件 plist
+			//删除oss对应文件 plist
+			String ossPath = file.getOssPath();
+			ossMgr.removeFile(ossPath);
+			ossMgr.removeFile(ossPath + ".plist");
 			file.setOssPath("");
 		}
 		file.setState(IConsts.UpFileState.delete.getState());
@@ -115,14 +120,14 @@ public class OperationController {
 		
 		String packName = file.getPackName();
 		int type = file.getType();
-		String ossPath = "";
+		String ossPath = ossMgr.getOssBasePath(state);
 		if (type == IConsts.UpFileType.Android.getType()) {
-			//ossPath = basePath + packName + "/" + IConsts.UpFileType.Android.getDesc() + "/";
+			ossPath =  packName + "/" + IConsts.UpFileType.Android.getDesc() + "/";
 		} else {
-			//ossPath = basePath + packName + "/" + IConsts.UpFileType.Ios.getDesc() + "/";
+			ossPath =  packName + "/" + IConsts.UpFileType.Ios.getDesc() + "/";
 		}
 		
-		//找本地html 并修改 文件
+		//TODO 找本地html 并修改 文件
 		String tmpletPath = localPath + packName + "/";//html plist模板路径
 		String[] tmp = file.getLocalPath().split("/");
 		String tmpletName = file.getPackName().split("\\.")[1];
@@ -168,13 +173,34 @@ public class OperationController {
 		int id = param.getId();
 		int state = param.getGameState();
 		String tableName = getTableName(state);
-		UploadFile file = uploadDao.selectById(id,"");
-		//获得oss path
-		//替换path
-		//oss 检查文件是否存在
-		//oss 复制操作
-		String targetTable = getTableName(Math.abs(state - 1));
-		//insert file
+		try {
+			UploadFile file = uploadDao.selectById(id,tableName);
+			//获得oss path
+			String oldOssPath = file.getOssPath();
+			//替换path
+			String newOssPath ="";
+			if (oldOssPath.indexOf("test") > 0) {
+				newOssPath = oldOssPath.replace("test", "online");
+			} else if(oldOssPath.indexOf("online") > 0) {
+				newOssPath = oldOssPath.replace("online", "test");
+			} else {
+				return new RespEntity(-2,"初始路径错误，path ："+oldOssPath);
+			}
+			//oss 检查文件是否存在
+			if (ossMgr.fileIsExist(newOssPath)) {
+				return new RespEntity(-2,"文件已存在，path:"+newOssPath);
+			}
+			//oss 复制操作
+			
+			String targetTable = getTableName(Math.abs(state - 1));
+			//insert file
+			file.setOssPath(newOssPath);
+			file.setState(IConsts.UpFileState.up2oss.getState());
+			uploadDao.copyFile(file, targetTable);
+		} catch (Exception e) {
+			log.error("copyFile error,Exception - > {}",e);
+			return new RespEntity(RespCode.SERVER_ERROR);
+		}
 		
 		return new RespEntity(RespCode.SUCCESS);
 	}

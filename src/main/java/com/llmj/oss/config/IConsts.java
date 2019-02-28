@@ -27,7 +27,7 @@ public interface IConsts {
 	
 	enum UpFileState {
 		
-		original(0,"刚刚上传"),
+		//original(0,"刚刚上传"),
 		up2oss(1,"已上传oss"),
 		online(2,"线上版本"),
 		delete(3,"已删除"),
