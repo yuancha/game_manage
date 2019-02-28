@@ -13,14 +13,14 @@
     
       
         
-        <link rel="stylesheet" href="../css/bootstrap.css">
-        <link rel="stylesheet" href="../css/xenon/xenon-core.css">
-        <link rel="stylesheet" href="../css/xenon/xenon-forms.css">
-        <link rel="stylesheet" href="../css/xenon/xenon-components.css">
-        <link rel="stylesheet" href="../css/xenon/xenon-skins.css">
+        <link rel="stylesheet" href="../static/css/bootstrap.css">
+        <link rel="stylesheet" href="../static/css/xenon/xenon-core.css">
+        <link rel="stylesheet" href="../static/css/xenon/xenon-forms.css">
+        <link rel="stylesheet" href="../static/css/xenon/xenon-components.css">
+        <link rel="stylesheet" href="../static/css/xenon/xenon-skins.css">
      
     
-        <script src="../js/jquery-1.11.1.min.js"></script>
+        <script src="../static/js/jquery-1.11.1.min.js"></script>
     
         <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!--[if lt IE 9]>
@@ -28,7 +28,7 @@
             <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
         <![endif]-->
         
-         <link rel="stylesheet" href="../css/main.css">
+         <link rel="stylesheet" href="../static/css/main.css">
     </head>
     <body class="page-body"><div id="BAIDU_DUP_fp_wrapper" style="position: absolute; left: -1px; bottom: -1px; z-index: 0; width: 0px; height: 0px; overflow: hidden; visibility: hidden; display: none;"><iframe id="BAIDU_DUP_fp_iframe" src="https://pos.baidu.com/wh/o.htm?ltr=" style="width: 0px; height: 0px; visibility: hidden; display: none;"></iframe></div>
     
@@ -268,17 +268,17 @@
         
     	
         <!-- Bottom Scripts -->
-        <script src="../js/bootstrap.min.js"></script>
-        <script src="../js/xenon/TweenMax.min.js"></script>
-        <script src="../js/xenon/resizeable.js"></script>
-        <script src="../js/xenon/joinable.js"></script>
-        <script src="../js/xenon/xenon-api.js"></script>
-        <script src="../js/xenon/xenon-toggles.js"></script>
+        <script src="../static/js/bootstrap.min.js"></script>
+        <script src="../static/js/xenon/TweenMax.min.js"></script>
+        <script src="../static/js/xenon/resizeable.js"></script>
+        <script src="../static/js/xenon/joinable.js"></script>
+        <script src="../static/js/xenon/xenon-api.js"></script>
+        <script src="../static/js/xenon/xenon-toggles.js"></script>
     
     
         <!-- JavaScripts initializations and stuff -->
-        <script src="../js/xenon/xenon-custom.js"></script>
-    	<script src="../js/public_function.js"></script>
+        <script src="../static/js/xenon/xenon-custom.js"></script>
+    	<script src="../static/js/public_function.js"></script>
  
 
 </body></html>

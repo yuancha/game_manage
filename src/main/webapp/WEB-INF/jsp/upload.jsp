@@ -60,7 +60,7 @@
                 <script src="http://demo.cssmoban.com/cssthemes3/mstp_115_enonadmin/assets/js/xenon-toggles.js"></script>
                 <script src="http://demo.cssmoban.com/cssthemes3/mstp_115_enonadmin/assets/js/dropzone/dropzone.min.js"></script>
                 <script src="http://demo.cssmoban.com/cssthemes3/mstp_115_enonadmin/assets/js/xenon-custom.js"></script>
-                <script src="js/jquery.form.js"></script>
+                <script src="static/js/jquery.form.js"></script>
                 <script>
                     /* $(function(){  
                        
