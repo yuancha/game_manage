@@ -16,23 +16,23 @@ import com.llmj.oss.model.UploadFile;
 public interface UploadDao {
 	
 	// 插入货币类型
-	@Options(useGeneratedKeys = true, keyProperty = "id")
-	@Insert("insert into upload_file ( game, packName, vision, type , state, upTime, localPath) "
-			+ "values( #{game}, #{packName}, #{vision}, #{type}, #{state}, now(), #{localPath})")
-	int saveLog(UploadFile file);
+	@Options(useGeneratedKeys = true, keyProperty = "file.id")
+	@Insert("insert into ${tableName} ( game, packName, vision, type , state, upTime, localPath, ossPath) "
+			+ "values( #{file.game}, #{file.packName}, #{file.vision}, #{file.type}, #{file.state}, now(), #{file.localPath},#{file.ossPath})")
+	int saveLog(@Param("file") UploadFile file,@Param("tableName") String tableName);
 	
-	@Select("select * from upload_file where id=#{id}")
-	UploadFile selectById(@Param("id") int id);
+	@Select("select * from ${tableName} where id=#{id}")
+	UploadFile selectById(@Param("id") int id,@Param("tableName") String tableName);
 	
-	@Select("select * from upload_file where packName = #{packName} and type = #{type} and state != #{state}")
-	List<UploadFile> getFiles(@Param("packName") String packName,@Param("state") int state,@Param("type") int type);
+	@Select("select * from ${tableName} where packName = #{packName} and type = #{type} and state != #{state}")
+	List<UploadFile> getFiles(@Param("tableName") String tableName,@Param("packName") String packName,@Param("state") int state,@Param("type") int type);
 	
-	@Update("update upload_file set state=#{state},operTime=now(),ossPath=#{ossPath} where id=#{id}")
-	void upToOss(UploadFile file);
+	@Update("update ${tableName} set state=#{state},operTime=now(),ossPath=#{ossPath} where id=#{id}")
+	void upToOss(@Param("tableName") String tableName,UploadFile file);
 	
-	@Update("update upload_file set state=#{state},operTime=now(),ossPath=#{ossPath} where id=#{id}")
-	void delFile(UploadFile file);
+	@Update("update ${tableName} set state=#{state},operTime=now(),ossPath=#{ossPath} where id=#{id}")
+	void delFile(@Param("tableName") String tableName,UploadFile file);
 	
-	@Update("update upload_file set state=#{after} where state=#{before} and packName=#{file.packName} and type=#{file.type}")
-	void updateState(@Param("before") int before,@Param("after") int after,@Param("file") UploadFile file);
+	@Update("update ${tableName} set state=#{after} where state=#{before} and packName=#{file.packName} and type=#{file.type}")
+	void updateState(@Param("tableName") String tableName,@Param("before") int before,@Param("after") int after,@Param("file") UploadFile file);
 }

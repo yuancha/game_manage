@@ -11,8 +11,9 @@ import lombok.Setter;
 @Setter
 public class FileOperation {
 	private int id;
-	private int gameId;
-	private int gameType;
+	private int gameId;		//游戏id
+	private int gameType;	//游戏类型 0安卓 1ios
+	private int gameState;	//状态 0test 1正式
 	private int page;
 	private int limit;
 }

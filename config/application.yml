@@ -13,21 +13,17 @@ spring:
     password: 123456
     #driver-class-name: com.mysql.jdbc.Driver
   
-  mvc:
-    view:
-      prefix: /WEB-INF/page/
-      suffix: .jsp
-  
 upload:
   local:
     basePath: F:/save/
-    tmpsave: F:/save/temp
+    tmpsave: F:/save/temp/
   oss:
-     basePath: yctest/
+     test: yctest/test/
+     online: yctest/online/
 
 mybatis:
   type-aliases-package: com.llmj.oss.model
-  mapper-locations: classpath:mybatis-mappers/*Mapper.xml 
+  #mapper-locations: classpath:mybatis-mappers/*Mapper.xml 
     
 logging:
   config: classpath:logback-admin.xml

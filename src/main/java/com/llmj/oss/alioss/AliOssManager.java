@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.aliyun.oss.OSSClient;
@@ -20,9 +21,9 @@ import lombok.extern.slf4j.Slf4j;
 public class AliOssManager {
 	
 	public static void main(String[] args) {
-		AliOssManager obj = new AliOssManager();
+		/*AliOssManager obj = new AliOssManager();
 		String ossPath = ossBasePath + "123.txt";
-		obj.uploadFileByByte(ossPath,"hello");
+		obj.uploadFileByByte(ossPath,"hello");*/
 	}
 	
 	private static String endpoint = "http://oss-cn-beijing.aliyuncs.com";
@@ -31,7 +32,10 @@ public class AliOssManager {
     private static String accessKeySecret = "lpcoQYwaiv7LugHOUe8y0LiWjf6r6G";
     private static String bucketName = "bj-fftl-tongliao";
     
-    private static String ossBasePath = "yctest/";
+    @Value("${upload.oss.test}")
+    public String ossTest;
+    @Value("${upload.oss.online}")
+    public String ossOnline;
     
     //暂时每次都新建 也可以设置成单列（可并发使用）
     private OSSClient getClient() {
@@ -93,11 +97,14 @@ public class AliOssManager {
     }
     
     public boolean uploadFileByByte(String ossPath,String str) {
+    	return uploadFileByByte(ossPath,str.getBytes());
+    }
+    
+    public boolean uploadFileByByte(String ossPath,byte[] content) {
     	OSSClient ossClient = null;
     	boolean success = false;
     	try {
     		ossClient = getClient();
-    		byte[] content = str.getBytes();
     		PutObjectResult  result = ossClient.putObject(bucketName, ossPath, new ByteArrayInputStream(content));
     		//TODO result判断是否成功
         	log.debug("上传byte数据成功，"+ossPath);
@@ -111,7 +118,27 @@ public class AliOssManager {
     	return success;
     }
     
-
+    /**
+     * 判断文件是否存在
+     * @param ossPath
+     * @return
+     */
+    public boolean fileIsExist(String ossPath) {
+    	OSSClient ossClient = null;
+    	boolean success = false;
+    	try {
+    		ossClient = getClient();
+    		success = ossClient.doesObjectExist(bucketName, ossPath);
+    	} catch (Exception e) {
+        	log.error("oss fileIsExist error,Exception -> {}",e);
+        } finally {
+			if (ossClient != null) 
+				ossClient.shutdown();
+		}
+    	return success;
+    }
+    
+    
 	/**
 	 * 替换plist指定内容
 	 */

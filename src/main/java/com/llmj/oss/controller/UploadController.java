@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.llmj.oss.alioss.AliOssManager;
 import com.llmj.oss.config.GlobalBean;
 import com.llmj.oss.config.IConsts;
 import com.llmj.oss.config.RespCode;
@@ -30,6 +31,7 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,6 +45,8 @@ public class UploadController {
 	private UploadDao uploadDao;
 	@Autowired
 	private GlobalBean global;
+	@Autowired
+	private AliOssManager ossMgr;
 	
 	//本地存放路径
 	@Value("${upload.local.basePath}")
@@ -59,8 +63,7 @@ public class UploadController {
 
     @PostMapping("/uploadFile") 
     @ResponseBody
-    public RespEntity singleFileUpload(@RequestParam("file") MultipartFile file,
-                                   RedirectAttributes redirectAttributes) {
+    public RespEntity singleFileUpload(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
             return new RespEntity(RespCode.FILE_ERROR);
         }
@@ -82,7 +85,7 @@ public class UploadController {
             String filePath = tmpSave + filename;
             byte[] bytes = file.getBytes();
             
-            //TOOD 先存储不合理再删除  此处待优化
+            //TOOD 先存储 再删除  此处待优化
             Path path = Paths.get(filePath);
             Files.write(path, bytes);
             
@@ -104,31 +107,40 @@ public class UploadController {
             
             //最终保存
             String dateStr = DateUtil.getDateStr();
+            String ossPath = "";
             if (suffix.equalsIgnoreCase("ipa")) {
             	FileUtil.makeDir(basePath + packName + "/" + IConsts.UpFileType.Ios.getDesc() + "/" + dateStr);
             	filePath = basePath + packName + "/" + IConsts.UpFileType.Ios.getDesc() + "/" + dateStr + "/" +  filename;
+            	ossPath = ossMgr.ossTest + packName + "/" + IConsts.UpFileType.Ios.getDesc() + "/" +  filename;
             } else {
             	FileUtil.makeDir(basePath + packName + "/" + IConsts.UpFileType.Android.getDesc() + "/" + dateStr);
             	filePath = basePath + packName + "/" + IConsts.UpFileType.Android.getDesc() + "/" + dateStr + "/" +  filename;
+            	ossPath = ossMgr.ossTest + packName + "/" + IConsts.UpFileType.Android.getDesc() + "/" +  filename;
             }
             tmpMap.put("localPath", filePath);
             path = Paths.get(filePath);
             Files.write(path, bytes);
             
-            //钉钉通知
-            String msg = filename + "上传成功,下载路径:http://192.168.1.202:9100/downFile/"+filename;
-            //ddnotice.noticeGroup(msg);
+            //上传到oss 测试路径
+            ossMgr.uploadFileByByte(ossPath,bytes);
+            //TODO 自动刷新测试下载链接
             
+            tmpMap.put("ossPath", ossPath);
             //日志信息存储
-            saveUploadLog(tmpMap);
-        } catch (IOException e) {
-            e.printStackTrace();
+            int tableId = saveUploadLog(tmpMap);
+            log.info("upload file success -> info : {}",tmpMap);
+            
+            //钉钉通知
+            /*String msg = filename + "上传成功,下载路径:http://118.89.237.82:9100/downFile/"+tableId;
+            ddnotice.noticeGroup(msg);*/
+        } catch (Exception e) {
+            log.error("singleFileUpload error,Exception -> {}",e);
             return new RespEntity(RespCode.SERVER_ERROR);
         }
         return new RespEntity(0,"上传成功");
     }
     
-    private void saveUploadLog(Map<String,Object> map) {
+    private int saveUploadLog(Map<String,Object> map) {
     	UploadFile info = new UploadFile();
     	info.setGame(map.get("name").toString());
     	info.setPackName(map.get("package").toString());
@@ -136,8 +148,18 @@ public class UploadController {
     	info.setVision(map.get("versionName").toString());
     	info.setType(Integer.parseInt(map.get("type").toString()));
     	info.setLocalPath(map.get("localPath").toString());
-    	uploadDao.saveLog(info);
-    	log.info("upload file success -> info : {}",map);
+    	info.setOssPath(map.get("ossPath").toString());
+    	uploadDao.saveLog(info,IConsts.UpFileTable.test.getTableName());
+    	return info.getId();
     }
     
+    /**
+     * 上传对应的plist html模板
+     */
+    @PostMapping("/uploadOther") 
+    @ResponseBody
+    public RespEntity otherFileUpload(@RequestParam("file") MultipartFile file) {
+    	
+    	return new RespEntity(0,"上传成功");
+    }
 }

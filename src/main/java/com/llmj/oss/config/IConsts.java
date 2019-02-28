@@ -49,4 +49,27 @@ public interface IConsts {
 		}
 		
 	}
+	
+	enum UpFileTable {
+
+		test(0, "upload_file_test"), 
+		online(1, "upload_file_online"),
+		;
+		private int state;
+		private String tableName;
+
+		private UpFileTable(int state, String tableName) {
+			this.state = state;
+			this.tableName = tableName;
+		}
+
+		public int getState() {
+			return state;
+		}
+
+		public String getTableName() {
+			return tableName;
+		}
+
+	}
 }
