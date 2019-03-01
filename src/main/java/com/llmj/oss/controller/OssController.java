@@ -2,14 +2,13 @@ package com.llmj.oss.controller;
 
 import java.util.List;
 
-import javax.management.RuntimeErrorException;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,7 +18,9 @@ import com.llmj.oss.alioss.AliOssManager;
 import com.llmj.oss.config.GlobalBean;
 import com.llmj.oss.config.IConsts;
 import com.llmj.oss.config.RespCode;
+import com.llmj.oss.dao.DownDao;
 import com.llmj.oss.dao.UploadDao;
+import com.llmj.oss.model.DownLink;
 import com.llmj.oss.model.FileOperation;
 import com.llmj.oss.model.RespEntity;
 import com.llmj.oss.model.UploadFile;
@@ -39,20 +40,29 @@ public class OssController {
 	private GlobalBean global;
 	@Autowired
 	private UploadDao uploadDao;
+	@Autowired
+	private DownDao downDao;
 	
 	//本地存放路径
 	@Value("${upload.local.basePath}")
 	private String localPath;
 	
-	@GetMapping("/fileManage/{gameState}")
-	public String fileManage(Model model,@PathVariable String gameState) {
-		int state = 0;
-		//flag 为 test online
-		if (gameState.equals("online")) {
-			state = 1;
+	@GetMapping("/fileManage")
+	public String fileManage(Model model,HttpServletRequest request) {
+		try {
+			int state = 0;
+			//flag 为 test online
+			String gameState = request.getParameter("state");
+			if (gameState.equals("online")) {
+				state = 1;
+			}
+			model.addAttribute("gameState", state);
+			return "fileManage";
+		} catch (Exception e) {
+			model.addAttribute("message", e.toString());
+			log.error("fileManage error,Exception -> {}",e);
 		}
-		model.addAttribute("gameState", state);
-		return "test";
+		return "error";
 	}
 	
 	private String getTableName (int state) {
@@ -101,25 +111,31 @@ public class OssController {
 	@PostMapping("/delFile")
 	@ResponseBody
 	public RespEntity delFile(@RequestBody FileOperation param) {
-		int id = param.getId();
-		int state = param.getGameState();
-		String tableName = getTableName(state);
-		UploadFile file = uploadDao.selectById(id,tableName);
-		if (file == null || file.getState() == IConsts.UpFileState.delete.getState()) {
-			return new RespEntity(-2,"文件不存在");
-		}
-		if (file.getState() == IConsts.UpFileState.online.getState()) return new RespEntity(-2,"线上版本不允许删除");
-		
-		if (file.getState() == IConsts.UpFileState.up2oss.getState()) {
+		try {
+			int id = param.getId();
+			int state = param.getGameState();
+			String tableName = getTableName(state);
+			UploadFile file = uploadDao.selectById(id,tableName);
+			if (file == null || file.getState() == IConsts.UpFileState.delete.getState()) {
+				return new RespEntity(-2,"文件不存在");
+			}
+			if (file.getState() == IConsts.UpFileState.online.getState()) return new RespEntity(-2,"线上版本不允许删除");
+			
 			//删除oss对应文件 plist
 			String ossPath = file.getOssPath();
 			ossMgr.removeFile(ossPath);
-			ossMgr.removeFile(ossPath + ".plist");
-			file.setOssPath("");
+			if (file.getType() == IConsts.UpFileType.Ios.getType()) {
+				//删除ios对应plist文件
+				ossMgr.removeFile(ossPath + ".plist");
+				file.setOssPath("");
+			}
+			file.setState(IConsts.UpFileState.delete.getState());
+			uploadDao.delFile(tableName,file);
+			log.info("delFile success,id:{},packName:{},type:{},state:{}",file.getId(),file.getPackName(),file.getType(),state);
+		} catch (Exception e) {
+			log.error("delFile error,Exception - > {}",e);
+			return new RespEntity(RespCode.SERVER_ERROR);
 		}
-		file.setState(IConsts.UpFileState.delete.getState());
-		uploadDao.delFile(tableName,file);
-		log.info("delFile success,id:{},packName:{},type:{},state:{}",file.getId(),file.getPackName(),file.getType(),state);
 		return new RespEntity(RespCode.SUCCESS);
 	}
 	
@@ -127,60 +143,58 @@ public class OssController {
 	@PostMapping("/refreshPack")
 	@ResponseBody
 	public RespEntity refreshPackage(@RequestBody FileOperation param) {
-		int id = param.getId();
-		int state = param.getGameState();
-		String tableName = getTableName(state);
-		UploadFile file = uploadDao.selectById(id,tableName);
-		if (file == null) {
-			return new RespEntity(-2, "文件不存在");
-		}
-		if (file.getState() == IConsts.UpFileState.online.getState())
-			return new RespEntity(-2, "已是线上版本");
-		
-		String packName = file.getPackName();
-		int type = file.getType();
-		String ossPath = ossMgr.getOssBasePath(state);
-		if (type == IConsts.UpFileType.Android.getType()) {
-			ossPath =  packName + "/" + IConsts.UpFileType.Android.getDesc() + "/";
-		} else {
-			ossPath =  packName + "/" + IConsts.UpFileType.Ios.getDesc() + "/";
-		}
-		
-		//TODO 找本地html 并修改 文件
-		String tmpletPath = localPath + packName + "/";//html plist模板路径
-		String[] tmp = file.getLocalPath().split("/");
-		String tmpletName = file.getPackName().split("\\.")[1];
-		if (type == IConsts.UpFileType.Android.getType()) {
-			String htmlPath = tmpletPath + tmpletName + ".html";
-			String htmlStr = FileUtil.fileToString(htmlPath,"utf-8");
-			if (StringUtil.isEmpty(htmlStr)) {
-				return new RespEntity(-2,"html 读取错误");
+		try {
+			int id = param.getId();
+			int state = param.getGameState();
+			String tableName = getTableName(state);
+			UploadFile file = uploadDao.selectById(id,tableName);
+			if (file == null) {
+				log.error("文件不存在,id : {},tableName : {}",id,tableName);
+				return new RespEntity(-2, "文件不存在");
 			}
-			//修改html 不上传
-			//ossMgr.changeHtml(htmlStr,ossPath+tmp[tmp.length - 1],ossPath+tmpletName+".html");
-		} else {
-			//找本地plist并修改 文件
-			String plistPath = tmpletPath + tmpletName+".plist";
-			String plistStr = FileUtil.fileToString(plistPath,"utf-8");
-			String htmlPath = tmpletPath + tmpletName + ".html";
-			String htmlStr = FileUtil.fileToString(htmlPath,"utf-8");
-			if (StringUtil.isEmpty(plistStr) || StringUtil.isEmpty(htmlStr)) {
-				return new RespEntity(-2,"plist 或 html 读取错误");
+			if (file.getState() == IConsts.UpFileState.online.getState())
+				return new RespEntity(-2, "已是线上版本");
+			
+			String ossPath = file.getOssPath();
+			if (!ossMgr.fileIsExist(ossPath)) {
+				log.error("oss上不存在该文件, ossPath : {}",ossPath);
+				return new RespEntity(-2, "oss上不存在该文件");
 			}
-			//ossMgr.changePlist(plistStr,file.getLocalPath()+".plist",ossPath+tmp[tmp.length - 1],ossPath+tmp[tmp.length - 1]+".plist",file);
-			//ossMgr.changeHtml(htmlStr,ossPath+tmp[tmp.length - 1]+".plist",ossPath+tmpletName+".html");
+			
+			String packName = file.getPackName();
+			int type = file.getType();
+			
+			//ios版本 需要操作plist
+			String link = ossPath;
+			if (type == IConsts.UpFileType.Ios.getType()) {
+				//String[] tmp = file.getLocalPath().split("/");
+				String gmPy = file.getPackName().split("\\.")[1];
+				String plistPath = localPath + packName + "/" + gmPy + ".plist";// plist模板路径
+				String plistStr = FileUtil.fileToString(plistPath,"utf-8");
+				if (StringUtil.isEmpty(plistStr)) {
+					return new RespEntity(-2,"plist 读取错误");
+				}
+				ossMgr.changePlist(plistStr,file.getLocalPath()+".plist",ossPath,ossPath+".plist",file);
+				ossPath = ossPath+".plist";
+			}
+			
+			//保存到mysql
+			String gid = global.getGameIdByPack(packName);
+			String dlid = gid + "_" + state + "_" + file.getType();
+			DownLink dl = new DownLink();
+			dl.setId(dlid);
+			dl.setType(file.getType());
+			dl.setLink(link);
+			downDao.saveLink(dl);
+			
+			file.setState(IConsts.UpFileState.online.getState());
+			uploadDao.updateState(tableName,IConsts.UpFileState.online.getState(), IConsts.UpFileState.up2oss.getState(),file);//先更改之前线上状态信息
+			uploadDao.updateState1(tableName,file);	//再修改自己状态信息
+			log.info("refreshPack success,packfile info : {}",StringUtil.objToJson(file));
+		} catch (Exception e) {
+			log.error("refreshPackage error,Exception ->{}",e);
+			return new RespEntity(RespCode.SERVER_ERROR);
 		}
-		
-		// 上传包到指定路径
-		/*boolean success = ossMgr.uploadFile(ossPath+tmp[tmp.length - 1], file.getLocalPath());
-		if (!success) {
-			return new RespEntity(-2,"上传错误");
-		}*/
-		file.setState(IConsts.UpFileState.online.getState());
-		file.setOssPath(ossPath+tmp[tmp.length - 1]);
-		uploadDao.updateState(tableName,IConsts.UpFileState.online.getState(), IConsts.UpFileState.up2oss.getState(),file);//先更改之前线上状态信息
-		uploadDao.upToOss(tableName,file);
-		log.info("refreshPack success,packfile info : {}",StringUtil.objToJson(file));
 		return new RespEntity(RespCode.SUCCESS);
 	}
 	

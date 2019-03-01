@@ -49,4 +49,19 @@ public class GlobalBean {
 		Set<String> tmp = new HashSet<String>(gamePackage.values());
 		return tmp.contains(packName);
 	}
+	
+	/**
+	 * 根据包名获得游戏id
+	 * @param packName
+	 * @return
+	 */
+	public String getGameIdByPack(String packName) {
+		String gid = "";
+		for (String id : gamePackage.keySet()) {
+			if (gamePackage.get(id).equals(packName)) {
+				gid = id;
+			}
+		}
+		return gid;
+	}
 }

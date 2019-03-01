@@ -15,15 +15,16 @@ import com.llmj.oss.model.UploadFile;
 @Mapper
 public interface UploadDao {
 	
-	// 插入货币类型
 	@Options(useGeneratedKeys = true, keyProperty = "file.id")
-	@Insert("insert into ${tableName} ( game, packName, vision, type , state, upTime, localPath, ossPath) "
-			+ "values( #{file.game}, #{file.packName}, #{file.vision}, #{file.type}, #{file.state}, now(), #{file.localPath},#{file.ossPath})")
+	@Insert("insert into ${tableName} ( game, packName, vision, type , state, upTime, localPath, ossPath,fileName) "
+			+ "values( #{file.game}, #{file.packName}, #{file.vision}, #{file.type}, #{file.state}, now(), "
+			+ "#{file.localPath},#{file.ossPath},#{file.fileName})")
 	int saveFile(@Param("file") UploadFile file,@Param("tableName") String tableName);
 	
 	@Options(useGeneratedKeys = true, keyProperty = "file.id")
-	@Insert("insert into ${tableName} ( game, packName, vision, type , state, upTime, localPath, ossPath, operTime) "
-			+ "values( #{file.game}, #{file.packName}, #{file.vision}, #{file.type}, #{file.state}, #{file.upTime}, #{file.localPath},#{file.ossPath},now())")
+	@Insert("insert into ${tableName} ( game, packName, vision, type , state, upTime, localPath, ossPath, operTime,fileName) "
+			+ "values( #{file.game}, #{file.packName}, #{file.vision}, #{file.type}, #{file.state},"
+			+ " #{file.upTime}, #{file.localPath},#{file.ossPath},now(),#{file.fileName})")
 	int copyFile(@Param("file") UploadFile file,@Param("tableName") String tableName);
 	
 	@Select("select * from ${tableName} where id=#{id}")
@@ -32,11 +33,11 @@ public interface UploadDao {
 	@Select("select * from ${tableName} where packName = #{packName} and type = #{type} and state != #{state} order by upTime desc")
 	List<UploadFile> getFiles(@Param("tableName") String tableName,@Param("packName") String packName,@Param("state") int state,@Param("type") int type);
 	
-	@Update("update ${tableName} set state=#{state},operTime=now(),ossPath=#{ossPath} where id=#{id}")
-	void upToOss(@Param("tableName") String tableName,UploadFile file);
+	@Update("update ${tableName} set state=#{file.state},operTime=now() where id=#{file.id}")
+	void updateState1(@Param("tableName") String tableName,@Param("file") UploadFile file);
 	
-	@Update("update ${tableName} set state=#{state},operTime=now(),ossPath=#{ossPath} where id=#{id}")
-	void delFile(@Param("tableName") String tableName,UploadFile file);
+	@Update("update ${tableName} set state=#{file.state},operTime=now(),ossPath=#{file.ossPath} where id=#{file.id}")
+	void delFile(@Param("tableName") String tableName,@Param("file") UploadFile file);
 	
 	@Update("update ${tableName} set state=#{after} where state=#{before} and packName=#{file.packName} and type=#{file.type}")
 	void updateState(@Param("tableName") String tableName,@Param("before") int before,@Param("after") int after,@Param("file") UploadFile file);

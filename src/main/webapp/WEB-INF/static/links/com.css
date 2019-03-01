@@ -1,0 +1,76 @@
+html, body, div, h1, h2, h3, h4, h5, h6, ul, ol, dl, li, dt, dd, p, blockquote,
+pre, form, fieldset, table, th, td{margin:0;padding:0;font-family:"微软雅黑",Tahoma,Arial,sans-serif;}
+body{background-color:#fff;color:#3f3a39;line-height:1.5;font-size:16px; }
+h1, h2, h3, h4, h5,h6,.s_btn{font:normal 18px/35px "微软雅黑"}
+body{background:#f0f0f0; background-attachment:fixed;background-size:100%;text-align:center}
+a,a:visited,object,object:focus{color: #555;cursor: pointer;text-decoration: none;cursor:pointer;bblr:expression(this.onFocus=this.blur());/*IE使用*/outline-style:none;/*FF使用*/}a:hover {text-decoration: none;color:#2ea7e0;}a:active, a:focus{text-decoration: none;color:#555;}a:focus{color:#2ea7e0;}
+
+img{display:block;border:none;width:100%;min-height:20px;min-width:20px}
+/*** FORMS ***/
+textarea:active, input[type='text']:active,input[type='password']:active, select:active {border-color: #2ea7e0;}
+textarea:focus, input[type='text']:focus,input[type='password']:focus, select:focus {outline: none;border-color:#2ea7e0!important;-webkit-appearance:none;}
+input[type='text'],input[type='password'] {cursor: text; min-height: 25px;font-size:14px;-webkit-appearance:none;}
+textarea,div,p,li{word-wrap:break-word;}
+h3{text-decoration:none;position:relative}
+h3 a:hover{text-decoration:none}
+h3 .ab_r{height:23px;line-height:23px;top:5px;display:block;width:36px;padding-left:13px;font-size:12px;}
+.fl{float:left;}
+.fr{float:right;}
+
+/*tool*/
+.btn{-moz-border-radius:8px; border-radius:8px;}
+
+.btn,.btn:visited{border:2px solid #f60;background-color:#fff;cursor:pointer;display:inline-block;color:#f60;padding:0 10px;line-height:24px;height:28px;outline-style:none;-webkit-appearance:none;}
+.btn:hover,.btn:active,.btn:focus{border-color:#f60;background-color:#f60;color:#fff;-webkit-appearance:none;}
+.btn:disabled{background-color:#ccc;color:#999;border-color:#ccc;}
+.rd5{-moz-border-radius: 5px; border-radius: 5px; }
+.opa,.i_opa i{opacity: 0.65;filter:alpha(opacity =65);}
+.bor{border:1px solid #ccc;zoom:1;}
+.ab_l{top:0;left:0;position:absolute;}
+.ab_r{top:0;right:0;position:absolute;}
+.mt10{margin-top:10px;}
+/*block****/
+.clear {clear:both;height:0;line-height:0;padding:0;visibility: hidden;}
+.clearfix,.img_bd,.ul_h,.dl_h,dl{display:block;zoom:1;}
+.clearfix:after,.ul_h:after,.ul_h li:after,.ul_v li:after,.dl_h:after{content: "."; display: block; height: 0; clear: both; visibility: hidden; }
+html[xmlns] .clearfix,html[xmlns] .ul_h{display:block;}
+.ul_h{margin:0;}.ul_v{margin-left:0;padding:0;zoom:1;}
+.ul_h li,.ul_v li{list-style:none outside none;overflow:hidden;position:relative;display:block;margin-left:0;zoom:1;}
+.ul_h li,.dl_h dt,.dl_h dd{float:left;display:inline;}
+/*start:color*/
+.black,.black:visited,.black a,.black a:visited{color:#3f3a39;}a.black:hover,a.black:active,a.black:focus,.black a:hover,.black a:active,.black a:focus{color:#1c87ca;}
+.white,.white:visited,.white a,.white a:visited{color:#fff;}a.white:hover,a.white:active,a.white:focus,.white a:hover,.white a:active,.white a:focus{color:#ececec;}
+.graya,.graya:visited,.graya a,.graya a:visited{color:#999;}a.graya:hover,a.graya:active,a.graya:focus,.graya a:hover,.graya a:active,.graya a:focus{color:#1c87ca;}
+.green,.green:visited,.green a,.green a:visited {color:#268202;}a.green:hover,a.green:active,a.green:focus,.green a:hover,.green a:active,.green a:focus{color:#0f712d;}
+.blue,.blue:visited,.blue a,.blue a:visited{color:#2ea7e0;}a.blue:hover,a.blue:active,a.blue:focus,.blue a:hover,.blue a:active,.blue a:focus{color:#1c87ca;}
+.yellow,.yellow:visited,.yellow a,.yellow a:visited{color:#ff0;}a.yellow:hover,a.yellow:active,a.yellow:focus,.yellow a:hover,.yellow a:active,.yellow a:focus{color:#f4f61c;}
+.orange,.orange:visited,.orange a,.orange a:visited{color:#ff9600;}a.orange:hover,a.orange:active,a.orange:focus,.orange a:hover,.orange a:active,.orange a:focus{color:#feae3b;}
+.red,.red:visited,.red a,.red a:visited{color:#de110c;}a.red:hover,a.red:active,a.red:focus,.red a:hover,.red a:active,.red a:focus{color:#f30;}
+/**end:color**/
+
+/***重定义****/
+#logo{background:url(../img/logo.png) center center no-repeat;-webkit-background-size:70px 40px;background-size:70px 40px}
+#logo{height:110px;background-color:#fff;-webkit-box-shadow:0 1px 2px rgba(0, 0, 0, 0.3);-moz-box-shadow:0 1px 2px rgba(0, 0, 0, 0.3);box-shadow:0 1px 2px rgba(0, 0, 0, 0.3);border-bottom:1px solid #fff;}
+#icon{background:url(../img/icon.png) center center no-repeat;-webkit-background-size:80px 80px;background-size:80px 80px}
+#icon{height:130px;}
+.tc_f .bd{background:url(../img/instruction.png) top right no-repeat;-webkit-background-size:3171px 117px;background-size:171px 117px}
+body{background-color:#f8f8f8;}
+#head{position:relative}
+.lvbd{background-color:#f8f8f8;padding-top:10px;}
+
+body,.lvbd{padding:0;}
+.ios{text-align:center}
+.ios img{max-width:300px;margin:10px auto;}
+h1{padding-top:10px;font-size:23px;line-height:60px;}
+#header,.lvbd,.ul_h li,.btn,.btn2{-webkit-box-sizing:border-box;-moz-box-sizing:border-box;box-sizing:border-box;}
+
+.tztool{padding-bottom:10px;margin-top:10px;}
+.tztool .btn{height:43px;width:90%;line-height:39px;max-width:200px;font-size:16px;}
+.tztool .btn2:hover{line-height:39px;background:#2ea7e0;color:#fff}
+p.v20{height:40px;}
+/***弹出框****/
+.tc_f .opa,.tc_f{z-index:99999;position: fixed;top:0;left:0;right:0;bottom:0;_position:absolute;}
+.tc_f .opa{display:block;background:#333;}
+.tc_f .bd{position:fixed;top:0px;right:0;width:200px;height:200px;z-index:199999;}
+.tc_f .con{padding:10px 20px 20px;}
+

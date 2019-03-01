@@ -20,6 +20,7 @@ import com.llmj.oss.model.RespEntity;
 import com.llmj.oss.model.UploadFile;
 import com.llmj.oss.util.DateUtil;
 import com.llmj.oss.util.FileUtil;
+import com.llmj.oss.util.StringUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -56,11 +57,19 @@ public class UploadController {
 	@Value("${upload.local.tmpsave}")
 	private String tmpSave;
 	
+	 @GetMapping("/test")
+	public String test() {
+		return "html/links/ffyl/android";
+	}
+	
     @GetMapping("/upload")
     public String index() {
         return "upload";
     }
-
+    
+    /*
+     * 只允许上传ipa apk格式文件
+     */
     @PostMapping("/uploadFile") 
     @ResponseBody
     public RespEntity singleFileUpload(@RequestParam("file") MultipartFile file) {
@@ -100,22 +109,26 @@ public class UploadController {
             }
             FileUtil.deleteFile(filePath);	//删除临时存放
             String packName = (String) tmpMap.get("package");
-            //TODO 包名库
+            //TODO 包名库需完善
             if (packName == null || !global.isContainPackage(packName) ) {
+            	log.error("文件非法，packName : {}",packName);
             	return new RespEntity(RespCode.FILE_ERROR);
             }
             
             //最终保存
             String dateStr = DateUtil.getDateStr();
             String ossPath = "";
+            //正规命名
+            String gmPy = packName.split("\\.")[1];
+            String saveName = gmPy+"_"+tmpMap.get("versionName").toString()+"_" + dateStr;
             if (suffix.equalsIgnoreCase("ipa")) {
             	FileUtil.makeDir(basePath + packName + "/" + IConsts.UpFileType.Ios.getDesc() + "/" + dateStr);
-            	filePath = basePath + packName + "/" + IConsts.UpFileType.Ios.getDesc() + "/" + dateStr + "/" +  filename;
-            	ossPath = ossMgr.ossTest + packName + "/" + IConsts.UpFileType.Ios.getDesc() + "/" +  filename;
+            	filePath = basePath + packName + "/" + IConsts.UpFileType.Ios.getDesc() + "/" + dateStr + "/" +  saveName + ".ipa";
+            	ossPath = ossMgr.ossTest + packName + "/" + IConsts.UpFileType.Ios.getDesc() + "/" +  saveName + ".ipa";
             } else {
             	FileUtil.makeDir(basePath + packName + "/" + IConsts.UpFileType.Android.getDesc() + "/" + dateStr);
-            	filePath = basePath + packName + "/" + IConsts.UpFileType.Android.getDesc() + "/" + dateStr + "/" +  filename;
-            	ossPath = ossMgr.ossTest + packName + "/" + IConsts.UpFileType.Android.getDesc() + "/" +  filename;
+            	filePath = basePath + packName + "/" + IConsts.UpFileType.Android.getDesc() + "/" + dateStr + "/" +  saveName + ".apk";
+            	ossPath = ossMgr.ossTest + packName + "/" + IConsts.UpFileType.Android.getDesc() + "/" +  saveName + ".apk";
             }
             tmpMap.put("localPath", filePath);
             path = Paths.get(filePath);
@@ -126,9 +139,9 @@ public class UploadController {
             //TODO 自动刷新测试下载链接
             
             tmpMap.put("ossPath", ossPath);
+            tmpMap.put("fileName", filename);
             //日志信息存储
             int tableId = saveUploadLog(tmpMap);
-            log.info("upload file success -> info : {}",tmpMap);
             
             //钉钉通知
             /*String msg = filename + "上传成功,下载路径:http://118.89.237.82:9100/downFile/"+tableId;
@@ -144,13 +157,14 @@ public class UploadController {
     	UploadFile info = new UploadFile();
     	info.setGame(map.get("name").toString());
     	info.setPackName(map.get("package").toString());
-    	info.setState(0);
     	info.setVision(map.get("versionName").toString());
     	info.setType(Integer.parseInt(map.get("type").toString()));
     	info.setLocalPath(map.get("localPath").toString());
     	info.setOssPath(map.get("ossPath").toString());
     	info.setState(IConsts.UpFileState.up2oss.getState());
+    	info.setFileName(map.get("fileName").toString());
     	uploadDao.saveFile(info,IConsts.UpFileTable.test.getTableName());
+    	log.info("upload file success -> info : {}",StringUtil.objToJson(info));
     	return info.getId();
     }
     

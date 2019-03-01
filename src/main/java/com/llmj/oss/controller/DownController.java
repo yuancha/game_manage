@@ -4,19 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.llmj.oss.dao.DownDao;
 import com.llmj.oss.dao.UploadDao;
 import com.llmj.oss.model.UploadFile;
 
 import lombok.extern.slf4j.Slf4j;
-
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -33,11 +27,21 @@ public class DownController {
 	
 	@Autowired
 	private UploadDao uploadDao;
+	@Autowired
+	private DownDao downDao;
 	
-	@GetMapping("/testLink")
-	public String downLinkTest(Model model) {
-		model.addAttribute("message", "this is index jsp page!");
-		return "index";
+	@GetMapping("/link")
+	public String downLinkTest(Model model,HttpServletRequest request) {
+		String type = request.getParameter("type");
+		//String gameState = request.getParameter("gameState");
+		//String gameId = request.getParameter("gameId");
+		String html = "html/links/ffyl/android";
+		if (type.equals("ios")) {
+			html = "html/links/ffyl/ios";
+		}
+		//TODO 连接配置 动态获取
+		model.addAttribute("downlink", "www.baidu.com");
+		return html;
 	}
 	
 	@GetMapping("/onlineLink")

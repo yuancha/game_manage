@@ -22,6 +22,7 @@ public class UploadFile implements Serializable {
 	
 	private int id;
 	private String game;
+	private String fileName;
 	private String packName;
 	private String vision;
 	private int type;	//0 安卓 1 ios

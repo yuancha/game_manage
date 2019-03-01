@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<!-- saved from url=(0064)http://llmj.cdn.xianyugame.com/down/hainan/ios/ios_download.html -->
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>六六海南麻将</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=0, viewport-fit=cover">
+
+<meta name="Robots" contect="none">
+<meta name="keywords" content="六六发发娱乐麻将">
+<meta name="description" content="六六发发娱乐麻将">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="format-detection" content="telephone=no">
+<link type="image/x-icon" rel="Icon" href="http://llmj.cdn.xianyugame.com/down/hainan/ios/etongdai.ico">
+<link type="image/x-icon" rel="Shortcut Icon" href="http://llmj.cdn.xianyugame.com/down/hainan/ios/etongdai.ico">
+<link type="image/x-icon" rel="Bookmark" href="http://llmj.cdn.xianyugame.com/down/hainan/ios/etongdai.ico">
+<link rel="stylesheet" href="../static/links/com.css" type="text/css">
+<link rel="stylesheet" href="../static/links/m_size.css">
+<script type="text/javascript">
+	function installApp(){
+		if(window.navigator.standalone){ // from Home Screen Icon
+			// tap Install Button by script
+			var event = document.createEvent("MouseEvents");
+			event.initEvent("click", true, true);
+			document.getElementById("install").dispatchEvent(event);
+		}
+		downLink();
+	}
+	
+	function downLink() {
+		var link = document.getElementById("link").value;
+		var install = document.getElementById("install");
+		//install.href = "itms-services://?action=download-manifest&amp;url=https://"+link;
+		install.href = "http://"+link;
+	}
+	</script>
+</head>
+<body onload="installApp();">
+    <header class="com_menu">
+        <h1 id="logo"></h1>
+    </header>
+	<section class="ibd lvbd">
+    <h1>六六发发娱乐麻将约局神器</h1>
+    <div class="h1bd graya">
+     	<p>海南本地人最爱玩的麻将</p>
+        <p>原汁原味复现正宗本地玩法，防作弊，更放心</p>
+        <p>全面支持安卓、iOS手机，好友约局随时随地想玩就玩</p>
+    </div>
+    <input type="hidden" th:value="${downlink}" id="link"/>
+    <p id="icon"></p>
+          <p class="tztool"> <a id="install" class="btn" href="">立即下载</a></p>
+			<section class="ios">
+                <p>
+                    安装教程（iOS10用户必看）
+                </p>
+                <img class="common-center" src="../static/links/ios_guid.png">
+
+            </section>
+	</section>
+    <aside class="tc_f" id="weixin" style="display:none">
+        <i class="opa"></i>
+        <div class="bd">
+        </div>
+    </aside>
+
+
+</body></html>

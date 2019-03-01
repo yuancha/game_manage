@@ -1,0 +1,31 @@
+@-ms-viewport {
+  width: device-width;
+}
+@media (min-width:320px) {
+body{padding:0;font-size:14px}
+.lvbd{min-height:420px}
+}
+
+@media (max-width:320px) {
+.lvbd{min-height:420px}
+}
+@media (max-width:540px) {
+.lvbd{min-height:500px}
+.footer{padding-top:2%;}
+}
+@media print {
+
+}
+@media (min-width:768px) and (max-width: 979px) {
+.lvbd{min-height:500px}
+.footer{padding-top:2%;}
+}
+@media (min-width:1024px) {
+.lvbd{min-height:500px;padding-bottom:2%;}
+.footer{padding-top:2%;}
+
+}
+@media (max-width:979px) {}
+@media (max-width:320px) {
+.lvbd{width:320px;}
+}
