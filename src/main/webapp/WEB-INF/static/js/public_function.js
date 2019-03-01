@@ -75,42 +75,12 @@ $('#app_android,#app_iOS').on('click',function(){
 });
 
 
-//拷贝
-$(document).on('click','.ev_copy',function(){
-	var id 		= $(this).parents('tr').find('.app_id').val();
-	var gameState 	= $('#app_state').val();
-	var data 		= '{"id":"'+id+'","gameState":"'+gameState+'"}';
-	copyFilesInfoByAjax(data); 
-});
-
-function copyFilesInfoByAjax(data){
-	$.ajax({
-		 //几个参数需要注意一下
-       type: "POST",//方法类型
-       dataType: "json",//预期服务器返回的数据类型
-       contentType: "application/json; charset=utf-8",
-       url: "/oss/copyFile" ,//url
-       data: data,
-       success: function (result) {
-           console.log(result);//打印服务端返回的数据(调试用)
-           if (result.code == 0) {
-               alert("拷贝成功");    
-           }else if(result.code == -2){
-        	   alert("文件已存在");
-           }
-       },
-       error : function() {
-           alert("异常！");
-       }
-   });
-}
-
 //刷包
-$(document).on('click','#app_refresh',function(){
+$(document).on('click','.ev_refresh',function(){
 	var id 			= $(this).parents('.modal-content').find('#show_app_id').val();
 	var gameState 	= $('#app_state').val();
 	var data 		= '{"id":"'+id+'","gameState":"'+gameState+'"}';
-	console.log(data);
+
 	refreshFilesInfoByAjax(data); 
 });
 
@@ -134,6 +104,39 @@ function refreshFilesInfoByAjax(data){
           alert("异常！");
       }
   });
+}
+
+
+
+//拷贝
+$(document).on('click','.app_refresh',function(){
+	var id 			= $(this).parents('tr').find('.app_id').val();
+	var gameState 	= $('#app_state').val();
+	var data 		= '{"id":"'+id+'","gameState":"'+gameState+'"}';
+	console.log(data);
+	copyFilesInfoByAjax(data); 
+});
+
+function copyFilesInfoByAjax(data){
+	$.ajax({
+		 //几个参数需要注意一下
+       type: "POST",//方法类型
+       dataType: "json",//预期服务器返回的数据类型
+       contentType: "application/json; charset=utf-8",
+       url: "/oss/copyFile" ,//url
+       data: data,
+       success: function (result) {
+           console.log(result);//打印服务端返回的数据(调试用)
+           if (result.code == 0) {
+               alert("拷贝成功");    
+           }else if(result.code == -2){
+        	   alert("文件已存在");
+           }
+       },
+       error : function() {
+           alert("异常！");
+       }
+   });
 }
 
 //删除
@@ -167,7 +170,11 @@ function deleteFilesInfoByAjax(data){
 }
 
 //获取游戏包数据详情
-function getFilesInfoByAjax(data){
+function getFilesInfoByAjax(data){	
+	$('#online_osspath').text("");
+	$('#online_version').text("");
+    $('#online_operTime').text("");
+    $('#online_upTime').text("");
 	$.ajax({
 		 //几个参数需要注意一下
         type: "POST",//方法类型
@@ -184,11 +191,11 @@ function getFilesInfoByAjax(data){
                 for(var i in data){
                
                	 $('#app_box').append("<tr>\
-               		<td class='middle-align'>"+data[i].game+"</td>\
+               		<td class='middle-align'>"+filePathSplit(data[i].ossPath)+"</td>\
                        <td class='middle-align'>"+data[i].vision+"</td>\
                        <td>\
                            <a href='#' class='btn btn-secondary btn-single btn-sm ev_look'>查看</a>\
-                           <a href='#' class='btn btn-turquoise btn-single btn-sm ev_copy'>拷贝</a>\
+                           <a href='#' class='btn btn-turquoise btn-single btn-sm ev_refresh'>刷包</a>\
                        </td>\
                        <input type='hidden' value="+data[i].id+" class='app_id' >\
                        <input type='hidden' value="+data[i].game+" class='app_game' >\
@@ -204,6 +211,7 @@ function getFilesInfoByAjax(data){
                 }
                 
               //上线数据详情
+              $('#online_osspath').text(filePathSplit(data[i].ossPath));  
               $('#online_version').text(result.online.vision);
               $('#online_operTime').text(result.online.operTime);
               $('#online_upTime').text(result.online.upTime);
@@ -217,6 +225,17 @@ function getFilesInfoByAjax(data){
     });
 }
 
+
+//oss路径名称截取
+function filePathSplit(str){
+	if(str){
+		var name = str.split("/")[4];
+		return name;
+	}else{
+		return "无";
+	}
+	
+}
 
 //小标题更改
 function getNavTitle(gameId){

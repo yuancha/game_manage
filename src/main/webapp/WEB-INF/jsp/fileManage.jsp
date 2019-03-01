@@ -136,6 +136,7 @@
                   <div class="row">
 	                    <div class="col-md-12">
 	                   		<div class="panel panel-default">
+	                   			<p>线上包名：<span id="online_osspath"></span></p>
 	                    		<p>线上详情版本号：<span id="online_version"></span></p>
 	                    		<p>上传时间：<span id="online_operTime"></span></p>
 	                    		<p>操作时间：<span id="online_upTime"></span></p>
@@ -266,7 +267,7 @@
                     <div class="modal-footer">
                     	<button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
                         <button type="button" class="btn btn-danger" data-dismiss="modal" id="app_delete">删除</button>
-                        <button type="button" class="btn btn-info" data-dismiss="modal" id="app_refresh">刷包</button>
+                        <button type="button" class="btn btn-info" data-dismiss="modal" id="app_copy">拷贝</button>
                     </div>
                 </div>
             </div>
