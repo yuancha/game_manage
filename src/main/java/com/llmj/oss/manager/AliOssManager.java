@@ -1,4 +1,4 @@
-package com.llmj.oss.alioss;
+package com.llmj.oss.manager;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -22,14 +22,12 @@ import lombok.extern.slf4j.Slf4j;
 public class AliOssManager {
 	
 	public static void main(String[] args) {
-		AliOssManager mgr = new AliOssManager();
-		String source = "yctest/test/com.ffylmj.taiding/android/ffylmj_formal_20190215_03.apk";
-		String target = "yctest/online/com.ffylmj.taiding/android/ffylmj_formal_20190215_01.apk";
-		System.out.println(mgr.fileIsExist(source));
+		StringBuilder sb = new StringBuilder(endpoint);
+		sb.insert(7, bucketName+".");
+		System.out.println(sb.toString());
 	}
 	
 	private static String endpoint = "http://oss-cn-beijing.aliyuncs.com";
-	private static String endpoints = "https://oss-cn-beijing.aliyuncs.com";
 	private static String accessKeyId = "LTAIMO9xn64DcMJ6";
     private static String accessKeySecret = "lpcoQYwaiv7LugHOUe8y0LiWjf6r6G";
     private static String bucketName = "bj-fftl-tongliao";
@@ -176,7 +174,10 @@ public class AliOssManager {
 	 */
 	public void changePlist(String content,String saveLocalPath,String ossIpaPath,String ossPlistPath,UploadFile file) {
 		try {
-			String change = content.replaceAll("<string>http:.*</string>", "<string>"+endpoint+"/"+ossIpaPath+"</string>");//plist path
+			StringBuilder sb = new StringBuilder(endpoint);
+			sb.insert(7, bucketName+".");
+			sb.append("/").append(ossIpaPath);
+			String change = content.replaceAll("<string>http:.*</string>", "<string>"+sb.toString()+"</string>");//plist path
 			change = change.replaceAll("<string>com.*</string>", "<string>"+file.getPackName()+"</string>");
 			change = change.replaceAll("<string>六六.*</string>", "<string>"+file.getGame()+"</string>");
 			FileUtil.stringToFile(change,saveLocalPath);
@@ -187,16 +188,4 @@ public class AliOssManager {
 		}
 	}
 	
-	/**
-	 * 替换html指定内容
-	 */
-	public void changeHtml(String content,String replace,String ossPath) {
-		try {
-			String change = content.replaceAll("url=.*plist", "url="+endpoints+"/"+replace);
-			uploadFileByByte(ossPath,change);
-			log.info("html 操作成功，oss保存路径 ->{}",ossPath);
-		} catch (Exception e) {
-			log.error("changeHtml error,Exception --> {}",e);
-		}
-	}
 }

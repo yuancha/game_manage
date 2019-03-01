@@ -15,7 +15,7 @@ public interface DownDao {
 			+ "on duplicate key update link=values(link),upTime=values(upTime)")
 	int saveLink(DownLink dl);
 	
-	@Select("select * from down_link where id=#{id} and type=#{type}")
-	DownLink selectById(@Param("id") String id,@Param("type") int type);
+	@Select("select * from down_link where id=#{id}")
+	DownLink selectById(@Param("id") String id);
 	
 }

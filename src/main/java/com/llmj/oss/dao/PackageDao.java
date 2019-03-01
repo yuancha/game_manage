@@ -1,0 +1,32 @@
+package com.llmj.oss.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
+
+import com.llmj.oss.model.PackageName;
+
+@Mapper
+public interface PackageDao {
+	
+	@Insert("insert into package_name ( gameId,desc, android,ios) "
+			+ "values ( #{gameId},#{desc}, #{android}, #{#{ios}})")
+	int savePack(PackageName pack);
+	
+	@Select("select * from package_name where gameId=#{gameId}")
+	PackageName selectById(@Param("gameId") String gameId);
+	
+	@Select("select * from package_name")
+	List<PackageName> getAll();
+	
+	@Update("update package_name set desc=#{desc},android=#{android},ios=#{ios} where gameId=#{gameId}")
+	void updatePack(PackageName pack);
+	
+	@Delete("delete from package_name where gameId=#{gameId}")
+	void delPack(@Param("gameId") int gameId);
+}

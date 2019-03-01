@@ -8,14 +8,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.llmj.oss.alioss.AliOssManager;
-import com.llmj.oss.config.GlobalBean;
 import com.llmj.oss.config.IConsts;
 import com.llmj.oss.config.RespCode;
 import com.llmj.oss.dao.UploadDao;
 import com.llmj.oss.mail.DingDingNotice;
+import com.llmj.oss.manager.AliOssManager;
+import com.llmj.oss.manager.PackManager;
 import com.llmj.oss.model.RespEntity;
 import com.llmj.oss.model.UploadFile;
 import com.llmj.oss.util.DateUtil;
@@ -24,15 +23,10 @@ import com.llmj.oss.util.StringUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,7 +39,7 @@ public class UploadController {
 	@Autowired
 	private UploadDao uploadDao;
 	@Autowired
-	private GlobalBean global;
+	private PackManager packMgr;
 	@Autowired
 	private AliOssManager ossMgr;
 	
@@ -100,17 +94,20 @@ public class UploadController {
             
             File fileapk = new File(filePath);
             Map<String,Object> tmpMap =  new HashMap<>();
+            int type = 0;
             if (suffix.equalsIgnoreCase("ipa")) {
             	tmpMap = FileUtil.readIPA(fileapk);
             	tmpMap.put("type", IConsts.UpFileType.Ios.getType());
+            	type = IConsts.UpFileType.Ios.getType();
             } else {
             	tmpMap = FileUtil.readAPK(fileapk);
             	tmpMap.put("type", IConsts.UpFileType.Android.getType());
+            	type = IConsts.UpFileType.Android.getType();
             }
             FileUtil.deleteFile(filePath);	//删除临时存放
             String packName = (String) tmpMap.get("package");
             //TODO 包名库需完善
-            if (packName == null || !global.isContainPackage(packName) ) {
+            if (packName == null || !packMgr.isContainPackage(packName,type) ) {
             	log.error("文件非法，packName : {}",packName);
             	return new RespEntity(RespCode.FILE_ERROR);
             }

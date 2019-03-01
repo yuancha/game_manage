@@ -1,4 +1,4 @@
-package com.llmj.oss.model;
+package com.llmj.oss.model.oper;
 
 import lombok.Getter;
 import lombok.Setter;

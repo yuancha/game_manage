@@ -35,19 +35,10 @@ import net.dongliu.apk.parser.bean.UseFeature;
 public class FileUtil {
 
 	public static void main(String[] args) {
-		/*File file = new File("F://upload//ffylmj_formal_20190215_01.ipa");
+		File file = new File("F://upload//ffylmj_formal_20190215_01.ipa");
 		Map<String, Object> map = FileUtil.readIPA(file);
-		System.out.println(map);*/
-		
-		/*String filePath = "F:/upload/六六海南麻将.html";
-		String str = FileUtil.fileToString(filePath,"utf-8");
-		//System.out.println(str);
-		String change = str.replaceAll("url=https:.*plist", "url=https://www.baidu.com/down/123.plist");
-		//System.out.println(change);
-		FileUtil.stringToFile(change,filePath);*/
-		
-		Map<String,String> map = LoadPopertiesFile("config/gamePackage.properties");
 		System.out.println(map);
+		
 	}
 
 	/**

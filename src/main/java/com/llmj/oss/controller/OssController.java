@@ -14,16 +14,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.llmj.oss.alioss.AliOssManager;
-import com.llmj.oss.config.GlobalBean;
 import com.llmj.oss.config.IConsts;
 import com.llmj.oss.config.RespCode;
 import com.llmj.oss.dao.DownDao;
 import com.llmj.oss.dao.UploadDao;
+import com.llmj.oss.manager.AliOssManager;
+import com.llmj.oss.manager.PackManager;
 import com.llmj.oss.model.DownLink;
-import com.llmj.oss.model.FileOperation;
 import com.llmj.oss.model.RespEntity;
 import com.llmj.oss.model.UploadFile;
+import com.llmj.oss.model.oper.FileOperation;
 import com.llmj.oss.util.FileUtil;
 import com.llmj.oss.util.StringUtil;
 
@@ -37,7 +37,7 @@ public class OssController {
 	@Autowired
 	private AliOssManager ossMgr;
 	@Autowired
-	private GlobalBean global;
+	private PackManager packMgr;
 	@Autowired
 	private UploadDao uploadDao;
 	@Autowired
@@ -46,6 +46,11 @@ public class OssController {
 	//本地存放路径
 	@Value("${upload.local.basePath}")
 	private String localPath;
+	
+	@GetMapping("/home")
+	public String home(Model model,HttpServletRequest request) {
+		return "error";
+	}
 	
 	@GetMapping("/fileManage")
 	public String fileManage(Model model,HttpServletRequest request) {
@@ -84,7 +89,7 @@ public class OssController {
 			int state = param.getGameState();
 			log.debug("getFilesInfo param,gameId:{},type:{},state:{}",gameId,type,state);
 			
-			String packName = global.getPackName(String.valueOf(gameId));
+			String packName = packMgr.getPackName(gameId,type);
 			if (StringUtil.isEmpty(packName)) {
 				return new RespEntity(RespCode.GAME_PACKAGE);
 			}
@@ -175,11 +180,11 @@ public class OssController {
 					return new RespEntity(-2,"plist 读取错误");
 				}
 				ossMgr.changePlist(plistStr,file.getLocalPath()+".plist",ossPath,ossPath+".plist",file);
-				ossPath = ossPath+".plist";
+				link = ossPath+".plist";
 			}
 			
 			//保存到mysql
-			String gid = global.getGameIdByPack(packName);
+			int gid = packMgr.getGameIdByPack(packName,type);
 			String dlid = gid + "_" + state + "_" + file.getType();
 			DownLink dl = new DownLink();
 			dl.setId(dlid);

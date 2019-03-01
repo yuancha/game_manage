@@ -8,7 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.llmj.oss.dao.DownDao;
 import com.llmj.oss.dao.UploadDao;
+import com.llmj.oss.model.DownLink;
 import com.llmj.oss.model.UploadFile;
+import com.llmj.oss.util.StringUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,23 +33,75 @@ public class DownController {
 	private DownDao downDao;
 	
 	@GetMapping("/link")
-	public String downLinkTest(Model model,HttpServletRequest request) {
-		String type = request.getParameter("type");
-		//String gameState = request.getParameter("gameState");
-		//String gameId = request.getParameter("gameId");
-		String html = "html/links/ffyl/android";
-		if (type.equals("ios")) {
-			html = "html/links/ffyl/ios";
+	public String downLink(Model model,HttpServletRequest request) {
+		
+		try {
+			String gameState = request.getParameter("gameState");
+			String gameId = request.getParameter("gameId");
+			
+			String userAgent = request.getHeader("user-agent").toLowerCase();
+			String html = "";
+			String linkid = "";
+			if(userAgent.indexOf("android") != -1){
+			    //安卓
+				html = "html/links/ffyl/android";
+				linkid = gameId + "_" + gameState + "_" + 0;
+			}else if(userAgent.indexOf("iphone") != -1 || userAgent.indexOf("ipad") != -1 || userAgent.indexOf("ipod") != -1){
+			   //苹果
+				html = "html/links/ffyl/ios";
+				linkid = gameId + "_" + gameState + "_" + 1;
+			}else{
+				//userAgent.indexOf("micromessenger")!= -1 微信
+			    //电脑
+				log.error("request info, userAgent -> {}",userAgent);
+				return "html/error";
+			}
+
+			//TODO 连接配置 动态获取
+			DownLink dl = downDao.selectById(linkid);
+			if (dl == null || StringUtil.isEmpty(dl.getLink())) {
+				log.error("link error, linkid : {}",linkid);
+				model.addAttribute("message", "server error!");
+				return "html/error";
+			}
+			//TODO oss域名动态获取
+			model.addAttribute("downlink", dl.getLink());
+			return html;
+		} catch (Exception e) {
+			log.error("downLink error,Exception -> {}",e);
 		}
-		//TODO 连接配置 动态获取
-		model.addAttribute("downlink", "www.baidu.com");
-		return html;
+		return "html/error";
 	}
 	
-	@GetMapping("/onlineLink")
-	public String downLinkOnline(Model model) {
-		model.addAttribute("message", "this is index html page!");
-		return "html/index";
+	@GetMapping("/link1")
+	public String downLinkOnline(Model model,HttpServletRequest request) {
+		try {
+			String gameState = request.getParameter("gameState");
+			String gameId = request.getParameter("gameId");
+			String type = request.getParameter("type");
+			String linkid = gameId + "_" + gameState + "_";
+			String html = "html/links/ffyl/android";
+			if (type.equals("ios")) {
+				html = "html/links/ffyl/ios";
+				linkid += 1;
+			} else {
+				linkid += 0;
+			}
+
+			//TODO 连接配置 动态获取
+			DownLink dl = downDao.selectById(linkid);
+			if (dl == null || StringUtil.isEmpty(dl.getLink())) {
+				log.error("link error, linkid : {}",linkid);
+				model.addAttribute("message", "server error!");
+				return "html/error";
+			}
+			//TODO oss域名动态获取
+			model.addAttribute("downlink", dl.getLink());
+			return html;
+		} catch (Exception e) {
+			log.error("downLink error,Exception -> {}",e);
+		}
+		return "html/error";
 	}
 	
 	
