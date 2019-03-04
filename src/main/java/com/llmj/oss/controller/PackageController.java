@@ -59,7 +59,6 @@ public class PackageController {
 		try {
 			PackageName pn = objChange(model);
 			packDao.savePack(pn);
-			packMgr.refreshPack(pn);
 		} catch (Exception e) {
 			log.error("packAdd error,Exception -> {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);
@@ -72,7 +71,6 @@ public class PackageController {
 		try {
 			PackageName pn = objChange(model);
 			packDao.updatePack(pn);
-			packMgr.refreshPack(pn);
 		} catch (Exception e) {
 			log.error("packUpdate error,Exception -> {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);
@@ -84,20 +82,8 @@ public class PackageController {
 	public RespEntity packDel(PackOperation model) {
 		try {
 			packDao.delPack(model.getGameId());
-			packMgr.delPack(model.getGameId());
 		} catch (Exception e) {
 			log.error("packDel error,Exception -> {}",e);
-			return new RespEntity(RespCode.SERVER_ERROR);
-		}
-		return new RespEntity(RespCode.SUCCESS);
-	}
-	
-	@PostMapping("/reload")
-	public RespEntity packReload() {
-		try {
-			packMgr.packNameInit();
-		} catch (Exception e) {
-			log.error("packReload error,Exception -> {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);
 		}
 		return new RespEntity(RespCode.SUCCESS);
