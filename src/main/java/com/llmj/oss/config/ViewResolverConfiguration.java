@@ -37,7 +37,7 @@ public class ViewResolverConfiguration {
         /* 路径拦截 */
 		@Override
 		public void addInterceptors(InterceptorRegistry registry) {
-			registry.addInterceptor(new UrlInterceptor()).addPathPatterns("/**");
+			registry.addInterceptor(new UrlInterceptor()).addPathPatterns("/**").excludePathPatterns("/static/**");
 		}
 
 		@Bean
@@ -76,7 +76,7 @@ public class ViewResolverConfiguration {
 
         @Override
         public void addResourceHandlers(ResourceHandlerRegistry registry) {
-            registry.addResourceHandler("/img/**").addResourceLocations("/img/");
+            //registry.addResourceHandler("/img/**").addResourceLocations("/WEB-INF/img/");
             registry.addResourceHandler("/static/**").addResourceLocations("/WEB-INF/static/");
         }
     }

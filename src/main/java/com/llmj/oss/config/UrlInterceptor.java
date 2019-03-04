@@ -15,7 +15,7 @@ public class UrlInterceptor implements HandlerInterceptor {
 		boolean flag = true;
 		String url = request.getRequestURI();
 		System.out.println("请求路径，"+url);
-		if (url.equals("/upload") || url.equals("/login")) {
+		if (url.equals("/upload") || url.equals("/login") || url.equals("/uploadFile")) {
 			return flag;
 		}
 		User user = (User) request.getSession().getAttribute("user");
