@@ -1,5 +1,8 @@
 server:
   port: 9100
+  servlet:
+    session:
+      timeout: 120s
   
 spring:
   servlet:
@@ -18,9 +21,10 @@ upload:
     basePath: F:/save/
     tmpsave: F:/save/temp/
   oss:
-     test: yctest/test/
-     online: yctest/online/
-
+    test: yctest/test/
+    online: yctest/online/
+  qrCode: 
+    basePath: F:/qrCode/
 mybatis:
   type-aliases-package: com.llmj.oss.model
   #mapper-locations: classpath:mybatis-mappers/*Mapper.xml 

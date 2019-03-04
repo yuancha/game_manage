@@ -7,6 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +16,7 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -239,7 +241,7 @@ public class FileUtil {
 	 */
 	public static void makeDir(String path) {
 		File file = new File(path);
-		if (!file.exists()) {
+		if (!file.exists() && !file.isDirectory()) {
 			file.mkdirs();
 		}
 	}
@@ -335,7 +337,7 @@ public class FileUtil {
      * @param filePath 
      *            : 文件路径 
      */  
-    public static Map<String,String> LoadPopertiesFile(String filePath) {  
+    public static Map<String,String> LoadPopertiesFile(String filePath) throws Exception {  
     	
     	Map<String,String> result = new HashMap<>();
     	
@@ -359,8 +361,8 @@ public class FileUtil {
             // 从输入流中读取属性列表  
             prop.load(is);  
         } catch (Exception e) {  
-            System.out.println("load file faile." + e);  
-            return result;  
+            System.out.println("load file fail " + e);  
+            throw e; 
         } finally {
         	if (is != null)
 				try {
@@ -384,4 +386,35 @@ public class FileUtil {
         }  
         return result;
     }  
+    
+    /**
+     * 读入TXT文件
+     */
+	public static Set<String> readTxtFile(String filePath) throws Exception {
+		
+		Set<String> set = new HashSet<>();
+		FileReader reader = null;
+		BufferedReader br = null;
+		try {
+			reader = new FileReader(filePath);
+			br = new BufferedReader(reader);
+			String line = null;
+			// 网友推荐更加简洁的写法
+			while ((line = br.readLine()) != null) {
+				// 一次读入一行数据
+				if (line != null) 
+					set.add(line.trim());
+			}
+		} catch (IOException e) {
+			throw e;
+		} finally {
+			if (reader != null) {
+				reader.close();
+			}
+			if (br != null) {
+				br.close();
+			}
+		}
+		return set;
+	}
 }

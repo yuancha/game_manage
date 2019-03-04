@@ -97,7 +97,7 @@ public class PackageController {
 	private PackageName objChange(PackOperation model) {
 		PackageName pn = new PackageName();
 		pn.setGameId(model.getGameId());
-		pn.setDesc(model.getDesc());
+		pn.setContent(model.getDesc());
 		pn.setAndroid(model.getAndroid());
 		pn.setIos(model.getIos());
 		return pn;

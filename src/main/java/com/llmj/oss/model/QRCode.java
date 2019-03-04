@@ -6,18 +6,20 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * 包名管理
+ * 二维码
  * @author xinghehudong
  *
  */
 @Getter
 @Setter
-public class PackageName implements Serializable {
+public class QRCode implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
-	private int gameId;		//gameId
+	private int id;	//自增id
+	private int gameId;	//游戏id
+	private int state;	//测试或是正式 0 1
 	private String content;	//描述
-	private String android;	//安卓包名
-	private String ios;	//ios包名
+	private String link;	//链接
+	private String photo;	//图片二进制
 }

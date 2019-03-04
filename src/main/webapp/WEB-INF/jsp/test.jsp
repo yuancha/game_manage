@@ -23,12 +23,31 @@
                 type: "POST",//方法类型
                 dataType: "json",//预期服务器返回的数据类型
                 contentType: "application/json; charset=utf-8",
-                url: "/package/list" ,//url
+                url: "/qrCode/list" ,//url
                 data: data,
                 success: function (result) {
                     console.log(result);//打印服务端返回的数据(调试用)
                     if (result.code == 0) {
                         alert("SUCCESS!啦啦啦");
+                        var arry = result.data[0].photo.split(',');
+                      
+                        console.log(arry);
+                        	var str12 = arrayBufferToBase64(arry);//转换字符串
+                            console.log(str12);
+                            var outputImg = document.createElement('img');
+                            outputImg.src = 'data:image/png;base64,'+str12;
+                            // // append it to your page
+                            document.body.appendChild(outputImg);
+                            console.log(outputImg);
+                            function arrayBufferToBase64( buffer ) {
+                                var binary = '';
+                                var bytes = new Uint8Array( buffer );
+                                var len = bytes.byteLength;
+                                for (var i = 0; i < len; i++) {
+                                    binary += String.fromCharCode( bytes[ i ] );
+                                }
+                                return window.btoa( binary );
+                            }
                     }
                     ;
                 },
