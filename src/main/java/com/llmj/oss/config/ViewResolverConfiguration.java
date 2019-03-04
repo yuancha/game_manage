@@ -1,11 +1,14 @@
 package com.llmj.oss.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.PathMatchConfigurer;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
@@ -20,6 +23,7 @@ public class ViewResolverConfiguration {
     @EnableWebMvc
     @ComponentScan("com.llmj.oss")
     public class WebConfig implements WebMvcConfigurer {
+    	
         @Bean
         public ViewResolver viewResolver() {
             InternalResourceViewResolver resolver = new InternalResourceViewResolver();
@@ -29,8 +33,14 @@ public class ViewResolverConfiguration {
             resolver.setOrder(2);
             return resolver;
         }
+        
+        /* 路径拦截 */
+		@Override
+		public void addInterceptors(InterceptorRegistry registry) {
+			registry.addInterceptor(new UrlInterceptor()).addPathPatterns("/**");
+		}
 
-        @Bean
+		@Bean
         public ITemplateResolver templateResolver() {
             SpringResourceTemplateResolver templateResolver = new SpringResourceTemplateResolver();
             templateResolver.setTemplateMode("HTML5");
