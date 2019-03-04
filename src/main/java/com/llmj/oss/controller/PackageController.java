@@ -6,6 +6,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.llmj.oss.config.RespCode;
 import com.llmj.oss.dao.PackageDao;
@@ -35,13 +36,14 @@ public class PackageController {
 	@Autowired
 	private PackManager packMgr;
 	
-	@GetMapping("/home")
+	@GetMapping("")
 	public String packHome(Model model,HttpServletRequest request) {
 		
-		return "packhome";
+		return "test";
 	}
 	
 	@PostMapping("/list")
+	@ResponseBody
 	public RespEntity packList() {
 		RespEntity res = new RespEntity();
 		try {
@@ -55,6 +57,7 @@ public class PackageController {
 	}
 	
 	@PostMapping("/add")
+	@ResponseBody
 	public RespEntity packAdd(PackOperation model) {
 		try {
 			PackageName pn = objChange(model);
@@ -67,6 +70,7 @@ public class PackageController {
 	}
 	
 	@PostMapping("/update")
+	@ResponseBody
 	public RespEntity packUpdate(PackOperation model) {
 		try {
 			PackageName pn = objChange(model);
@@ -79,6 +83,7 @@ public class PackageController {
 	}
 	
 	@PostMapping("/del")
+	@ResponseBody
 	public RespEntity packDel(PackOperation model) {
 		try {
 			packDao.delPack(model.getGameId());

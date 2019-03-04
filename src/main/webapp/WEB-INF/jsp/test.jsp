@@ -14,15 +14,16 @@
     <script type="text/javascript">
         function test() {
         	var gameId = $("#gameId").val();
-        	var gameType = $("#gameType").val();
-        	var id = $("#id").val();
-        	var data = '{"gameId":"'+gameId+'","gameType":"'+gameType+'","id":"'+id+'"}'
+        	var desc = $("#desc").val();
+        	var android = $("#android").val();
+        	var ios = $("#ios").val();
+        	var data = '{"gameId":"'+gameId+'","desc":"'+desc+'","android":"'+android+'","ios":"'+ios+'"}'
             $.ajax({
             //几个参数需要注意一下
                 type: "POST",//方法类型
                 dataType: "json",//预期服务器返回的数据类型
                 contentType: "application/json; charset=utf-8",
-                url: "/oss/copyFile" ,//url
+                url: "/package/list" ,//url
                 data: data,
                 success: function (result) {
                     console.log(result);//打印服务端返回的数据(调试用)
@@ -42,10 +43,10 @@
 <div id="form-div">
 	<%-- <%@include file = "nav.jsp" %> --%>
     <form id="form1" onsubmit="return false" action="##" method="post">
-    	<p>id：<input name="id" type="number" id="id" tabindex="1" size="15" value=""/></p>
-        <p>游戏id：<input name="gameId" type="number" id="gameId" tabindex="1" size="15" value="65537"/></p>
-        <p>游戏类型：<input name="gameType" type="number" id="gameType" tabindex="2" size="16" value="0"/></p>
-        <p>游戏状态：<input name="gameState" type="number" id="gameState" tabindex="2" size="16" value="${gameState}"/></p>
+    	<p>游戏id：<input name="gameId" type="number" id="gameId" tabindex="1" size="15" value=""/></p>
+        <p>描述：<input name="desc" type="text" id="desc" tabindex="1" size="15" value=""/></p>
+        <p>安卓包名：<input name="android" type="text" id="android" tabindex="2" size="16" value=""/></p>
+        <p>ios包名：<input name="ios" type="text" id="ios" tabindex="2" size="16" value=""/></p>
         <p><input type="button" value="测试" onclick="test()">&nbsp;<input type="reset" value="重置"></p>
     </form>
 </div>
