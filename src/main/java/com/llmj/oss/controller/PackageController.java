@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -39,7 +40,7 @@ public class PackageController {
 	@GetMapping("")
 	public String packHome(Model model,HttpServletRequest request) {
 		
-		return "manage";
+		return "packName";
 	}
 	
 	@PostMapping("/list")
@@ -58,7 +59,7 @@ public class PackageController {
 	
 	@PostMapping("/add")
 	@ResponseBody
-	public RespEntity packAdd(PackOperation model) {
+	public RespEntity packAdd(@RequestBody PackOperation model) {
 		try {
 			PackageName pn = objChange(model);
 			packDao.savePack(pn);
@@ -71,7 +72,7 @@ public class PackageController {
 	
 	@PostMapping("/update")
 	@ResponseBody
-	public RespEntity packUpdate(PackOperation model) {
+	public RespEntity packUpdate(@RequestBody PackOperation model) {
 		try {
 			PackageName pn = objChange(model);
 			packDao.updatePack(pn);
@@ -84,7 +85,7 @@ public class PackageController {
 	
 	@PostMapping("/del")
 	@ResponseBody
-	public RespEntity packDel(PackOperation model) {
+	public RespEntity packDel(@RequestBody PackOperation model) {
 		try {
 			packDao.delPack(model.getGameId());
 		} catch (Exception e) {
@@ -97,7 +98,7 @@ public class PackageController {
 	private PackageName objChange(PackOperation model) {
 		PackageName pn = new PackageName();
 		pn.setGameId(model.getGameId());
-		pn.setContent(model.getDesc());
+		pn.setContent(model.getContent());
 		pn.setAndroid(model.getAndroid());
 		pn.setIos(model.getIos());
 		return pn;

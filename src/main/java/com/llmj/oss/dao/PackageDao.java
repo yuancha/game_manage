@@ -15,7 +15,7 @@ import com.llmj.oss.model.PackageName;
 public interface PackageDao {
 	
 	@Insert("insert into package_name ( gameId,content, android,ios) "
-			+ "values ( #{gameId},#{content}, #{android}, #{#{ios}})")
+			+ "values ( #{gameId},#{content}, #{android}, #{ios})")
 	int savePack(PackageName pack);
 	
 	@Select("select * from package_name where gameId=#{gameId}")
@@ -25,7 +25,7 @@ public interface PackageDao {
 	@Select("select * from package_name where #{type}=#{type}")
 	PackageName selectByType(@Param("type") String type);
 	
-	@Select("select * from package_name")
+	@Select("select * from package_name order by gameId")
 	List<PackageName> getAll();
 	
 	@Update("update package_name set content=#{content},android=#{android},ios=#{ios} where gameId=#{gameId}")
