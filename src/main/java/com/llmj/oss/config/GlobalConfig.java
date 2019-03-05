@@ -46,5 +46,9 @@ public class GlobalConfig {
 	public boolean webDomainContains(String domain) {
 		return webDomains.contains(domain);
 	}
+	
+	public Set<String> getWebDomains() {
+		return webDomains;
+	}
 }
 

@@ -25,8 +25,8 @@ public interface QrcodeDao {
 	@Select("select * from qr_code where gameId = #{gameId} and state = #{state} ")
 	List<QRCode> getQRs(@Param("gameId") int gameId,@Param("state") int state);
 	
-	@Delete("delete from qr_code where id=#{id}")
-	void delQR(@Param("id") int id);
+	@Delete("delete from qr_code where link=#{link}")
+	void delQR(@Param("link") String link);
 	
 	@Update("update qr_code set link=#{link} , content=#{content} , desc=#{desc} where id=#{id} ")
 	void updateQr(QRCode qr);

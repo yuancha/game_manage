@@ -21,14 +21,7 @@
      
     
         <script src="../static/js/jquery-1.11.1.min.js"></script>
-    
-        <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-        <!--[if lt IE 9]>
-            <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-            <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-        <![endif]-->
-        
-         <link rel="stylesheet" href="../static/css/main.css">
+        <link rel="stylesheet" href="../static/css/main.css">
     </head>
     <body class="page-body">
   
@@ -135,25 +128,17 @@
                                 	<a title="创建"  rel="创建"  href="javascript:;" onclick="jQuery('#modal-2').modal('show', {backdrop: 'fade'});" >
                                 	<button class="btn btn-secondary" id='qrcode_create'>创建</button></a>
                             </div>
-                            <p>当前系统：<span id="app_system">Android</span></p>
-                            <table class="table" style="text-align: center">
+                            <table class="table" style="text-align: center" id="mytb">
                                 <thead>
                                     <tr>
                                     	<th width="30%"  style="text-align: center">二维码</th>
                                         <th width="30%"  style="text-align: center">描述</th>
+                                        <th width="30%"  style="text-align: center">链接</th>
                                         <th style="text-align: center">操作</th>
                                     </tr>
                                 </thead>
                                 <tbody id='app_box'>
-                                     <tr>
-                                    	<td class="middle-align"><img src="../static/images/IMG_1950.JPG" style='width: 10rem;'></td>
-                                        <td class="middle-align">2019-2-25</td>
-                                        <td><a href="#" class="btn btn-danger btn-single btn-sm qrcode_delete">删除</a></td>
-                                    </tr>
-                                    
-                                  
-                              
-                                 
+                                	
                                 </tbody>
                             </table>
                             
@@ -188,11 +173,6 @@
                     
                 </footer>
             </div>
-            
-                
-          
-            
-            
         </div>
         
         
@@ -232,8 +212,12 @@
                     </div>
                     
                     <div class="modal-body">
-                            	<p>请输入域名:<input type='text' value='' style="width:300px;"></p>
-                            	<p>请填写描述:<textarea placeholder="请填写描述，不能超过50字" style="width:300px;min-height:100px;"></textarea></p>
+                            	<p>请选择域名:
+                            		<select style="width:300px;" id="domain">
+                            			
+                            		</select>
+                            	</p>
+                            	<p>请填写描述:<textarea placeholder="请填写描述，不能超过50字" style="width:300px;min-height:100px;" id="desc"></textarea></p>
                     </div>
                     
                     <div class="modal-footer">
@@ -243,12 +227,6 @@
                 </div>
             </div>
         </div>
-        
-        
-    
-        
-        
-       
         
     	
         <!-- Bottom Scripts -->
@@ -264,20 +242,19 @@
         <script src="../static/js/xenon/xenon-custom.js"></script>
     	<script>
     		$(document).ready(function(){
-    			//getListByAjax();
-    		});
-    		
-    		
-    		$('.qrcode_delete').on('click',function(){
-    			
+    			getDomain();
+    			getListByAjax();
     		});
     		
     		//确认创建
 			$('#app_confirm').on('click',function(){
-				var data = "";
-					
+				var gameId = 666666;
+    			var state = $("#app_state").val();
+    			var domain = $("#domain").val();
+    			var desc = $("#desc").val();
+				var data = '{"gameId":"'+gameId+'","state":"'+state+'","domain":"'+domain+'","desc":"'+desc+'"}';
+				createQrcode(data);
     		});
-    		
     		
     		function createQrcode(data){
 	    			$.ajax({
@@ -288,9 +265,9 @@
 				      url: "/qrCode/add" ,//url
 				      data: data,
 				      success: function (result) {
-				          console.log(result);//打印服务端返回的数据(调试用)
 				          if (result.code == 0) {
-				              alert("创建成功");    
+				        	  getListByAjax();
+				              //alert("创建成功");    
 				          }else{
 				       	   	  alert(result.message);
 				          }
@@ -302,6 +279,10 @@
     		}
     		
     		function getListByAjax(){
+    			var gameId = 666666;
+    			var state = $("#app_state").val();
+    			var data = '{"gameId":"'+gameId+'","state":"'+state+'"}'
+    			console.log(data);
     			$.ajax({
 					 //几个参数需要注意一下
 			      type: "POST",//方法类型
@@ -312,11 +293,22 @@
 			      success: function (result) {
 			          console.log(result);//打印服务端返回的数据(调试用)
 			          if (result.code == 0) {
-			        	  
-			        	  
-			              $('#app_box').append("");
-			        	  
-			        	  
+			        	  $("#mytb tbody").empty();
+			        	   var tb = $("#mytb tbody");
+							var arry = result.data;
+							var trHTML = "";
+							for (var i = 0; i < arry.length; i++) {
+								var obj = arry[i];
+								var bytes = obj.photo.split(",");
+								var str = arrayBufferToBase64(bytes);
+								trHTML += "<tr>"
+										+ "<td><img style='width:100px;' src='data:image/png;base64,"+str+"'></td>"
+										+ "<td class='content'>"+ obj.content+ "</td>"
+										+ "<td class='link'>"+ obj.link+ "</td>"
+										+ "<td><button class='btn_del'>删除</button></td>"
+										+ "</tr>";
+							}
+							tb.append(trHTML);
 			          }else{
 			       	   	  alert(result.message);
 			          }
@@ -327,18 +319,22 @@
 			  });
     		}
     		
-    		function deleteQrcode(data){
+    		function getDomain(){
     			$.ajax({
 					 //几个参数需要注意一下
 			      type: "POST",//方法类型
 			      dataType: "json",//预期服务器返回的数据类型
 			      contentType: "application/json; charset=utf-8",
-			      url: "/qrCode//del" ,//url
-			      data: data,
+			      url: "/qrCode/domain" ,//url
+			      data: "",
 			      success: function (result) {
 			          console.log(result);//打印服务端返回的数据(调试用)
 			          if (result.code == 0) {
-			        	  alert("删除成功");  	  
+			        	  $("#domain").empty();
+			        	  var ary = result.data;
+			        	  for (var i=0;i<ary.length;i++) {
+			        		  $("#domain").append("<option>"+ary[i]+"</option>");
+			        	  }
 			          }else{
 			       	   	  alert(result.message);
 			          }
@@ -347,6 +343,38 @@
 			          alert("异常！");
 			      }
 			  });
+    		}
+    		
+    		$(document).on('click','.btn_del',function() {
+    			var link = $(this).parents('tr').find('.link').text();
+    			var data = '{"domain":"'+link+'"}'
+    			$.ajax({
+    				type : "POST",//方法类型
+    				dataType : "json",//预期服务器返回的数据类型
+    				contentType : "application/json; charset=utf-8",
+    				url : "/qrCode/del",//url
+    				data : data,
+    				success : function(result) {
+    					if (result.code == 0) {
+    						getListByAjax();
+    					} else {
+    						alert(result.message);
+    					}
+    				},
+    				error : function() {
+    					alert("异常！");
+    				}
+    			});
+    		});
+    		
+    		function arrayBufferToBase64( buffer ) {
+	    		var binary = '';
+	    		var bytes = new Uint8Array( buffer );
+	    		var len = bytes.byteLength;
+	    		for (var i = 0; i < len; i++) {
+    				binary += String.fromCharCode( bytes[ i ] );
+    			}
+    			return window.btoa( binary );
     		}
     	</script>
  

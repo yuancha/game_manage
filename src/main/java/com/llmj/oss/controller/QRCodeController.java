@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -44,14 +45,26 @@ public class QRCodeController {
 	private String savePath;//二维码保存路径
 	
 	@GetMapping("")
-	public String packHome(Model model,HttpServletRequest request) {
-		
-		return "qrcodeManage";
+	public String qrCodeHome(Model model,HttpServletRequest request) {
+		try {
+			int state = 0;
+			//flag 为 test online
+			String gameState = request.getParameter("state");
+			if (gameState.equals("online")) {
+				state = 1;
+			}
+			model.addAttribute("gameState", state);
+			return "qrcodeManage";
+		} catch (Exception e) {
+			model.addAttribute("message", "server error");
+			log.error("packHome error,Exception -> {}",e);
+		}
+		return "error";
 	}
 	
 	@PostMapping("/list")
 	@ResponseBody
-	public RespEntity qrCodeList(QrOperation model) {
+	public RespEntity qrCodeList(@RequestBody QrOperation model) {
 		RespEntity res = new RespEntity();
 		try {
 			int gameId = model.getGameId();
@@ -67,7 +80,7 @@ public class QRCodeController {
 	
 	@PostMapping("/add")
 	@ResponseBody
-	public RespEntity qrCodeAdd(QrOperation model) {
+	public RespEntity qrCodeAdd(@RequestBody QrOperation model) {
 		try {
 			int gameId = model.getGameId();
 			int state = model.getState();
@@ -97,7 +110,7 @@ public class QRCodeController {
 	
 	@PostMapping("/update")
 	@ResponseBody
-	public RespEntity qrCodeUpdate(QrOperation model) {
+	public RespEntity qrCodeUpdate(@RequestBody QrOperation model) {
 		try {
 			QRCode qr = qrDao.selectById(model.getId());
 			if (qr == null) {
@@ -144,16 +157,29 @@ public class QRCodeController {
 	
 	@PostMapping("/del")
 	@ResponseBody
-	public RespEntity qrCodeDel(QrOperation model) {
+	public RespEntity qrCodeDel(@RequestBody QrOperation model) {
 		try {
-			qrDao.delQR(model.getId());
-			log.info("二维码删除成功，id : {}",model.getId());
+			qrDao.delQR(model.getDomain());
+			log.info("二维码删除成功，link : {}",model.getDomain());
 			//TODO 更新二维码相关地方
 		} catch (Exception e) {
 			log.error("qrCodeDel error,Exception -> {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);
 		}
 		return new RespEntity(RespCode.SUCCESS);
+	}
+	
+	@PostMapping("/domain")
+	@ResponseBody
+	public RespEntity qrCodeDomain() {
+		RespEntity res = new RespEntity();
+		try {
+			res.setData(global.getWebDomains());
+		} catch (Exception e) {
+			log.error("qrCodeDomain error,Exception -> {}",e);
+			return new RespEntity(RespCode.SERVER_ERROR);
+		}
+		return res;
 	}
 	
 }

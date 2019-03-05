@@ -50,8 +50,11 @@
 					<div class="box" id="btn_app_manage">
 						APP包名管理
 					</div>
-					<div class="box" id="btn_app_qrcode">
-						APP二维码管理
+					<div class="box" id="btn_qr_test_info">
+						二维码(<span style="color:#FA552C">测试</span>)
+					</div>
+					<div class="box" id="btn_qr_on_info">
+						二维码(<span style="color:#FA552C">正式</span>)
 					</div>
 				</div>
 			</div>
@@ -74,8 +77,12 @@
 		$('#btn_app_manage').on('click',function(){
 			window.location.href = "/package";
 		});
-		$('#btn_app_qrcode').on('click',function(){
-			window.location.href = "/qrCode";
+		$('#btn_qr_test_info').on('click',function(){
+			window.location.href = "/qrCode?state=test";
+		});
+		
+		$('#btn_qr_on_info').on('click',function(){
+			window.location.href = "/qrCode?state=online";
 		});
 		
 
