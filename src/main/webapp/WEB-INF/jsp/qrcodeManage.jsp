@@ -132,7 +132,7 @@
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 	二维码详情
-                                	<a title="创建"  rel="创建">
+                                	<a title="创建"  rel="创建"  href="javascript:;" onclick="jQuery('#modal-2').modal('show', {backdrop: 'fade'});" >
                                 	<button class="btn btn-secondary" id='qrcode_create'>创建</button></a>
                             </div>
                             <p>当前系统：<span id="app_system">Android</span></p>
@@ -146,12 +146,9 @@
                                 </thead>
                                 <tbody id='app_box'>
                                      <tr>
-                                    	<td class="middle-align"><img src="../static/images/IMG_1950.JPG" style='width:150px;'></td>
+                                    	<td class="middle-align"><img src="../static/images/IMG_1950.JPG" style='width: 10rem;'></td>
                                         <td class="middle-align">2019-2-25</td>
-                                        <td>
-                                              <a href="#" class="btn btn-danger btn-single btn-sm">删除</a>
-                                       
-                                        </td>
+                                        <td><a href="#" class="btn btn-danger btn-single btn-sm qrcode_delete">删除</a></td>
                                     </tr>
                                     
                                   
@@ -235,13 +232,13 @@
                     </div>
                     
                     <div class="modal-body">
-                            消息框内容
+                            	<p>请输入域名:<input type='text' value='' style="width:300px;"></p>
+                            	<p>请填写描述:<textarea placeholder="请填写描述，不能超过50字" style="width:300px;min-height:100px;"></textarea></p>
                     </div>
                     
                     <div class="modal-footer">
                     	<button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
-                        <button type="button" class="btn btn-danger" data-dismiss="modal" id="app_delete">删除</button>
-                        <button type="button" class="btn btn-info" data-dismiss="modal" id="app_copy">拷贝</button>
+                        <button type="button" class="btn btn-info" data-dismiss="modal" id="app_confirm">确定</button>
                     </div>
                 </div>
             </div>
@@ -265,7 +262,93 @@
     
         <!-- JavaScripts initializations and stuff -->
         <script src="../static/js/xenon/xenon-custom.js"></script>
-    	
+    	<script>
+    		$(document).ready(function(){
+    			//getListByAjax();
+    		});
+    		
+    		
+    		$('.qrcode_delete').on('click',function(){
+    			
+    		});
+    		
+    		//确认创建
+			$('#app_confirm').on('click',function(){
+				var data = "";
+					
+    		});
+    		
+    		
+    		function createQrcode(data){
+	    			$.ajax({
+						 //几个参数需要注意一下
+				      type: "POST",//方法类型
+				      dataType: "json",//预期服务器返回的数据类型
+				      contentType: "application/json; charset=utf-8",
+				      url: "/qrCode/add" ,//url
+				      data: data,
+				      success: function (result) {
+				          console.log(result);//打印服务端返回的数据(调试用)
+				          if (result.code == 0) {
+				              alert("创建成功");    
+				          }else{
+				       	   	  alert(result.message);
+				          }
+				      },
+				      error : function() {
+				          alert("异常！");
+				      }
+				  });
+    		}
+    		
+    		function getListByAjax(){
+    			$.ajax({
+					 //几个参数需要注意一下
+			      type: "POST",//方法类型
+			      dataType: "json",//预期服务器返回的数据类型
+			      contentType: "application/json; charset=utf-8",
+			      url: "/qrCode/list" ,//url
+			      data: data,
+			      success: function (result) {
+			          console.log(result);//打印服务端返回的数据(调试用)
+			          if (result.code == 0) {
+			        	  
+			        	  
+			              $('#app_box').append("");
+			        	  
+			        	  
+			          }else{
+			       	   	  alert(result.message);
+			          }
+			      },
+			      error : function() {
+			          alert("异常！");
+			      }
+			  });
+    		}
+    		
+    		function deleteQrcode(data){
+    			$.ajax({
+					 //几个参数需要注意一下
+			      type: "POST",//方法类型
+			      dataType: "json",//预期服务器返回的数据类型
+			      contentType: "application/json; charset=utf-8",
+			      url: "/qrCode//del" ,//url
+			      data: data,
+			      success: function (result) {
+			          console.log(result);//打印服务端返回的数据(调试用)
+			          if (result.code == 0) {
+			        	  alert("删除成功");  	  
+			          }else{
+			       	   	  alert(result.message);
+			          }
+			      },
+			      error : function() {
+			          alert("异常！");
+			      }
+			  });
+    		}
+    	</script>
  
 
 </body></html>
