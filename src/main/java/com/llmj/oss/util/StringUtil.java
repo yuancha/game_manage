@@ -8,8 +8,9 @@ import com.llmj.oss.model.UploadFile;
 public class StringUtil {
 	
 	public static void main(String[] args) {
-		String str = "com.abc.123";
-		System.out.println(Arrays.toString(str.split("\\.")));
+		String str = "[com.abc.123]";
+		str = str.substring(1, str.length() - 1);
+		System.out.println(str);
 	}
 	
 	public static boolean isEmpty(String str) {

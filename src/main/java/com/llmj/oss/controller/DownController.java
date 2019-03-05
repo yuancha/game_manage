@@ -9,13 +9,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.llmj.oss.dao.DownDao;
 import com.llmj.oss.dao.UploadDao;
 import com.llmj.oss.model.DownLink;
-import com.llmj.oss.model.UploadFile;
 import com.llmj.oss.util.StringUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * 下载管理

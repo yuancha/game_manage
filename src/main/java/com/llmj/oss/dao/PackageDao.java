@@ -14,8 +14,8 @@ import com.llmj.oss.model.PackageName;
 @Mapper
 public interface PackageDao {
 	
-	@Insert("insert into package_name ( gameId,desc, android,ios) "
-			+ "values ( #{gameId},#{desc}, #{android}, #{#{ios}})")
+	@Insert("insert into package_name ( gameId,content, android,ios) "
+			+ "values ( #{gameId},#{content}, #{android}, #{#{ios}})")
 	int savePack(PackageName pack);
 	
 	@Select("select * from package_name where gameId=#{gameId}")
@@ -28,7 +28,7 @@ public interface PackageDao {
 	@Select("select * from package_name")
 	List<PackageName> getAll();
 	
-	@Update("update package_name set desc=#{desc},android=#{android},ios=#{ios} where gameId=#{gameId}")
+	@Update("update package_name set content=#{content},android=#{android},ios=#{ios} where gameId=#{gameId}")
 	void updatePack(PackageName pack);
 	
 	@Delete("delete from package_name where gameId=#{gameId}")
