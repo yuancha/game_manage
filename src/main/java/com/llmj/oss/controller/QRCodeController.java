@@ -46,7 +46,7 @@ public class QRCodeController {
 	@GetMapping("")
 	public String packHome(Model model,HttpServletRequest request) {
 		
-		return "test";
+		return "qrcodeManage";
 	}
 	
 	@PostMapping("/list")

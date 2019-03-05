@@ -50,7 +50,7 @@
 					<div class="box" id="btn_app_manage">
 						APP包名管理
 					</div>
-					<div class="box" id="">
+					<div class="box" id="btn_app_qrcode">
 						APP二维码管理
 					</div>
 				</div>
@@ -74,6 +74,10 @@
 		$('#btn_app_manage').on('click',function(){
 			window.location.href = "/package";
 		});
+		$('#btn_app_qrcode').on('click',function(){
+			window.location.href = "/qrCode";
+		});
+		
 
         function login() {
         	var name = $("#user_name").val();

@@ -119,7 +119,7 @@
 									+ "<td class='content'>"+ obj.content+ "</td>"
 									+ "<td class='android'>"+ obj.android+ "</td>"
 									+ "<td class='ios'>"+ obj.ios+ "</td>"
-									+ "<td><a class='blue-xt btn_update'>修改</a><a class='blue-xt btn_del'>删除</a></td>"
+									+ "<td><a class='blue-xt btn_update'>修改</a><a class='red-xt btn_del'>删除</a></td>"
 									+ "</tr>";
 						}
 						tb.append(trHTML);
