@@ -34,24 +34,20 @@
                     
                             
                     <ul id="main-menu" class="main-menu">
-                          <li>
+                       <li>
                             <a href="#" id='65537'>
                                 <span class="title">内蒙</span>
                             </a>
-                          
                         </li>
                         <li class="active">
                             <a href="#" id='888888'>
                                 <span class="title">淮北</span>
                             </a>
-                          
                         </li>
                         <li>
                             <a href="#">
-
                                 <span class="title">通辽</span>
                             </a>
-                            
                         </li>
                         <li>
                             <a href="#">
@@ -63,38 +59,32 @@
                                 <span class="title">山西</span>
                                 <!-- <span class="label label-success pull-right">5</span> -->
                             </a>
-                           
                         </li>
                         <li>
                             <a href="#">
                                 <span class="title">福建</span>
                             </a>
-                        
                         </li>
                         <li>
-                            <a href="forms-native.html">
+                            <a href="#">
                                 <span class="title">齐齐哈尔</span>
                             </a>
-                        
                         </li>
                         <li>
                             <a href="#">
                                 <span class="title">云南</span>
                                 <!-- <span class="label label-purple pull-right hidden-collapsed">New Items</span> -->
                             </a>
-                           
                         </li>
                         <li>
                             <a href="#">
                                 <span class="title">我是大A王</span>
                             </a>
-                          
                         </li>
                         <li>
                             <a href="#">
                                 <span class="title">发发填大坑</span>
                             </a>
-                           
                         </li>
                     </ul>
                             

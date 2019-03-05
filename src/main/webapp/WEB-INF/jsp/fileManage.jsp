@@ -30,12 +30,7 @@
         
          <link rel="stylesheet" href="../static/css/main.css">
     </head>
-    <body class="page-body"><div id="BAIDU_DUP_fp_wrapper" style="position: absolute; left: -1px; bottom: -1px; z-index: 0; width: 0px; height: 0px; overflow: hidden; visibility: hidden; display: none;"><iframe id="BAIDU_DUP_fp_iframe" src="https://pos.baidu.com/wh/o.htm?ltr=" style="width: 0px; height: 0px; visibility: hidden; display: none;"></iframe></div>
-    
-    <script type="text/javascript">var cpro_id = "u837382";</script>
-    <script src="http://cpro.baidustatic.com/cpro/ui/f.js" type="text/javascript"></script>
-   
-    
+    <body class="page-body">
   
         <div class="page-container">
         	<%@include file ='nav.jsp'%>

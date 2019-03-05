@@ -2,9 +2,104 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Home</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	
+	<title>入口</title>
+	<meta name="keywords" content="" />
+	<meta name="description" content="" /> 
+	
+	<link rel="stylesheet" type="text/css" href="../static/css/bootstrap.css">
+	<link rel="stylesheet" type="text/css" href="../static/css/fonts/font-awesome-4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" type="text/css" href="../static/css/fonts/iconic/css/material-design-iconic-font.min.css">
+	<link rel="stylesheet" type="text/css" href="../static/css/login/util.css">
+	<link rel="stylesheet" type="text/css" href="../static/css/login/main.css">
+	<style>
+		.box{font-size: 30px;
+		padding: 20px;
+		line-height: 1.2;
+		text-align: center;
+		border: 1px solid #000;
+		margin: 15px;cursor: pointer;
+		transition: color 0.5s,background-color 0.5s;
+		-moz-transition: color 0.5s,background-color 0.5s;	/* Firefox 4 */
+		-webkit-transition: color 0.5s,background-color 0.5s;	/* Safari 和 Chrome */
+		-o-transition: color 0.5s,background-color 0.5s;	/* Opera */
+		}
+	.box:hover{
+		color: #fff;background: #46E8D1;
+		
+	}
+	</style>
 </head>
 <body>
-<span th:text="${message}"></span>
+<div class="limiter">
+		<div class="container-login100" style="background-image: url('../static/images/bg-01.jpg');">
+			<div class="wrap-login100 p-l-55 p-r-55 p-t-65 p-b-54">
+				<div class="login100-form validate-form">
+					<span class="login100-form-title p-b-49">选择</span>
+
+					<div class="box" id="btn_app_upload">
+						APP上传
+					</div>
+					<div class="box" id="btn_app_test_info">
+						APP(<span style="color:#FA552C">测试</span>)详情
+					</div>
+					<div class="box" id="btn_app_on_info">
+						APP(<span style="color:#FA552C">正式</span>)详情
+					</div>
+					<div class="box" id="btn_app_manage">
+						APP管理
+					</div>
+
+				
+				</div>
+			</div>
+		</div>
+	</div>
+	<script src="../static/js/jquery-1.11.1.min.js"></script>
+	<script type="text/javascript">
+	
+		$('#btn_app_upload').on('click',function(){
+			window.location.href = "/upload";
+		});
+	
+		$('#btn_app_test_info').on('click',function(){
+			window.location.href = "/oss/fileManage?state=test";
+		});
+		
+		$('#btn_app_on_info').on('click',function(){
+			window.location.href = "/oss/fileManage?state=online";
+		});
+		$('#btn_app_manage').on('click',function(){
+			window.location.href = "/package";
+		});
+
+        function login() {
+        	var name = $("#user_name").val();
+        	var pwd = $("#user_password").val();
+        	var data = '{"name":"'+name+'","pwd":"'+pwd+'"}';
+        	console.log(data);
+             $.ajax({
+            //几个参数需要注意一下
+                type: "POST",//方法类型
+                dataType: "json",//预期服务器返回的数据类型
+                contentType: "application/json; charset=utf-8",
+                url: "/login" ,//url
+                data: data,
+                success: function (result) {
+                    console.log(result);//打印服务端返回的数据(调试用)
+                    if (result.code == 0) {
+                    	window.location.href = "/home";
+                    } else {
+                    	alert(result.message);
+                    }
+                    ;
+                },
+                error : function() {
+                    alert("异常！");
+                }
+            }); 
+        }
+    </script>
 </body>
 </html>

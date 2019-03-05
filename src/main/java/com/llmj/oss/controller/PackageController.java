@@ -39,7 +39,7 @@ public class PackageController {
 	@GetMapping("")
 	public String packHome(Model model,HttpServletRequest request) {
 		
-		return "test";
+		return "manage";
 	}
 	
 	@PostMapping("/list")
