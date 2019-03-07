@@ -21,7 +21,17 @@
      
     
         <script src="../static/js/jquery-1.11.1.min.js"></script>
-        <link rel="stylesheet" href="../static/css/main.css">
+        <!-- <link rel="stylesheet" href="../static/css/main.css"> -->
+        <style>
+        	@media screen and (max-width: 768px){
+        		#app_box td img{width:50px;}
+        		.col-md-12{padding:0}
+        		#mytb thead tr>th:nth-child(3),#mytb tbody tr>td:nth-child(3){display:none} 
+        	}
+        	@media screen and (min-width: 768px){
+        		#app_box td img{width:100px;}
+        	}
+        </style>
     </head>
     <body class="page-body">
   
@@ -111,7 +121,7 @@
                                             <a href="#"><i class="fa-home"></i>六六游戏</a>
                                         </li>
                                         <li class="active">
-                                            <a href="#">通辽</a>
+                                            <a href="#">内蒙</a>
                                         </li>
                                     </ol>
                                     
@@ -212,14 +222,24 @@
                     </div>
                     
                     <div class="modal-body">
-                            	<p>请选择域名:
-                            		<select style="width:300px;" id="domain">
-                            			
-                            		</select>
-                            	</p>
-                            	<p>请填写描述:<textarea placeholder="请填写描述，不能超过50字" style="width:300px;min-height:100px;" id="desc"></textarea></p>
-                    </div>
-                    
+                    	<div class="form-horizontal">
+		                    	<div class="form-group">
+		                    		<label class="col-sm-4 control-label">请选择域名:</label>
+		                    		<div class="col-sm-6">
+										<select class="form-control" id="domain">
+										</select>
+									</div>
+		                    	</div>
+	                    		<div class="form-group-separator"></div>
+		                         <div class="form-group">   	
+		                            <label class="col-sm-4 control-label">请填写描述:</label>		
+		                        	<div class="col-sm-8">
+		                            	<textarea  class="form-control" placeholder="请填写描述，不能超过50字" style="min-height:100px;" id="desc"></textarea>
+		                           </div>
+		                        </div>
+	                        	<div class="form-group-separator"></div>
+	                    	
+	                   </div>
                     <div class="modal-footer">
                     	<button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
                         <button type="button" class="btn btn-info" data-dismiss="modal" id="app_confirm">确定</button>
@@ -240,6 +260,7 @@
     
         <!-- JavaScripts initializations and stuff -->
         <script src="../static/js/xenon/xenon-custom.js"></script>
+       
     	<script>
     		$(document).ready(function(){
     			getDomain();
@@ -302,10 +323,10 @@
 								var bytes = obj.photo.split(",");
 								var str = arrayBufferToBase64(bytes);
 								trHTML += "<tr>"
-										+ "<td><img style='width:100px;' src='data:image/png;base64,"+str+"'></td>"
-										+ "<td class='content'>"+ obj.content+ "</td>"
-										+ "<td class='link'>"+ obj.link+ "</td>"
-										+ "<td><button class='btn_del'>删除</button></td>"
+										+ "<td style='vertical-align: middle;'><img src='data:image/png;base64,"+str+"'></td>"
+										+ "<td style='vertical-align: middle;' class='content'>"+ obj.content+ "</td>"
+										+ "<td style='vertical-align: middle;' class='link'>"+ obj.link+ "</td>"
+										+ "<td style='vertical-align: middle;'><button class='btn btn-danger btn-single btn-sm btn_del'>删除</button></td>"
 										+ "</tr>";
 							}
 							tb.append(trHTML);
