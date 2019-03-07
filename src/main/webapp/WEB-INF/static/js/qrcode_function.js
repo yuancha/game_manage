@@ -8,27 +8,23 @@ $('#main-menu').find('a').on('click',function(){
 	var data 		= '{"gameId":"'+gameId+'","gameType":"'+gameType+'","gameState":"'+gameState+'"}';
 	$('#gameId').val(gameId);
 	$('.page-title').find('.active').find('a').html(getNavTitle(gameId));
-	console.log(data);
-//	getListByAjax(data); 
+	getListByAjax(data); 
 });
     	
-    	
-$(document).ready(function(){
-	getDomain();
-	getListByAjax();
-});
+
 
 //确认创建
 $('#app_confirm').on('click',function(){
-	var gameId = 666666;
+	var gameId  = $('#gameId').val();
 	var state = $("#app_state").val();
 	var domain = $("#domain").val();
 	var desc = $("#desc").val();
 	var data = '{"gameId":"'+gameId+'","state":"'+state+'","domain":"'+domain+'","desc":"'+desc+'"}';
 	createQrcode(data);
 });
-    		
+
 function createQrcode(data){
+		console.log(data);
 		$.ajax({
 			 //几个参数需要注意一下
 	      type: "POST",//方法类型
@@ -49,11 +45,11 @@ function createQrcode(data){
 	      }
 	  });
 }
-    		
-function getListByAjax(){
-	var gameId = 666666;
-	var state = $("#app_state").val();
-	var data = '{"gameId":"'+gameId+'","state":"'+state+'"}'
+
+function getListByAjax(data){
+//	var gameId  = $('#gameId').val();
+//	var state = $("#app_state").val();
+//	var data = '{"gameId":"'+gameId+'","state":"'+state+'"}'
 	console.log(data);
 	$.ajax({
 		 //几个参数需要注意一下
@@ -90,7 +86,7 @@ function getListByAjax(){
       }
   });
 }
-    		
+
 function getDomain(){
 	$.ajax({
 		 //几个参数需要注意一下
@@ -105,7 +101,7 @@ function getDomain(){
         	  $("#domain").empty();
         	  var ary = result.data;
         	  for (var i=0;i<ary.length;i++) {
-        		  $("#domain").append("<option>"+ary[i]+"</option>");
+        		  $("#domain").append("<option>"+ary[i].domain+"</option>");
         	  }
           }else{
        	   	  alert(result.message);
@@ -116,7 +112,10 @@ function getDomain(){
       }
   });
 }
-    		
+
+
+
+//删除
 $(document).on('click','.btn_del',function() {
 	var link = $(this).parents('tr').find('.link').text();
 	var data = '{"domain":"'+link+'"}'
@@ -128,7 +127,11 @@ $(document).on('click','.btn_del',function() {
 		data : data,
 		success : function(result) {
 			if (result.code == 0) {
-				getListByAjax();
+				$('#app_box').children().remove();
+				var gameId  = $('#gameId').val();
+				var state = $("#app_state").val();
+				var data = '{"gameId":"'+gameId+'","state":"'+state+'"}';
+				getListByAjax(data);
 			} else {
 				alert(result.message);
 			}
@@ -138,7 +141,7 @@ $(document).on('click','.btn_del',function() {
 		}
 	});
 });
-    		
+
 function arrayBufferToBase64( buffer ) {
 	var binary = '';
 	var bytes = new Uint8Array( buffer );
