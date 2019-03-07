@@ -51,11 +51,6 @@ public class UploadController {
 	@Value("${upload.local.tmpsave}")
 	private String tmpSave;
 	
-	 @GetMapping("/test")
-	public String test() {
-		return "html/links/ffyl/android";
-	}
-	
     @GetMapping("/upload")
     public String index() {
         return "upload";

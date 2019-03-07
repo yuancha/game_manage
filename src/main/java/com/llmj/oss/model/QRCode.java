@@ -22,4 +22,6 @@ public class QRCode implements Serializable {
 	private String content;	//描述
 	private String link;	//链接
 	private String photo;	//图片二进制
+	private String ossPath;	//oss 二维码图片路径
+	private int logicUse;	//1为备份到逻辑服
 }

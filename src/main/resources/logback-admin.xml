@@ -68,9 +68,9 @@
 		<appender-ref ref="adminLog" />
 	</logger>
 
-	<!-- <logger name="com.llmj.oss.dao" level="DEBUG" additivity="true">
+	<logger name="com.llmj.oss.dao" level="DEBUG" additivity="true">
 		<appender-ref ref="sqlLog" />
-	</logger> -->
+	</logger>
 
 	<root level="${rootlevel}">
 		<appender-ref ref="STDOUT" />

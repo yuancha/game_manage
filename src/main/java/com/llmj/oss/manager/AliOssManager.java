@@ -2,7 +2,6 @@ package com.llmj.oss.manager;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -11,7 +10,6 @@ import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.model.GetObjectRequest;
 import com.aliyun.oss.model.ObjectMetadata;
 import com.aliyun.oss.model.PutObjectResult;
-import com.llmj.oss.config.IConsts;
 import com.llmj.oss.model.UploadFile;
 import com.llmj.oss.util.FileUtil;
 
@@ -22,16 +20,16 @@ import lombok.extern.slf4j.Slf4j;
 public class AliOssManager {
 	
 	public static void main(String[] args) {
-		StringBuilder sb = new StringBuilder(endpoint);
-		sb.insert(7, bucketName+".");
-		System.out.println(sb.toString());
 	}
 	
-	private static String endpoint = "http://oss-cn-beijing.aliyuncs.com";
-	private static String accessKeyId = "LTAIMO9xn64DcMJ6";
-    private static String accessKeySecret = "lpcoQYwaiv7LugHOUe8y0LiWjf6r6G";
-    private static String bucketName = "bj-fftl-tongliao";
-    
+	@Value("${upload.oss.endpoint}")
+	private String endpoint;
+	@Value("${upload.oss.accessKeyId}")
+	private String accessKeyId;
+	@Value("${upload.oss.accessKeySecret}")
+    private String accessKeySecret;
+	@Value("${upload.oss.bucketName}")
+    private String bucketName;
     @Value("${upload.oss.test}")
     public String ossTest;
     @Value("${upload.oss.online}")
@@ -48,6 +46,12 @@ public class AliOssManager {
         	throw new RuntimeException("Bucket不存在,"+bucketName);
         }
     	return ossClient;
+    }
+    
+    public String ossDomain() {
+    	StringBuilder sb = new StringBuilder(endpoint);
+		sb.insert(7, bucketName+".").append("/");
+    	return sb.toString(); 
     }
     
     public boolean uploadFile(String ossPath,String localPath) {

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.llmj.oss.config.RespCode;
 import com.llmj.oss.dao.DomainDao;
 import com.llmj.oss.dao.QrcodeDao;
+import com.llmj.oss.manager.AliOssManager;
 import com.llmj.oss.model.QRCode;
 import com.llmj.oss.model.RespEntity;
 import com.llmj.oss.model.oper.QrOperation;
@@ -36,10 +37,17 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping("/qrCode")
 public class QRCodeController {
 	
+	@Value("${upload.oss.test}")
+    public String ossTest;
+    @Value("${upload.oss.online}")
+    public String ossOnline;
+	
 	@Autowired
 	private QrcodeDao qrDao;
 	@Autowired
 	private DomainDao domainDao;
+	@Autowired
+	private AliOssManager ossMgr;
 	
 	@GetMapping("")
 	public String qrCodeHome(Model model,HttpServletRequest request) {
@@ -105,7 +113,7 @@ public class QRCodeController {
 		return new RespEntity(RespCode.SUCCESS);
 	}
 	
-	@PostMapping("/update")
+	/*@PostMapping("/update")
 	@ResponseBody
 	public RespEntity qrCodeUpdate(@RequestBody QrOperation model) {
 		try {
@@ -132,23 +140,26 @@ public class QRCodeController {
 			return new RespEntity(RespCode.SERVER_ERROR);
 		}
 		return new RespEntity(RespCode.SUCCESS);
-	}
+	}*/
 	
 	private String saveQr(QRCode qr,String domain) throws Exception {
 		int gameId = qr.getGameId();
 		int state = qr.getState();
 		String link = domain + "?gameId="+gameId+"&gameState="+state;
 		
-		if (qrDao.selectByLink(link,qr.getId()) != null) {
+		if (qrDao.selectByLink(link) != null) {
 			return link;
 		}
 		
 		qr.setLink(link);
-		String arryStr = Arrays.toString(QRCodeUtil.encode(link));
+		byte[] tmp = QRCodeUtil.encode(link);
+		String arryStr = Arrays.toString(tmp);
 		arryStr = arryStr.substring(1, arryStr.length() - 1);
 		qr.setPhoto(arryStr);
 		
-		//TODO 更新二维码相关地方
+		String qrSavePath = qrOssPath(state,StringUtil.getUUIDStr());
+		ossMgr.uploadFileByByte(qrSavePath, tmp);
+		qr.setOssPath(qrSavePath);
 		return "";
 	}
 	
@@ -156,9 +167,17 @@ public class QRCodeController {
 	@ResponseBody
 	public RespEntity qrCodeDel(@RequestBody QrOperation model) {
 		try {
+			String link = model.getDomain();
+			QRCode qr = qrDao.selectByLink(link);
+			if (qr == null) {
+				return new RespEntity(RespCode.SUCCESS);
+			}
+			if (qr.getLogicUse() == 1) {
+				return new RespEntity(-2,"已在逻辑服备份，请先刷新其它二维码备份后再删除");
+			}
 			qrDao.delQR(model.getDomain());
+			ossMgr.removeFile(qr.getOssPath());
 			log.info("二维码删除成功，link : {}",model.getDomain());
-			//TODO 更新二维码相关地方
 		} catch (Exception e) {
 			log.error("qrCodeDel error,Exception -> {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);
@@ -179,4 +198,37 @@ public class QRCodeController {
 		return res;
 	}
 	
+	/**
+	 * 刷新通知逻辑服
+	 * @return
+	 */
+	@PostMapping("/refresh")
+	@ResponseBody
+	public RespEntity qrCodeRefresh(@RequestBody QrOperation model) {
+		RespEntity res = new RespEntity();
+		try {
+			int id = model.getId();
+			QRCode qr = qrDao.selectById(id);
+			int gameId = qr.getGameId();
+			String ossPath = qr.getOssPath();
+			//TDOO 刷新到逻辑服
+		} catch (Exception e) {
+			log.error("qrCodeRefresh error,Exception -> {}",e);
+			return new RespEntity(RespCode.SERVER_ERROR);
+		}
+		return res;
+	}
+	
+	//逻辑服主动请求二维码
+	
+	private String qrOssPath(int state,String name) {
+		String base = "";
+		if (state == 0) {
+			base = ossTest;
+		} else {
+			base = ossOnline;
+		}
+		base += "qrcode/"+name+".png";
+		return base;
+	}
 }

@@ -16,7 +16,8 @@ import com.llmj.oss.model.QRCode;
 public interface QrcodeDao {
 	
 	@Options(useGeneratedKeys = true, keyProperty = "id")
-	@Insert("insert into qr_code ( gameId, state, content, link, photo) values( #{gameId}, #{state}, #{content}, #{link}, #{photo})")
+	@Insert("insert into qr_code ( gameId, state, content, link, photo, ossPath) "
+			+ "values( #{gameId}, #{state}, #{content}, #{link}, #{photo} , #{ossPath})")
 	int save(QRCode qr);
 	
 	@Select("select * from qr_code where id=#{id}")
@@ -28,9 +29,9 @@ public interface QrcodeDao {
 	@Delete("delete from qr_code where link=#{link}")
 	void delQR(@Param("link") String link);
 	
-	@Update("update qr_code set link=#{link} , content=#{content} , desc=#{desc} where id=#{id} ")
-	void updateQr(QRCode qr);
+	/*@Update("update qr_code set link=#{link} , content=#{content} , desc=#{desc} where id=#{id} ")
+	void updateQr(QRCode qr);*/
 	
-	@Select("select * from qr_code where link = #{link} and id != #{id}")
-	QRCode selectByLink(@Param("link") String link,@Param("id") int id);
+	@Select("select * from qr_code where link = #{link}")
+	QRCode selectByLink(@Param("link") String link);
 }

@@ -1,16 +1,13 @@
 package com.llmj.oss.util;
 
-import java.util.Arrays;
+import java.util.UUID;
 
 import com.alibaba.fastjson.JSON;
-import com.llmj.oss.model.UploadFile;
 
 public class StringUtil {
 	
 	public static void main(String[] args) {
-		String str = "[com.abc.123]";
-		str = str.substring(1, str.length() - 1);
-		System.out.println(str);
+		System.out.println(getUUIDStr());
 	}
 	
 	public static boolean isEmpty(String str) {
@@ -21,4 +18,7 @@ public class StringUtil {
 		return JSON.toJSONString(obj);
 	}
 	
+	public static String getUUIDStr() {
+		return UUID.randomUUID().toString().replace("-", "");
+	}
 }
