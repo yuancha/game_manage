@@ -266,7 +266,8 @@
     $(document).ready(function(){
     	getDomain();
     	
-    	var gameId 		= "65537";
+    	var gameId 	= "65537";
+    	$("#gameId").val(gameId);
 		var state = $("#app_state").val();
 		var data = '{"gameId":"'+gameId+'","state":"'+state+'"}';
 		
