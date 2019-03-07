@@ -188,6 +188,7 @@ function getFilesInfoByAjax(data){
             if (result.code == 0) {
                 //alert("SUCCESS!啦啦啦");
                 var data = result.data;
+                if (data.length == 0) return; 
                 for(var i in data){
                
                	 $('#app_box').append("<tr>\

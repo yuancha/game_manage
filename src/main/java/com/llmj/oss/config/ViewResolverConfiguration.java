@@ -34,10 +34,10 @@ public class ViewResolverConfiguration {
         }
         
         /* 路径拦截 */
-		/*@Override
+		@Override
 		public void addInterceptors(InterceptorRegistry registry) {
 			registry.addInterceptor(new UrlInterceptor()).addPathPatterns("/**").excludePathPatterns("/static/**");
-		}*/
+		}
 
 		@Bean
         public ITemplateResolver templateResolver() {
