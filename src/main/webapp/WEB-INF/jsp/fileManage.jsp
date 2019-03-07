@@ -274,6 +274,7 @@
     
         <!-- JavaScripts initializations and stuff -->
         <script src="../static/js/xenon/xenon-custom.js"></script>
+        <script src="../static/js/public.js?v=2"></script>
     	<script src="../static/js/app_function.js?v=2"></script>
  		<script>
  		$(document).ready(function(){

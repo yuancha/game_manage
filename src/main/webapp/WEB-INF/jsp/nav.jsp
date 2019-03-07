@@ -45,45 +45,50 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="#" id='393217'>
                                 <span class="title">通辽</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="#" id='589825'>
                                 <span class="title">海南</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="#" id='262145'>
                                 <span class="title">山西</span>
                                 <!-- <span class="label label-success pull-right">5</span> -->
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="#" id='459010'>
                                 <span class="title">福建</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="#" id='132019'>
                                 <span class="title">齐齐哈尔</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="#" id='65793'>
                                 <span class="title">云南</span>
                                 <!-- <span class="label label-purple pull-right hidden-collapsed">New Items</span> -->
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="#" id='196609'>
                                 <span class="title">我是大A王</span>
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a href="#" id='100001'>
                                 <span class="title">发发填大坑</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" id='1048577'>
+                                <span class="title">发发娱乐麻将</span>
                             </a>
                         </li>
                     </ul>
