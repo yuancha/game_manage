@@ -65,7 +65,7 @@
 		    
 		        <!-- JavaScripts initializations and stuff -->
 		        <script src="../static/js/xenon/xenon-custom.js"></script>
-		    	<script src="../static/js/public_function.js?v=1"></script>
+		    	<script src="../static/js/public.js?v=1"></script>
                 <script>
                     /* $(function(){  
                        
