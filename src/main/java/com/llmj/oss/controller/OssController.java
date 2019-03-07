@@ -172,9 +172,9 @@ public class OssController {
 			//ios版本 需要操作plist
 			String link = ossPath;
 			if (type == IConsts.UpFileType.Ios.getType()) {
-				//String[] tmp = file.getLocalPath().split("/");
-				String gmPy = file.getPackName().split("\\.")[1];
-				String plistPath = localPath + packName + "/" + gmPy + ".plist";// plist模板路径
+//				String gmPy = file.getPackName().split("\\.")[1];
+//				String plistPath = localPath + packName + "/" + gmPy + ".plist";// plist模板路径
+				String plistPath = "config/template.plist"; // plist模板路径
 				String plistStr = FileUtil.fileToString(plistPath,"utf-8");
 				if (StringUtil.isEmpty(plistStr)) {
 					return new RespEntity(-2,"plist 读取错误");

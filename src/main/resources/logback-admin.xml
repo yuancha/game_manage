@@ -49,7 +49,7 @@
 		</filter>
 	</appender>
 
-	<!-- <appender name="sqlLog"
+	<appender name="sqlLog"
 		class="ch.qos.logback.core.rolling.RollingFileAppender">
 		<file>${logFile}.sql</file>
 		<encoder>
@@ -62,13 +62,13 @@
 			<maxFileSize>${maxFileSize}</maxFileSize>
 			<maxHistory>${maxHistory}</maxHistory>
 		</rollingPolicy>
-	</appender> -->
+	</appender>
 
 	<logger name="ossLogger" level="${mylevel}" additivity="true">
 		<appender-ref ref="adminLog" />
 	</logger>
 
-	<!-- <logger name="com.llmj.admin.server.paycenter.dao" level="DEBUG" additivity="true">
+	<!-- <logger name="com.llmj.oss.dao" level="DEBUG" additivity="true">
 		<appender-ref ref="sqlLog" />
 	</logger> -->
 

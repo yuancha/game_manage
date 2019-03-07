@@ -2,24 +2,17 @@ server:
   port: 9100
   servlet:
     session:
-      timeout: 120s
+      timeout: 11120s
   
 spring:
+  profiles:
+    active: 154
   servlet:
     multipart:
       max-file-size: 120MB
       max-request-size: 200MB
       
-  datasource:
-    url: jdbc:mysql://192.168.1.235:3306/oss_server?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false
-    username: root
-    password: 123456
-    #driver-class-name: com.mysql.jdbc.Driver
-  
 upload:
-  local:
-    basePath: F:/save/
-    tmpsave: F:/save/temp/
   oss:
     test: yctest/test/
     online: yctest/online/

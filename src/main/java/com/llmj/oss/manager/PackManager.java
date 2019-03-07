@@ -34,13 +34,6 @@ public class PackManager {
 		
 	}*/
 	
-	private String getTypeStr(int type) {
-		if (type == IConsts.UpFileType.Android.getType()) {
-			return IConsts.UpFileType.Android.getDesc();
-		}
-		return IConsts.UpFileType.Ios.getDesc();
-	}
-	
 	/**
 	 * 根据游戏id获得包名
 	 * @param gameId
@@ -63,9 +56,13 @@ public class PackManager {
 	 * @return
 	 */
 	public boolean isContainPackage(String packName,int type) {
-		 String str = getTypeStr(type);
-		 PackageName pn = packDao.selectByType(str);
-		 return pn != null;
+		PackageName pn = null;
+		if (type == IConsts.UpFileType.Android.getType()) {
+			pn = packDao.selectByAndroid(packName);
+		} else {
+			pn = packDao.selectByIos(packName);
+		}
+		return pn != null;
 	}
 	
 	/**
@@ -74,11 +71,15 @@ public class PackManager {
 	 * @return
 	 */
 	public int getGameIdByPack(String packName,int type) {
-		 String str = getTypeStr(type);
-		 PackageName pn = packDao.selectByType(str);
-		 if (pn == null) {
-			 return 0;
-		 }
-		 return pn.getGameId();
+		PackageName pn = null;
+		if (type == IConsts.UpFileType.Android.getType()) {
+			pn = packDao.selectByAndroid(packName);
+		} else {
+			pn = packDao.selectByIos(packName);
+		}
+		if (pn == null) {
+			return 0;
+		}
+		return pn.getGameId();
 	}
 }

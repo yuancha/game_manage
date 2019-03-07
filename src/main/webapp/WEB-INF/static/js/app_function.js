@@ -69,18 +69,15 @@ $('#app_android,#app_iOS').on('click',function(){
 	}
 	var gameState = $('#app_state').val();
 	var data 		= '{"gameId":"'+gameId+'","gameType":"'+gameType+'","gameState":"'+gameState+'"}';
-	
-	console.log(data);
 	getFilesInfoByAjax(data); 
 });
 
 
 //刷包
 $(document).on('click','.ev_refresh',function(){
-	var id 			= $(this).parents('.modal-content').find('#show_app_id').val();
+	var id 			= $(this).parents('tr').find('.app_id').val();
 	var gameState 	= $('#app_state').val();
 	var data 		= '{"id":"'+id+'","gameState":"'+gameState+'"}';
-
 	refreshFilesInfoByAjax(data); 
 });
 
@@ -96,6 +93,16 @@ function refreshFilesInfoByAjax(data){
           console.log(result);//打印服务端返回的数据(调试用)
           if (result.code == 0) {
               alert("刷包成功");    
+              var gameId  = $('#gameId').val();
+          	  var gameType;
+          	  if ($('#app_system').val() == "Android") {
+          		gameType = 0;
+          	  } else {
+          		gameType = 1;
+          	  }
+          	  var gameState 	= $('#app_state').val();
+          	  var data 		= '{"gameId":"'+gameId+'","gameType":"'+gameType+'","gameState":"'+gameState+'"}';
+          	  getFilesInfoByAjax(data);
           }else{
        	   	  alert(result.message);
           }
@@ -109,11 +116,10 @@ function refreshFilesInfoByAjax(data){
 
 
 //拷贝
-$(document).on('click','.app_refresh',function(){
-	var id 			= $(this).parents('tr').find('.app_id').val();
+$(document).on('click','#app_copy',function(){
+	var id 			= $(this).parents('.modal-content').find('#show_app_id').val();
 	var gameState 	= $('#app_state').val();
 	var data 		= '{"id":"'+id+'","gameState":"'+gameState+'"}';
-	console.log(data);
 	copyFilesInfoByAjax(data); 
 });
 
@@ -126,11 +132,10 @@ function copyFilesInfoByAjax(data){
        url: "/oss/copyFile" ,//url
        data: data,
        success: function (result) {
-           console.log(result);//打印服务端返回的数据(调试用)
            if (result.code == 0) {
                alert("拷贝成功");    
-           }else if(result.code == -2){
-        	   alert("文件已存在");
+           }else {
+        	   alert(result.message);
            }
        },
        error : function() {
@@ -159,6 +164,16 @@ function deleteFilesInfoByAjax(data){
           console.log(result);//打印服务端返回的数据(调试用)
           if (result.code == 0) {
               alert("删除成功");    
+              var gameId  = $('#gameId').val();
+              var gameType;
+          	  if ($('#app_system').val() == "Android") {
+          		gameType = 0;
+          	  } else {
+          		gameType = 1;
+          	  }
+          	  var gameState 	= $('#app_state').val();
+          	  var data 		= '{"gameId":"'+gameId+'","gameType":"'+gameType+'","gameState":"'+gameState+'"}';
+          	  getFilesInfoByAjax(data);
           }else{
         	  alert(result.message);
           }
@@ -212,12 +227,12 @@ function getFilesInfoByAjax(data){
                 }
                 
               //上线数据详情
-              
-              $('#online_osspath').text(filePathSplit(data[i].ossPath));  
-              $('#online_version').text(result.online.vision);
-              $('#online_operTime').text(result.online.operTime);
-              $('#online_upTime').text(result.online.upTime);
-              
+              if (result.online) {
+            	  $('#online_osspath').text(filePathSplit(result.online.ossPath));  
+                  $('#online_version').text(result.online.vision);
+                  $('#online_operTime').text(result.online.operTime);
+                  $('#online_upTime').text(result.online.upTime);
+              }  
             }
    
         },

@@ -182,7 +182,7 @@ public class AliOssManager {
 			change = change.replaceAll("<string>六六.*</string>", "<string>"+file.getGame()+"</string>");
 			FileUtil.stringToFile(change,saveLocalPath);
 			uploadFileByByte(ossPlistPath,change);
-			log.info("plist 操作成功，本地报错路径->{},oss保存路径->{}",saveLocalPath,ossPlistPath);
+			log.info("plist 操作成功，本地保存路径->{},oss保存路径->{}",saveLocalPath,ossPlistPath);
 		} catch (Exception e) {
 			log.error("changePlist error,Exception --> {}",e);
 		}

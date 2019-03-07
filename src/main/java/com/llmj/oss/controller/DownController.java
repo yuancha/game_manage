@@ -58,7 +58,7 @@ public class DownController {
 				//userAgent.indexOf("micromessenger")!= -1 微信
 			    //电脑
 				log.error("request info, userAgent -> {}",userAgent);
-				return "html/error";
+				return "error";
 			}
 
 			//连接配置 动态获取
@@ -66,23 +66,23 @@ public class DownController {
 			if (dl == null || StringUtil.isEmpty(dl.getLink())) {
 				log.error("link error, linkid : {}",linkid);
 				model.addAttribute("message", "server error!");
-				return "html/error";
+				return "error";
 			}
 			//oss域名动态获取
 			List<Domain> domains = domainDao.selectByType(1);
 			if (domains.isEmpty()) {
 				log.error("oss 没有域名存在 数据库为空 ");
 				model.addAttribute("message", "server error!");
-				return "html/error";
+				return "error";
 			}
-			String link = domains.get(0).getDomain() + dl.getLink();
+			String link = domains.get(0).getDomain() + "/" + dl.getLink();
 			model.addAttribute("downlink", link);
 			log.info("获得动态链接，link:{}",link);
 			return html;
 		} catch (Exception e) {
 			log.error("downLink error,Exception -> {}",e);
 		}
-		return "html/error";
+		return "error";
 	}
 	
 	@GetMapping("/link1")

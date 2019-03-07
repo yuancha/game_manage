@@ -28,12 +28,12 @@ public class GlobalConfig {
 	
 	@PostConstruct
 	private void init() {
-		try {
+		/*try {
 			webDomains = FileUtil.readTxtFile("config/webdomain.txt");
 			log.info("webDomains load success, -> {}",webDomains);
 		} catch (Exception e) {
 			log.error("GlobalConfig init error,Exception -> {}",e);
-		}
+		}*/
 		
 		log.info("============>初始加载配置文件成功");
 	}

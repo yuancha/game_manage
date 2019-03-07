@@ -55,6 +55,12 @@ function getNavTitle(gameId){
 	case "100001":
 	  return "发发填大坑";
 	  break;
+	case "1048577":
+	  return "发发娱乐麻将";
+	  break;
+	case "524289":
+	  return "大师兄";
+	  break;  
 	default:
 	  return "未识别";
 	}

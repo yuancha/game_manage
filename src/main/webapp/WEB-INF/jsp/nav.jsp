@@ -91,6 +91,11 @@
                                 <span class="title">发发娱乐麻将</span>
                             </a>
                         </li>
+						<li>
+                            <a href="#" id='524289'>
+                                <span class="title">大师兄</span>
+                            </a>
+                        </li>
                     </ul>
                             
                     <div class="ps-scrollbar-x-rail" style="display: block; width: 340px; left: 0px; bottom: 3px;">

@@ -3,9 +3,8 @@ $('#main-menu').find('a').on('click',function(){
 	$(this).parents('li').addClass('active').siblings("li").removeClass('active');
 	
 	var gameId 		= $(this).attr('id');
-	var gameType 	= "0";
-	var gameState 	= $('#app_state').val();
-	var data 		= '{"gameId":"'+gameId+'","gameType":"'+gameType+'","gameState":"'+gameState+'"}';
+	var state 	= $('#app_state').val();
+	var data  = '{"gameId":"'+gameId+'","state":"'+state+'"}';
 	$('#gameId').val(gameId);
 	$('.page-title').find('.active').find('a').html(getNavTitle(gameId));
 	getListByAjax(data); 
@@ -34,7 +33,10 @@ function createQrcode(data){
 	      data: data,
 	      success: function (result) {
 	          if (result.code == 0) {
-	        	  getListByAjax();
+	        	  var gameId  = $('#gameId').val();
+	        	  var state = $("#app_state").val();
+	        	  var data1 = '{"gameId":"'+gameId+'","state":"'+state+'"}';
+	        	  getListByAjax(data1);
 	              //alert("创建成功");    
 	          }else{
 	       	   	  alert(result.message);

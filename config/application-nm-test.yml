@@ -1,36 +1,10 @@
-server:
-  port: 9100
-  
 spring:
-  servlet:
-    multipart:
-      max-file-size: 120MB
-      max-request-size: 200MB
-      
   datasource:
     url: jdbc:mysql://127.0.0.1:31036/oss_server?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false
     username: root
     password: Psg1j!ODYPk99UPc
-    #driver-class-name: com.mysql.jdbc.Driver
-  
+
 upload:
   local:
     basePath: /data/llmj_sp/oss_web/save/
-    tmpsave: /data/llmj_sp/oss_web/save/temp/
-  oss:
-     test: yctest/test/
-     online: yctest/online/
-
-mybatis:
-  type-aliases-package: com.llmj.oss.model
-  #mapper-locations: classpath:mybatis-mappers/*Mapper.xml 
-    
-logging:
-  config: classpath:logback-admin.xml
-log:
-  level:
-    root: info
-    my: debug
-  file: logs/admin-oss.log
-  maxsize: 30MB
-  maxhistory: 168
+    tmpsave: /data/llmj_sp/oss_web/save/temp/  

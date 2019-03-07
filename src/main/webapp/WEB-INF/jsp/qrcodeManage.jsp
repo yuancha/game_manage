@@ -135,7 +135,7 @@
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 	二维码详情
-                                	<a title="创建"  rel="创建"  href="javascript:;" onclick="jQuery('#modal-2').modal('show', {backdrop: 'fade'});" >
+                                	<a title="创建"  rel="创建"  href="javascript:;" onclick="modalShow();" >
                                 	<button class="btn btn-secondary" id='qrcode_create'>创建</button></a>
                             </div>
                             <table class="table" style="text-align: center" id="mytb">
@@ -273,6 +273,11 @@
 		console.log(data);
     	getListByAjax(data);
     });
+    
+    function modalShow() {
+    	$('#modal-2').modal();
+    	$("#desc").val("");
+    }
     </script>
  
 

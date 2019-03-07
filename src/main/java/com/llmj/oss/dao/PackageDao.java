@@ -22,8 +22,11 @@ public interface PackageDao {
 	PackageName selectById(@Param("gameId") int gameId);
 	
 	/*根据安卓或是ios包名查找类*/
-	@Select("select * from package_name where #{type}=#{type}")
-	PackageName selectByType(@Param("type") String type);
+	@Select("select * from package_name where ios=#{pack}")
+	PackageName selectByIos(@Param("pack") String pack);
+	
+	@Select("select * from package_name where android=#{pack}")
+	PackageName selectByAndroid(@Param("pack") String pack);
 	
 	@Select("select * from package_name order by gameId")
 	List<PackageName> getAll();
