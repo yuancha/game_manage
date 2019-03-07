@@ -23,8 +23,7 @@ upload:
   oss:
     test: yctest/test/
     online: yctest/online/
-  qrCode: 
-    basePath: F:/qrCode/
+    
 mybatis:
   type-aliases-package: com.llmj.oss.model
   #mapper-locations: classpath:mybatis-mappers/*Mapper.xml 

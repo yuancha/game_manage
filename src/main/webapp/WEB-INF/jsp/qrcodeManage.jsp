@@ -262,8 +262,141 @@
         <script src="../static/js/xenon/xenon-custom.js"></script>
        <script src="../static/js/public.js?v=2"></script>
     	<script>
-    	
-    	
+    		$(document).ready(function(){
+    			getDomain();
+    			getListByAjax();
+    		});
+    		
+    		//确认创建
+			$('#app_confirm').on('click',function(){
+				var gameId = 666666;
+    			var state = $("#app_state").val();
+    			var domain = $("#domain").val();
+    			var desc = $("#desc").val();
+				var data = '{"gameId":"'+gameId+'","state":"'+state+'","domain":"'+domain+'","desc":"'+desc+'"}';
+				createQrcode(data);
+    		});
+    		
+    		function createQrcode(data){
+	    			$.ajax({
+						 //几个参数需要注意一下
+				      type: "POST",//方法类型
+				      dataType: "json",//预期服务器返回的数据类型
+				      contentType: "application/json; charset=utf-8",
+				      url: "/qrCode/add" ,//url
+				      data: data,
+				      success: function (result) {
+				          if (result.code == 0) {
+				        	  getListByAjax();
+				              //alert("创建成功");    
+				          }else{
+				       	   	  alert(result.message);
+				          }
+				      },
+				      error : function() {
+				          alert("异常！");
+				      }
+				  });
+    		}
+    		
+    		function getListByAjax(){
+    			var gameId = 666666;
+    			var state = $("#app_state").val();
+    			var data = '{"gameId":"'+gameId+'","state":"'+state+'"}'
+    			console.log(data);
+    			$.ajax({
+					 //几个参数需要注意一下
+			      type: "POST",//方法类型
+			      dataType: "json",//预期服务器返回的数据类型
+			      contentType: "application/json; charset=utf-8",
+			      url: "/qrCode/list" ,//url
+			      data: data,
+			      success: function (result) {
+			          console.log(result);//打印服务端返回的数据(调试用)
+			          if (result.code == 0) {
+			        	  $("#mytb tbody").empty();
+			        	   var tb = $("#mytb tbody");
+							var arry = result.data;
+							var trHTML = "";
+							for (var i = 0; i < arry.length; i++) {
+								var obj = arry[i];
+								var bytes = obj.photo.split(",");
+								var str = arrayBufferToBase64(bytes);
+								trHTML += "<tr>"
+										+ "<td style='vertical-align: middle;'><img src='data:image/png;base64,"+str+"'></td>"
+										+ "<td style='vertical-align: middle;' class='content'>"+ obj.content+ "</td>"
+										+ "<td style='vertical-align: middle;' class='link'>"+ obj.link+ "</td>"
+										+ "<td style='vertical-align: middle;'><button class='btn btn-danger btn-single btn-sm btn_del'>删除</button></td>"
+										+ "</tr>";
+							}
+							tb.append(trHTML);
+			          }else{
+			       	   	  alert(result.message);
+			          }
+			      },
+			      error : function() {
+			          alert("异常！");
+			      }
+			  });
+    		}
+    		
+    		function getDomain(){
+    			$.ajax({
+					 //几个参数需要注意一下
+			      type: "POST",//方法类型
+			      dataType: "json",//预期服务器返回的数据类型
+			      contentType: "application/json; charset=utf-8",
+			      url: "/qrCode/domain" ,//url
+			      data: "",
+			      success: function (result) {
+			          console.log(result);//打印服务端返回的数据(调试用)
+			          if (result.code == 0) {
+			        	  $("#domain").empty();
+			        	  var ary = result.data;
+			        	  for (var i=0;i<ary.length;i++) {
+			        		  $("#domain").append("<option>"+ary[i].domain+"</option>");
+			        	  }
+			          }else{
+			       	   	  alert(result.message);
+			          }
+			      },
+			      error : function() {
+			          alert("异常！");
+			      }
+			  });
+    		}
+    		
+    		$(document).on('click','.btn_del',function() {
+    			var link = $(this).parents('tr').find('.link').text();
+    			var data = '{"domain":"'+link+'"}'
+    			$.ajax({
+    				type : "POST",//方法类型
+    				dataType : "json",//预期服务器返回的数据类型
+    				contentType : "application/json; charset=utf-8",
+    				url : "/qrCode/del",//url
+    				data : data,
+    				success : function(result) {
+    					if (result.code == 0) {
+    						getListByAjax();
+    					} else {
+    						alert(result.message);
+    					}
+    				},
+    				error : function() {
+    					alert("异常！");
+    				}
+    			});
+    		});
+    		
+    		function arrayBufferToBase64( buffer ) {
+	    		var binary = '';
+	    		var bytes = new Uint8Array( buffer );
+	    		var len = bytes.byteLength;
+	    		for (var i = 0; i < len; i++) {
+    				binary += String.fromCharCode( bytes[ i ] );
+    			}
+    			return window.btoa( binary );
+    		}
     	</script>
  
 

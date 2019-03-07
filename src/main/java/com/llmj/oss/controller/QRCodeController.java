@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.llmj.oss.config.GlobalConfig;
 import com.llmj.oss.config.RespCode;
+import com.llmj.oss.dao.DomainDao;
 import com.llmj.oss.dao.QrcodeDao;
 import com.llmj.oss.model.QRCode;
 import com.llmj.oss.model.RespEntity;
@@ -39,10 +39,7 @@ public class QRCodeController {
 	@Autowired
 	private QrcodeDao qrDao;
 	@Autowired
-	private GlobalConfig global;
-	
-	@Value("${upload.qrCode.basePath}")
-	private String savePath;//二维码保存路径
+	private DomainDao domainDao;
 	
 	@GetMapping("")
 	public String qrCodeHome(Model model,HttpServletRequest request) {
@@ -90,7 +87,7 @@ public class QRCodeController {
 			qr.setState(state);
 			//域名拼接成链接
 			String domain = model.getDomain();
-			if (!global.webDomainContains(domain)) {
+			if (domainDao.selectById(domain) == null) {
 				log.error("无效的域名，domain : {}",domain);
 				return new RespEntity(-2,"无效域名");
 			}
@@ -118,7 +115,7 @@ public class QRCodeController {
 				return new RespEntity(-2,"数据不存在");
 			}
 			String domain = model.getDomain();
-			if (!global.webDomainContains(domain)) {
+			if (domainDao.selectById(domain) == null) {
 				log.error("无效的域名，domain : {}",domain);
 				return new RespEntity(-2,"无效域名");
 			}
@@ -174,7 +171,7 @@ public class QRCodeController {
 	public RespEntity qrCodeDomain() {
 		RespEntity res = new RespEntity();
 		try {
-			res.setData(global.getWebDomains());
+			res.setData(domainDao.selectByType(0));
 		} catch (Exception e) {
 			log.error("qrCodeDomain error,Exception -> {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);

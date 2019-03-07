@@ -6,12 +6,16 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import com.llmj.oss.dao.DomainDao;
 import com.llmj.oss.dao.DownDao;
 import com.llmj.oss.dao.UploadDao;
+import com.llmj.oss.model.Domain;
 import com.llmj.oss.model.DownLink;
 import com.llmj.oss.util.StringUtil;
 
 import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -29,6 +33,8 @@ public class DownController {
 	private UploadDao uploadDao;
 	@Autowired
 	private DownDao downDao;
+	@Autowired
+	private DomainDao domainDao;
 	
 	@GetMapping("/link")
 	public String downLink(Model model,HttpServletRequest request) {
@@ -55,15 +61,23 @@ public class DownController {
 				return "html/error";
 			}
 
-			//TODO 连接配置 动态获取
+			//连接配置 动态获取
 			DownLink dl = downDao.selectById(linkid);
 			if (dl == null || StringUtil.isEmpty(dl.getLink())) {
 				log.error("link error, linkid : {}",linkid);
 				model.addAttribute("message", "server error!");
 				return "html/error";
 			}
-			//TODO oss域名动态获取
-			model.addAttribute("downlink", dl.getLink());
+			//oss域名动态获取
+			List<Domain> domains = domainDao.selectByType(1);
+			if (domains.isEmpty()) {
+				log.error("oss 没有域名存在 数据库为空 ");
+				model.addAttribute("message", "server error!");
+				return "html/error";
+			}
+			String link = domains.get(0).getDomain() + dl.getLink();
+			model.addAttribute("downlink", link);
+			log.info("获得动态链接，link:{}",link);
 			return html;
 		} catch (Exception e) {
 			log.error("downLink error,Exception -> {}",e);
