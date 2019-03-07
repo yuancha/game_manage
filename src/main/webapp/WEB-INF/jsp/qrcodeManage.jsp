@@ -333,7 +333,7 @@
 			        	  $("#domain").empty();
 			        	  var ary = result.data;
 			        	  for (var i=0;i<ary.length;i++) {
-			        		  $("#domain").append("<option>"+ary[i]+"</option>");
+			        		  $("#domain").append("<option>"+ary[i].domain+"</option>");
 			        	  }
 			          }else{
 			       	   	  alert(result.message);
