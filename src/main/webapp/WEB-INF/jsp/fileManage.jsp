@@ -121,7 +121,7 @@
                                             <a href="#"><i class="fa-home"></i>六六游戏</a>
                                         </li>
                                         <li class="active">
-                                            <a href="#">通辽</a>
+                                            <a href="#">内蒙</a>
                                         </li>
                                     </ol>
                                     
@@ -156,7 +156,7 @@
                                     </tr>
                                 </thead>
                                 <tbody id='app_box'>
-                                     <tr>
+                                     <!-- <tr>
                                     	<td class="middle-align">111</td>
                                         <td class="middle-align">2019-2-25</td>
                                         <td>
@@ -165,19 +165,7 @@
                                             <a href="#" class="btn btn-danger btn-single btn-sm">删除</a>
                                        
                                         </td>
-                                    </tr>
-                                    
-                                    <tr>
-                                    	<td class="middle-align">haha</td>
-                                        <td class="middle-align">2019-2-25</td>
-                                        <td>
-                                            <a href="#" class="btn btn-secondary btn-single btn-sm">查看</a>
-                                            <a href="#" class="btn btn-turquoise btn-single btn-sm">修改</a>
-                                            <a href="#" class="btn btn-danger btn-single btn-sm">删除</a>
-                                        </td>
-                                    </tr>
-                              
-                                 
+                                    </tr> -->
                                 </tbody>
                             </table>
                             
@@ -286,7 +274,19 @@
     
         <!-- JavaScripts initializations and stuff -->
         <script src="../static/js/xenon/xenon-custom.js"></script>
-    	<script src="../static/js/public_function.js?v=1"></script>
- 
+    	<script src="../static/js/app_function.js?v=2"></script>
+ 		<script>
+ 		$(document).ready(function(){
+ 			var gameId 		= "65537";
+ 			var gameType 	= "0";
+ 			var gameState 	= $('#app_state').val();
+ 			var data 		= '{"gameId":"'+gameId+'","gameType":"'+gameType+'","gameState":"'+gameState+'"}';
+ 			$('#gameId').val(gameId);
+ 			$('.page-title').find('.active').find('a').html(getNavTitle(gameId));
+ 			console.log(data);
+ 			getFilesInfoByAjax(data);
+ 		})
+ 		
+ 		</script>
 
 </body></html>

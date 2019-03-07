@@ -18,10 +18,10 @@
                         
                         <!-- This will toggle the mobile menu and will be visible only on mobile devices -->
                         <div class="mobile-menu-toggle visible-xs">
-                            <a href="#" data-toggle="user-info-menu">
+                           <!--  <a href="#" data-toggle="user-info-menu">
                                 <i class="fa-bell-o"></i>
                                 <span class="badge badge-success">7</span>
-                            </a>
+                            </a> -->
                             
                             <a href="#" data-toggle="mobile-menu" style="background: #fff;width: 20px;">
                                 <i class="fa-bars"></i>
@@ -34,12 +34,12 @@
                     
                             
                     <ul id="main-menu" class="main-menu">
-                       <li>
+                       <li class="active">
                             <a href="#" id='65537'>
                                 <span class="title">内蒙</span>
                             </a>
                         </li>
-                        <li class="active">
+                        <li>
                             <a href="#" id='888888'>
                                 <span class="title">淮北</span>
                             </a>

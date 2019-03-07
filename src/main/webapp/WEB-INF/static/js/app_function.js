@@ -211,6 +211,7 @@ function getFilesInfoByAjax(data){
                 }
                 
               //上线数据详情
+              
               $('#online_osspath').text(filePathSplit(data[i].ossPath));  
               $('#online_version').text(result.online.vision);
               $('#online_operTime').text(result.online.operTime);
