@@ -38,6 +38,9 @@ public interface QrcodeDao {
 	@Update("update qr_code set logicUse=#{logicUse} where id=#{id} ")
 	void updateLogicUse(QRCode qr);
 	
-	@Select("select * from qr_code where gameId=#{gameId} and logicUse=#{logicUse}")
-	QRCode selectByLogicUse(@Param("gameId") int gameId,@Param("logicUse") int logicUse);
+	@Select("select * from qr_code where gameId=#{gameId} and logicUse=#{logicUse} and state=#{state}")
+	QRCode selectByLogicUse(@Param("gameId") int gameId,@Param("logicUse") int logicUse,@Param("state") int state);
+	
+	@Select("select content,link,ossPath from qr_code where logicUse = #{logicUse} and state = #{state} ")
+	List<QRCode> getOnlineQRs(@Param("logicUse") int logicUse,@Param("state") int state);
 }

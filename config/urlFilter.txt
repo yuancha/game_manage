@@ -4,3 +4,4 @@
 /down/link
 /error
 /qrCode/getIconLink
+/qrCode/icons

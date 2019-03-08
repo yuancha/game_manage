@@ -213,9 +213,10 @@ public class QRCodeController {
 	public RespEntity qrCodeRefresh(@RequestBody QrOperation model) {
 		RespEntity res = new RespEntity();
 		try {
+			int state = model.getState();
 			int gameId = model.getGameId();
 			String link = model.getDomain();
-			QRCode old = qrDao.selectByLogicUse(gameId,lUse);
+			QRCode old = qrDao.selectByLogicUse(gameId,lUse,state);
 			QRCode qr = qrDao.selectByLink(link);
 			if (qr == null) {
 				log.error("qrcode not find,link ： {}",link);
@@ -256,6 +257,24 @@ public class QRCodeController {
 		}
 		return res;
 	}
+	
+	@GetMapping("/icons")
+	public String onlineIcons(Model model,HttpServletRequest request) {
+		try {
+			List<QRCode> list = qrDao.getOnlineQRs(lUse, 1);
+			String ossdomain = ossMgr.ossDomain();
+			for (QRCode qr : list) {
+				qr.setOssPath(ossdomain + qr.getOssPath());
+			}
+			model.addAttribute("qrs", StringUtil.objToJson(list));
+			return "qrOnlineIcons";
+		} catch (Exception e) {
+			log.error("onlineIcons error,Exception -> {}",e);
+			model.addAttribute("message", "server error");
+		}
+		return "error";
+	}
+	
 	
 	private String qrOssPath(int state,String name) {
 		String base = "";
