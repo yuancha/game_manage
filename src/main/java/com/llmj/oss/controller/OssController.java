@@ -70,7 +70,7 @@ public class OssController {
 		return "error";
 	}
 	
-	private String getTableName (int state) {
+	public static String getTableName (int state) {
 		if (state == 0) {
 			return IConsts.UpFileTable.test.getTableName();
 		}

@@ -4,13 +4,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.llmj.oss.dao.DomainDao;
 import com.llmj.oss.dao.DownDao;
 import com.llmj.oss.dao.UploadDao;
+import com.llmj.oss.manager.AliOssManager;
 import com.llmj.oss.model.Domain;
 import com.llmj.oss.model.DownLink;
+import com.llmj.oss.model.UploadFile;
+import com.llmj.oss.model.oper.FileOperation;
 import com.llmj.oss.util.StringUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * 下载管理
@@ -35,6 +41,8 @@ public class DownController {
 	private DownDao downDao;
 	@Autowired
 	private DomainDao domainDao;
+	@Autowired 
+	private AliOssManager ossMgr;
 	
 	@GetMapping("/link")
 	public String downLink(Model model,HttpServletRequest request) {
@@ -85,35 +93,30 @@ public class DownController {
 		return "error";
 	}
 	
-	@GetMapping("/link1")
-	public String downLinkOnline(Model model,HttpServletRequest request) {
+	/**
+	 * 直接下载文件
+	 * @param model
+	 * @param request
+	 * @return
+	 */
+	@PostMapping("/file")
+	public void singleFileDown(@RequestBody FileOperation param,
+			HttpServletRequest request,HttpServletResponse response) {
 		try {
-			String gameState = request.getParameter("gameState");
-			String gameId = request.getParameter("gameId");
-			String type = request.getParameter("type");
-			String linkid = gameId + "_" + gameState + "_";
-			String html = "html/links/ffyl/android";
-			if (type.equals("ios")) {
-				html = "html/links/ffyl/ios";
-				linkid += 1;
-			} else {
-				linkid += 0;
-			}
-
-			//TODO 连接配置 动态获取
-			DownLink dl = downDao.selectById(linkid);
-			if (dl == null || StringUtil.isEmpty(dl.getLink())) {
-				log.error("link error, linkid : {}",linkid);
-				model.addAttribute("message", "server error!");
-				return "html/error";
-			}
-			//TODO oss域名动态获取
-			model.addAttribute("downlink", dl.getLink());
-			return html;
+    		int fileId = param.getId();
+    		int state = param.getGameState();
+    		String tbname = OssController.getTableName(state);
+        	UploadFile info = uploadDao.selectById(fileId,tbname);
+        	if (info == null) {
+        		log.error("UploadFile not find,id -> {}",fileId);
+        		return;
+        	}
+        	//直接转发oss
+        	String osslink = ossMgr.ossDomain() + info.getOssPath();
+        	response.sendRedirect(osslink);
 		} catch (Exception e) {
-			log.error("downLink error,Exception -> {}",e);
+			log.error("singleFileDown error, Exception -> {}",e);
 		}
-		return "html/error";
 	}
 	
 	
