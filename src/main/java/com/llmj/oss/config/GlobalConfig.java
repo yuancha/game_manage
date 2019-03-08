@@ -20,35 +20,30 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Slf4j(topic = "ossLogger")
 public class GlobalConfig {
-	/**
-	 * 游戏id 对应 唯一包名
-	 */
-	private Set<String> webDomains;	//web服务器域名
-	//oss服务器域名
+	
+	private Set<String> urlFilter;	//不需要拦截的url
+	
 	
 	@PostConstruct
 	private void init() {
-		/*try {
-			webDomains = FileUtil.readTxtFile("config/webdomain.txt");
-			log.info("webDomains load success, -> {}",webDomains);
+		try {
+			urlFilter = FileUtil.readTxtFile("config/urlFilter.txt");
+			log.info("webDomains load success, -> {}",urlFilter);
 		} catch (Exception e) {
 			log.error("GlobalConfig init error,Exception -> {}",e);
-		}*/
+		}
 		
 		log.info("============>初始加载配置文件成功");
 	}
 	
 	/**
-	 * 域名是否有效
+	 * 是否需要拦截
 	 * @param domain
 	 * @return
 	 */
-	public boolean webDomainContains(String domain) {
-		return webDomains.contains(domain);
+	public boolean notIntercept (String url) {
+		return urlFilter.contains(url);
 	}
 	
-	public Set<String> getWebDomains() {
-		return webDomains;
-	}
 }
 

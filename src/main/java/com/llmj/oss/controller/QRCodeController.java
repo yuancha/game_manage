@@ -14,6 +14,7 @@ import com.llmj.oss.config.RespCode;
 import com.llmj.oss.dao.DomainDao;
 import com.llmj.oss.dao.QrcodeDao;
 import com.llmj.oss.manager.AliOssManager;
+import com.llmj.oss.manager.MqManager;
 import com.llmj.oss.model.QRCode;
 import com.llmj.oss.model.RespEntity;
 import com.llmj.oss.model.oper.QrOperation;
@@ -37,6 +38,9 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping("/qrCode")
 public class QRCodeController {
 	
+	private static final int lUse = 1;	//逻辑服使用标识
+	private static final int lNoUse = 0;
+	
 	@Value("${upload.oss.test}")
     public String ossTest;
     @Value("${upload.oss.online}")
@@ -48,6 +52,8 @@ public class QRCodeController {
 	private DomainDao domainDao;
 	@Autowired
 	private AliOssManager ossMgr;
+	@Autowired
+	private MqManager mqMgr;
 	
 	@GetMapping("")
 	public String qrCodeHome(Model model,HttpServletRequest request) {
@@ -172,7 +178,7 @@ public class QRCodeController {
 			if (qr == null) {
 				return new RespEntity(RespCode.SUCCESS);
 			}
-			if (qr.getLogicUse() == 1) {
+			if (qr.getLogicUse() == lUse) {
 				return new RespEntity(-2,"已在逻辑服备份，请先刷新其它二维码备份后再删除");
 			}
 			qrDao.delQR(model.getDomain());
@@ -207,11 +213,26 @@ public class QRCodeController {
 	public RespEntity qrCodeRefresh(@RequestBody QrOperation model) {
 		RespEntity res = new RespEntity();
 		try {
-			int id = model.getId();
-			QRCode qr = qrDao.selectById(id);
-			int gameId = qr.getGameId();
-			String ossPath = qr.getOssPath();
+			int gameId = model.getGameId();
+			String link = model.getDomain();
+			QRCode old = qrDao.selectByLogicUse(gameId,lUse);
+			QRCode qr = qrDao.selectByLink(link);
+			if (qr == null) {
+				log.error("qrcode not find,link ： {}",link);
+				return new RespEntity(-2,"数据错误");
+			}
+			if (old != null) {
+				if (old.getLink().equals(link)) {
+					return new RespEntity(-2,"已经是备份状态");
+				}
+				old.setLogicUse(lNoUse);
+				qrDao.updateLogicUse(old);
+			}
+			qr.setLogicUse(lUse);
+			qrDao.updateLogicUse(qr);
+			String ossqrLink = ossMgr.ossDomain() + qr.getOssPath();
 			//TDOO 刷新到逻辑服
+			mqMgr.sendQrLinkToLogic(gameId,ossqrLink);
 		} catch (Exception e) {
 			log.error("qrCodeRefresh error,Exception -> {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);
@@ -220,6 +241,21 @@ public class QRCodeController {
 	}
 	
 	//逻辑服主动请求二维码
+	@PostMapping("/getIconLink")
+	@ResponseBody
+	public RespEntity qrCodeRefresh(HttpServletRequest request) {
+		RespEntity res = new RespEntity();
+		try {
+			String gameId = request.getParameter("gameId");
+			String state = request.getParameter("state");
+			System.out.println(gameId+"----"+state);
+			res.setData("http://qrcode.icon.link");
+		} catch (Exception e) {
+			log.error("qrCodeRefresh error,Exception -> {}",e);
+			return new RespEntity(RespCode.SERVER_ERROR);
+		}
+		return res;
+	}
 	
 	private String qrOssPath(int state,String name) {
 		String base = "";

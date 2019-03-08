@@ -1,0 +1,6 @@
+/login
+/upload
+/uploadFile
+/down/link
+/error
+/qrCode/getIconLink

@@ -23,6 +23,9 @@ public class ViewResolverConfiguration {
     @ComponentScan("com.llmj.oss")
     public class WebConfig implements WebMvcConfigurer {
     	
+    	@Autowired
+    	private GlobalConfig global;
+    	
         @Bean
         public ViewResolver viewResolver() {
             InternalResourceViewResolver resolver = new InternalResourceViewResolver();
@@ -36,7 +39,7 @@ public class ViewResolverConfiguration {
         /* 路径拦截 */
 		@Override
 		public void addInterceptors(InterceptorRegistry registry) {
-			registry.addInterceptor(new UrlInterceptor()).addPathPatterns("/**").excludePathPatterns("/static/**");
+			registry.addInterceptor(new UrlInterceptor(global)).addPathPatterns("/**").excludePathPatterns("/static/**");
 		}
 
 		@Bean
