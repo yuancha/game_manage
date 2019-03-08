@@ -143,7 +143,6 @@
                                     <tr>
                                     	<th width="30%"  style="text-align: center">二维码</th>
                                         <th width="30%"  style="text-align: center">描述</th>
-                                        <th width="30%"  style="text-align: center">链接</th>
                                         <th style="text-align: center">操作</th>
                                     </tr>
                                 </thead>
@@ -204,7 +203,7 @@
                     
                     <div class="modal-footer">
                         <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
-                        <button type="button" class="btn btn-info">确定</button>
+                        <button type="button" class="btn btn-danger" id="btn_del">删除</button>
                     </div>
                 </div>
             </div>
@@ -242,7 +241,7 @@
 		                   </div>
 	                    <div class="modal-footer">
 	                    	<button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
-	                        <button type="button" class="btn btn-info" data-dismiss="modal" id="app_confirm">确定</button>
+	                        <button type="button" class="btn btn-info" data-dismiss="modal"  id="app_confirm">确定</button>
 	                    </div>
 	                </div>
 	            </div>
@@ -261,7 +260,7 @@
         <!-- JavaScripts initializations and stuff -->
         <script src="../static/js/xenon/xenon-custom.js"></script>
        <script src="../static/js/public.js?v=2"></script>
-       <script src="../static/js/qrcode_function.js?v=4"></script>
+       <script src="../static/js/qrcode_function.js?v=5"></script>
     <script type="text/javascript">
     $(document).ready(function(){
     	getDomain();
