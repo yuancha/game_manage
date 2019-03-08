@@ -53,7 +53,7 @@ public class UploadController {
 	
     @GetMapping("/upload")
     public String index() {
-        return "upload";
+        return "html/upload";
     }
     
     /*
@@ -101,7 +101,7 @@ public class UploadController {
             }
             FileUtil.deleteFile(filePath);	//删除临时存放
             String packName = (String) tmpMap.get("package");
-            //TODO 包名库需完善
+            //包名验证
             if (packName == null || !packMgr.isContainPackage(packName,type) ) {
             	log.error("文件非法，packName : {}",packName);
             	return new RespEntity(RespCode.FILE_ERROR);
@@ -128,16 +128,13 @@ public class UploadController {
             
             //上传到oss 测试路径
             ossMgr.uploadFileByByte(ossPath,bytes);
-            //TODO 自动刷新测试下载链接
             
             tmpMap.put("ossPath", ossPath);
             tmpMap.put("fileName", filename);
             //日志信息存储
             int tableId = saveUploadLog(tmpMap);
             
-            //钉钉通知
-            /*String msg = filename + "上传成功,下载路径:http://118.89.237.82:9100/downFile/"+tableId;
-            ddnotice.noticeGroup(msg);*/
+            //TODO 某种通知方式
         } catch (Exception e) {
             log.error("singleFileUpload error,Exception -> {}",e);
             return new RespEntity(RespCode.SERVER_ERROR);
