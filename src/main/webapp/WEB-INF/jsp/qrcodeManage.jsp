@@ -202,7 +202,7 @@
                     </div>
                     
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                        <button type="button" class="btn btn-white" data-dismiss="modal" id='btn_close_1'>关闭</button>
                         <button type="button" class="btn btn-danger" id="btn_del">删除</button>
                     </div>
                 </div>

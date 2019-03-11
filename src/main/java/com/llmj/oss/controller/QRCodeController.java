@@ -81,6 +81,10 @@ public class QRCodeController {
 			int gameId = model.getGameId();
 			int state = model.getState();
 			List<QRCode> list = qrDao.getQRs(gameId,state);
+			String ossdomain = ossMgr.ossDomain();
+			for (QRCode qr : list) {
+				qr.setOssPath(ossdomain + qr.getOssPath());
+			}
 			res.setData(list);
 		} catch (Exception e) {
 			log.error("qrList error,Exception -> {}",e);
@@ -161,7 +165,8 @@ public class QRCodeController {
 		byte[] tmp = QRCodeUtil.encode(link);
 		String arryStr = Arrays.toString(tmp);
 		arryStr = arryStr.substring(1, arryStr.length() - 1);
-		qr.setPhoto(arryStr);
+		qr.setPhoto("");
+		//qr.setPhoto(arryStr);
 		
 		String qrSavePath = qrOssPath(state,StringUtil.getUUIDStr());
 		ossMgr.uploadFileByByte(qrSavePath, tmp);
@@ -233,7 +238,7 @@ public class QRCodeController {
 			qrDao.updateLogicUse(qr);
 			String ossqrLink = ossMgr.ossDomain() + qr.getOssPath();
 			//TDOO 刷新到逻辑服
-			mqMgr.sendQrLinkToLogic(gameId,ossqrLink);
+			//mqMgr.sendQrLinkToLogic(gameId,ossqrLink);
 		} catch (Exception e) {
 			log.error("qrCodeRefresh error,Exception -> {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);

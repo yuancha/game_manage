@@ -56,6 +56,9 @@
 					<div class="box" id="btn_qr_on_info">
 						二维码(<span style="color:#FA552C">正式</span>)
 					</div>
+					<div class="box" id="btn_qr_on_show">
+						线上二维码预览
+					</div>
 				</div>
 			</div>
 		</div>
@@ -85,6 +88,9 @@
 			window.location.href = "/qrCode?state=online";
 		});
 		
+		$('#btn_qr_on_show').on('click',function(){
+			window.location.href = "/qrCode/icons";
+		});
 
         function login() {
         	var name = $("#user_name").val();

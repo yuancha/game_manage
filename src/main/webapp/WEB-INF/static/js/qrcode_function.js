@@ -37,6 +37,7 @@ function createQrcode(data){
 	        	  var state = $("#app_state").val();
 	        	  var data1 = '{"gameId":"'+gameId+'","state":"'+state+'"}';
 	        	  getListByAjax(data1);
+	        	  alert(result.message);
 	              //alert("创建成功");    
 	          }else{
 	       	   	  alert(result.message);
@@ -52,7 +53,6 @@ function getListByAjax(data){
 //	var gameId  = $('#gameId').val();
 //	var state = $("#app_state").val();
 //	var data = '{"gameId":"'+gameId+'","state":"'+state+'"}'
-	console.log(data);
 	$.ajax({
 		 //几个参数需要注意一下
       type: "POST",//方法类型
@@ -69,10 +69,10 @@ function getListByAjax(data){
 				var trHTML = "";
 				for (var i = 0; i < arry.length; i++) {
 					var obj = arry[i];
-					var bytes = obj.photo.split(",");
-					var str = arrayBufferToBase64(bytes);
+					//var bytes = obj.photo.split(",");
+					//var str = arrayBufferToBase64(bytes);
 					trHTML += "<tr>\
-							<td style='vertical-align: middle;'><img src='data:image/png;base64,"+str+"'></td>\
+							<td style='vertical-align: middle;'><img src='"+obj.ossPath+"'></td>\
 							<td style='vertical-align: middle;' class='content'>"+ obj.content+ "</td>\
 							<td style='vertical-align: middle;'>\
 							<button class='btn btn-secondary btn-single btn-sm btn_look'>查看</button>\
@@ -113,7 +113,7 @@ function getDomain(){
         		  $("#domain").append("<option>"+ary[i].domain+"</option>");
         	  }
           }else{
-       	   	  alert(result.message);
+       	   	  alert("getDomain" + result.message);
           }
       },
       error : function() {
@@ -167,7 +167,9 @@ $(document).on('click','#btn_del',function() {
 				var state = $("#app_state").val();
 				var data = '{"gameId":"'+gameId+'","state":"'+state+'"}';
 				getListByAjax(data);
-				window.location.reload();
+				alert(result.message);
+				//window.location.reload();
+				$('#btn_close_1').click();
 			} else {
 				alert(result.message);
 			}
