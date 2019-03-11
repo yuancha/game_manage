@@ -182,10 +182,11 @@ $(document).on('click','#btn_del',function() {
 
 //刷新
 $(document).on('click','.btn_refresh',function() {
-	var link = $(this).parents('.tr').find('.link').val();
-	var gameId = $(this).parents('.tr').find('.gameId').val();
-	var state = $(this).parents('.tr').find('.state').val();
-	var data = '{"gameId":"'+gameId+'","link":"'+link+'","state":"'+state+'"}';
+	
+	var link = $(this).parents('tr').find('.link').val();
+	var gameId  = $('#gameId').val();
+	var state = $("#app_state").val();
+	var data = '{"gameId":"'+gameId+'","domain":"'+link+'","state":"'+state+'"}';
 	$.ajax({
 		type : "POST",//方法类型
 		dataType : "json",//预期服务器返回的数据类型
@@ -199,7 +200,8 @@ $(document).on('click','.btn_refresh',function() {
 				var state = $("#app_state").val();
 				var data = '{"gameId":"'+gameId+'","state":"'+state+'"}';
 				getListByAjax(data);
-				window.location.reload();
+				alert(result.message);
+				//window.location.reload();
 			} else {
 				alert(result.message);
 			}

@@ -5,8 +5,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.llmj.oss.dao.DomainDao;
 import com.llmj.oss.dao.DownDao;
@@ -15,7 +15,6 @@ import com.llmj.oss.manager.AliOssManager;
 import com.llmj.oss.model.Domain;
 import com.llmj.oss.model.DownLink;
 import com.llmj.oss.model.UploadFile;
-import com.llmj.oss.model.oper.FileOperation;
 import com.llmj.oss.util.StringUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -100,13 +99,11 @@ public class DownController {
 	 * @return
 	 */
 	@PostMapping("/file")
-	public void singleFileDown(@RequestBody FileOperation param,
-			HttpServletRequest request,HttpServletResponse response) {
+	public void singleFileDown(HttpServletRequest request,HttpServletResponse response,
+			@RequestParam(name = "fileId") String fileId, @RequestParam(name = "state") String state) {
 		try {
-    		int fileId = param.getId();
-    		int state = param.getGameState();
-    		String tbname = OssController.getTableName(state);
-        	UploadFile info = uploadDao.selectById(fileId,tbname);
+    		String tbname = OssController.getTableName(Integer.parseInt(state));
+        	UploadFile info = uploadDao.selectById(Integer.parseInt(fileId),tbname);
         	if (info == null) {
         		log.error("UploadFile not find,id -> {}",fileId);
         		return;

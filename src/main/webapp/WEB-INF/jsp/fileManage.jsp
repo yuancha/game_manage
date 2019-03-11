@@ -249,6 +249,7 @@
                     
                     <div class="modal-footer">
                     	<button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
+                    	<button type="button" class="btn btn-secondary" data-dismiss="modal" id="app_down">下载</button>
                         <button type="button" class="btn btn-danger" data-dismiss="modal" id="app_delete">删除</button>
                         <button type="button" class="btn btn-info" data-dismiss="modal" id="app_copy">拷贝</button>
                     </div>

@@ -238,6 +238,7 @@ public class QRCodeController {
 			log.error("qrCodeRefresh error,Exception -> {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);
 		}
+		res.setMessage("备份逻辑服成功");
 		return res;
 	}
 	

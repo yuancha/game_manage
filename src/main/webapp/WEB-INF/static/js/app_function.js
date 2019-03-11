@@ -35,6 +35,7 @@ $(document).on('click','.ev_look',function(){
 	var app_vision 		= $(this).parents('tr').find('.app_vision').val();
 	var app_game		= $(this).parents('tr').find('.app_game').val();
 	var app_id 			= $(this).parents('tr').find('.app_id').val();
+	var up_name 	    = $(this).parents('tr').find('.fileName').val();
 
 	if(app_type == 0){
 		var type = "安卓";
@@ -42,6 +43,7 @@ $(document).on('click','.ev_look',function(){
 		var type = "苹果";
 	}
 	$('#modal-2').find('.modal-body').html("\
+			<p>上传名称："+up_name+"</p>\
 			<p>名称："+app_game+"</p>\
 			<p>包名："+app_packName+"</p>\
 			<p>版本："+app_vision+"</p>\
@@ -184,6 +186,16 @@ function deleteFilesInfoByAjax(data){
   });
 }
 
+//下载到本地
+$(document).on('click','#app_down',function(){
+	var id 		= $(this).parents('.modal-content').find('#show_app_id').val();
+	var gameState 	= $('#app_state').val();
+	jQuery('<form action="/down/file" method="post">' +  // action请求路径及推送方法
+            '<input type="text" name="fileId" value="' + id + '"/>' + 
+            '<input type="text" name="state" value="' + gameState + '"/>' + 
+           '</form>').appendTo('body').submit().remove();
+});
+
 //获取游戏包数据详情
 function getFilesInfoByAjax(data){	
 	$('#online_osspath').text("");
@@ -223,6 +235,7 @@ function getFilesInfoByAjax(data){
                        <input type='hidden' value="+data[i].type+" class='app_type' >\
                        <input type='hidden' value="+data[i].upTime+" class='app_upTime' >\
                        <input type='hidden' value="+data[i].vision+" class='app_vision' >\
+                       <input type='hidden' value="+data[i].fileName+" class='fileName' >\
                    </tr>");
                 }
                 
