@@ -5,6 +5,7 @@ import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -124,8 +125,15 @@ public class QRCodeUtil {
         return true;
     }
     
-    public static Boolean encode(String content, String destPath,String name) throws Exception {
-        BufferedImage image = QRCodeUtil.createImage(content, "", false);
+    //后添
+    public static void encode(String content, String imgPath, OutputStream output, boolean needCompress)
+            throws Exception {
+        BufferedImage image = QRCodeUtil.createImage(content, imgPath, needCompress);
+        ImageIO.write(image, FORMAT_NAME, output);
+    }
+    
+    public static Boolean encode(String content, String destPath,String name,InputStream is) throws Exception {
+        BufferedImage image = QRCodeUtil.createImage(content,is);
         if(image==null){
             return false;
         }
@@ -135,9 +143,61 @@ public class QRCodeUtil {
         return true;
     }
     
-    public static void encode(String content, String imgPath, OutputStream output, boolean needCompress)
+    private static BufferedImage createImage(String content, InputStream is) throws Exception {
+		Hashtable hints = new Hashtable();
+		hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.H);
+		hints.put(EncodeHintType.CHARACTER_SET, CHARSET);
+		hints.put(EncodeHintType.MARGIN, 1);
+		BitMatrix bitMatrix = new MultiFormatWriter().encode(content, BarcodeFormat.QR_CODE, QRCODE_SIZE, QRCODE_SIZE,
+				hints);
+		int width = bitMatrix.getWidth();
+		int height = bitMatrix.getHeight();
+		BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				image.setRGB(x, y, bitMatrix.get(x, y) ? 0xFF000000 : 0xFFFFFFFF);
+			}
+		}
+		if (is == null) {
+			return image;
+		}
+		// 插入图片
+		QRCodeUtil.insertImage(image, is, true);
+		return image;
+	}
+    
+    private static void insertImage(BufferedImage source, InputStream is, boolean needCompress) throws Exception {
+        Image src = ImageIO.read(is);
+        int width = src.getWidth(null);
+        int height = src.getHeight(null);
+        if (needCompress) { // 压缩LOGO
+            if (width > WIDTH) {
+                width = WIDTH;
+            }
+            if (height > HEIGHT) {
+                height = HEIGHT;
+            }
+            Image image = src.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+            BufferedImage tag = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            Graphics g = tag.getGraphics();
+            g.drawImage(image, 0, 0, null); // 绘制缩小后的图
+            g.dispose();
+            src = image;
+        }
+        // 插入LOGO
+        Graphics2D graph = source.createGraphics();
+        int x = (QRCODE_SIZE - width) / 2;
+        int y = (QRCODE_SIZE - height) / 2;
+        graph.drawImage(src, x, y, width, height, null);
+        Shape shape = new RoundRectangle2D.Float(x, y, width, width, 6, 6);
+        graph.setStroke(new BasicStroke(3f));
+        graph.draw(shape);
+        graph.dispose();
+    }
+    
+    public static void encode(String content, InputStream is, OutputStream output)
             throws Exception {
-        BufferedImage image = QRCodeUtil.createImage(content, imgPath, needCompress);
+        BufferedImage image = QRCodeUtil.createImage(content, is);
         ImageIO.write(image, FORMAT_NAME, output);
     }
     
@@ -147,13 +207,16 @@ public class QRCodeUtil {
      * @param output
      * @throws Exception
      */
-    public static byte[] encode(String content,String imgPath,boolean needCompress) throws Exception {
+    public static byte[] encode(String content,InputStream is) throws Exception {
     	ByteArrayOutputStream output = new ByteArrayOutputStream();
     	try {
-            QRCodeUtil.encode(content, imgPath, output, needCompress);
+            QRCodeUtil.encode(content, is, output);
             return output.toByteArray();
 		} finally {
 			output.flush();
+			if (output != null) {
+				output.close();
+			}
 		}
     }
 	

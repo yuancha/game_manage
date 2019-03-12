@@ -26,9 +26,11 @@ import com.llmj.oss.util.StringUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -102,7 +104,7 @@ public class QRCodeController {
 	
 	@PostMapping("/add")
 	@ResponseBody
-	public RespEntity qrCodeAdd(@RequestBody QrOperation model) {
+	public RespEntity qrCodeAdd(@RequestBody QrOperation model,HttpServletRequest request) {
 		try {
 			int gameId = model.getGameId();
 			int state = model.getState();
@@ -116,7 +118,8 @@ public class QRCodeController {
 				log.error("无效的域名，domain : {}",domain);
 				return new RespEntity(-2,"无效域名");
 			}
-			String link = saveQr(qr,domain);
+			InputStream is = getMiddelImg(gameId,request);
+			String link = saveQr(qr,domain,is);
 			if (!link.equals("")) {
 				log.error("链接已存在，link ： {}",link);
 				return new RespEntity(-2,"链接已存在,"+link);
@@ -159,7 +162,7 @@ public class QRCodeController {
 		return new RespEntity(RespCode.SUCCESS);
 	}*/
 	
-	private String saveQr(QRCode qr,String domain) throws Exception {
+	private String saveQr(QRCode qr,String domain,InputStream is) throws Exception {
 		int gameId = qr.getGameId();
 		int state = qr.getState();
 		String link = domain + "?gameId="+gameId+"&gameState="+state;
@@ -168,22 +171,29 @@ public class QRCodeController {
 			return link;
 		}
 		
-		qr.setLink(link);
-		byte[] tmp = QRCodeUtil.encode(link,getMiddelImg(gameId),true);
-		/*String arryStr = Arrays.toString(tmp);
-		arryStr = arryStr.substring(1, arryStr.length() - 1);*/
-		qr.setPhoto("");
-		//qr.setPhoto(arryStr);
-		
-		//保存到oss
-		String qrName = StringUtil.getUUIDStr();
-		String qrSavePath = qrOssPath(state,qrName);
-		ossMgr.uploadFileByByte(qrSavePath, tmp);
-		qr.setOssPath(qrSavePath);
-		
-		//保存到本地
-		QRCodeUtil.encode(link,qrcodePath,qrName);
-		qr.setLocalPath(qrcodePath + qrName + ".png");
+		try {
+			qr.setLink(link);
+			byte[] tmp = QRCodeUtil.encode(link,is);
+			/*String arryStr = Arrays.toString(tmp);
+			arryStr = arryStr.substring(1, arryStr.length() - 1);*/
+			qr.setPhoto("");
+			//qr.setPhoto(arryStr);
+			
+			//保存到oss
+			String qrName = StringUtil.getUUIDStr();
+			String qrSavePath = qrOssPath(state,qrName);
+			ossMgr.uploadFileByByte(qrSavePath, tmp);
+			qr.setOssPath(qrSavePath);
+			
+			//保存到本地
+			is.reset();//重复利用
+			QRCodeUtil.encode(link,qrcodePath,qrName,is);
+			qr.setLocalPath(qrcodePath + qrName + ".png");
+		} finally {
+			if (is != null) {
+				is.close();
+			}
+		}
 		return "";
 	}
 	
@@ -315,15 +325,21 @@ public class QRCodeController {
 	}
 	
 	//获得二维码中间图片
-	private String getMiddelImg(int gameId) {
-		String path = QRCodeController.class.getResource("/").getPath();
-		path = path.substring(1)+"WEB-INF/static/images/";
-		switch (gameId) {
-			default : {
-				path += "test.png";
-				break;
+	private InputStream getMiddelImg(int gameId,HttpServletRequest request) {
+		InputStream is = null;
+		try {
+			ServletContext context = request.getSession().getServletContext();
+			String path = "WEB-INF/static/images/";
+			switch (gameId) {
+				default : {
+					path += "test.png";
+					break;
+				}
 			}
+			is = context.getResourceAsStream(path);
+		} catch (Exception e) {
+			log.error("getMiddelImg error,Exception -> {}",e);
 		}
-		return path;
+		return is;
 	}
 }
