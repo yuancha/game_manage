@@ -24,9 +24,6 @@ public class QRCodeUtil {
 		String img = save + "麻将.png";
 		try {
 			//QRCodeUtil.encode("www.baidu.com", img,save,true,"123");
-			
-			byte[] ary = QRCodeUtil.encode("www.baidu.com");
-			System.out.println(Arrays.toString(ary));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -150,10 +147,10 @@ public class QRCodeUtil {
      * @param output
      * @throws Exception
      */
-    public static byte[] encode(String content) throws Exception {
+    public static byte[] encode(String content,String imgPath,boolean needCompress) throws Exception {
     	ByteArrayOutputStream output = new ByteArrayOutputStream();
     	try {
-            QRCodeUtil.encode(content, null, output, false);
+            QRCodeUtil.encode(content, imgPath, output, needCompress);
             return output.toByteArray();
 		} finally {
 			output.flush();

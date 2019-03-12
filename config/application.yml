@@ -14,8 +14,8 @@ spring:
       
 upload:
   oss:
-    test: yctest/test/
-    online: yctest/online/
+    test: down/test/
+    online: down/online/
     endpoint: http://oss-cn-beijing.aliyuncs.com
     accessKeyId: LTAIMO9xn64DcMJ6
     accessKeySecret: lpcoQYwaiv7LugHOUe8y0LiWjf6r6G

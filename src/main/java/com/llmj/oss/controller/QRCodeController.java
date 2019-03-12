@@ -169,7 +169,7 @@ public class QRCodeController {
 		}
 		
 		qr.setLink(link);
-		byte[] tmp = QRCodeUtil.encode(link);
+		byte[] tmp = QRCodeUtil.encode(link,getMiddelImg(gameId),true);
 		/*String arryStr = Arrays.toString(tmp);
 		arryStr = arryStr.substring(1, arryStr.length() - 1);*/
 		qr.setPhoto("");
@@ -255,8 +255,7 @@ public class QRCodeController {
 			qr.setLogicUse(lUse);
 			qrDao.updateLogicUse(qr);
 			String qrLink = switchMgr.getQrcodeLink(qr);;
-			//TDOO 刷新到逻辑服
-			gameId = 65537;
+			//刷新到逻辑服
 			mqMgr.sendQrLinkToLogic(gameId,qrLink);
 		} catch (Exception e) {
 			log.error("qrCodeRefresh error,Exception -> {}",e);
@@ -313,5 +312,18 @@ public class QRCodeController {
 		}
 		base += "qrcode/"+name+".png";
 		return base;
+	}
+	
+	//获得二维码中间图片
+	private String getMiddelImg(int gameId) {
+		String path = QRCodeController.class.getResource("/").getPath();
+		path = path.substring(1)+"WEB-INF/static/images/";
+		switch (gameId) {
+			default : {
+				path += "test.png";
+				break;
+			}
+		}
+		return path;
 	}
 }

@@ -12,6 +12,17 @@ spring:
     publisher-confirms: true
     virtual-host: /
     
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    timeout: 1000
+    password: 123456
+    database: 0
+    pool:
+      max-active: 1000
+      max-idle: 20
+      max-wait: 1000 
+    
 upload:
   local:
     basePath: F:/save/

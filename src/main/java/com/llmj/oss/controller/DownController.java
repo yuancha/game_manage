@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.llmj.oss.config.IConsts;
+import com.llmj.oss.config.RedisConsts;
 import com.llmj.oss.dao.DomainDao;
 import com.llmj.oss.dao.DownDao;
 import com.llmj.oss.dao.UploadDao;
@@ -16,6 +18,7 @@ import com.llmj.oss.manager.SwitchManager;
 import com.llmj.oss.model.Domain;
 import com.llmj.oss.model.DownLink;
 import com.llmj.oss.model.UploadFile;
+import com.llmj.oss.util.RedisTem;
 import com.llmj.oss.util.StringUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +48,8 @@ public class DownController {
 	private AliOssManager ossMgr;
 	@Autowired 
 	private SwitchManager switchMgr;
+	@Autowired 
+	private RedisTem redis;
 			
 	@GetMapping("/link")
 	public String downLink(Model model,HttpServletRequest request) {
@@ -59,11 +64,11 @@ public class DownController {
 			if(userAgent.indexOf("android") != -1){
 			    //安卓
 				html = "html/links/ffyl/android";
-				linkid = gameId + "_" + gameState + "_" + 0;
+				linkid = gameId + "_" + gameState + "_" + IConsts.UpFileType.Android.getType();
 			}else if(userAgent.indexOf("iphone") != -1 || userAgent.indexOf("ipad") != -1 || userAgent.indexOf("ipod") != -1){
 			   //苹果
 				html = "html/links/ffyl/ios";
-				linkid = gameId + "_" + gameState + "_" + 1;
+				linkid = gameId + "_" + gameState + "_" + IConsts.UpFileType.Ios.getType();
 			}else{
 				//userAgent.indexOf("micromessenger")!= -1 微信
 			    //电脑
@@ -71,32 +76,16 @@ public class DownController {
 				return "error";
 			}
 			
-			//连接配置 动态获取
-			DownLink dl = downDao.selectById(linkid);
-			if (dl == null || StringUtil.isEmpty(dl.getLink())) {
-				log.error("link error, linkid : {}",linkid);
-				model.addAttribute("message", "server error!");
-				return "error";
-			}
-			
-			String link = "";
-			if (switchMgr.ossSuccess) {
-				//oss域名动态获取
-				List<Domain> domains = domainDao.selectByType(1);
-				if (domains.isEmpty()) {
-					log.error("oss 没有域名存在 数据库为空 ");
+			String link = redis.getPre(RedisConsts.PRE_LINK_KEY, linkid);
+			if (StringUtil.isEmpty(link)) {
+				//连接配置 动态获取
+				DownLink dl = downDao.selectById(linkid);
+				link = getLink(dl);
+				if ("error".equals(link)) {
 					model.addAttribute("message", "server error!");
 					return "error";
 				}
-				link = domains.get(0).getDomain() + "/" + dl.getLink();
-			} else {
-				//TODO 本地下载
-				List<Domain> domains = domainDao.selectByType(0);
-				if (domains.isEmpty()) {
-					log.error("server 没有域名存在 数据库为空 ");
-					model.addAttribute("message", "server error!");
-					return "error";
-				}
+				redis.setPre(RedisConsts.PRE_LINK_KEY, linkid, link);
 			}
 			
 			model.addAttribute("downlink", link);
@@ -106,6 +95,32 @@ public class DownController {
 			log.error("downLink error,Exception -> {}",e);
 		}
 		return "error";
+	}
+	
+	public String getLink(DownLink dl) {
+		String link = "";
+		if (dl == null || StringUtil.isEmpty(dl.getLink())) {
+			log.error("DownLink error,dl : {}",StringUtil.objToJson(dl));
+			return "error";
+		}
+		
+		if (switchMgr.ossSuccess) {
+			//oss域名动态获取
+			List<Domain> domains = domainDao.selectByType(1);
+			if (domains.isEmpty()) {
+				log.error("oss 没有域名存在 数据库为空 ");
+				return "error";
+			}
+			link = domains.get(0).getDomain() + "/" + dl.getLink();
+		} else {
+			//TODO 本地下载
+			List<Domain> domains = domainDao.selectByType(0);
+			if (domains.isEmpty()) {
+				log.error("server 没有域名存在 数据库为空 ");
+				return "error";
+			}
+		}
+		return link;
 	}
 	
 	/**

@@ -5,15 +5,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeoutException;
 
 import javax.annotation.PostConstruct;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.llmj.oss.model.mq.QrcodeMsg;
+import com.llmj.oss.util.FileUtil;
 import com.llmj.oss.util.StringUtil;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
@@ -30,16 +29,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j(topic = "ossLogger")
 public class MqManager {
 	
-	public static void main(String[] args) {
-		MqManager mgr = new MqManager();
-		try {
-			mgr.init();
-			mgr.sendMessage("llmj_qrcode_icon_link_"+888888, "hello");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-	
 	@Value("${spring.rabbitmq.host}")
 	private String host;
 	@Value("${spring.rabbitmq.port}")
@@ -51,9 +40,6 @@ public class MqManager {
 	@Value("${spring.rabbitmq.virtual-host}")
 	private String virtualHost;
 	
-	private String channelPrefix = "llmj_qrcode_icon_link_";
-	
-    
     //初始化队列 创建连接
 	private Channel channel;
 	private Connection connection;
@@ -65,11 +51,13 @@ public class MqManager {
     	mqInit();
     }
     
-    private void initQueue() {
-    	//TODO 回头动态加载
+    private void initQueue() throws Exception {
+    	//TODO 有待改善
     	channelMap = new HashMap<>();
-    	channelMap.put(65537, "llmj_qrcode_link");
-    	channelMap.put(888888, "llmj_qrcode_link_hb");
+    	Map<String,String> tmp = FileUtil.LoadPopertiesFile("config/channel.properties");
+    	for(Map.Entry<String, String> entry : tmp.entrySet()) {
+    		channelMap.put(Integer.parseInt(entry.getKey()), entry.getValue());
+    	}
     	if (channelMap.isEmpty()) {
     		throw new RuntimeException("加载rabbit mq channel error");
     	}
@@ -100,6 +88,10 @@ public class MqManager {
     
     public void sendQrLinkToLogic(int gameId,String link) throws IOException {
     	String mqName = channelMap.get(gameId);
+    	if (mqName == null) {
+    		log.error("mqname not find,gameId : {}",gameId);
+    		return;
+    	}
     	QrcodeMsg msg = new QrcodeMsg();
     	msg.setGameID(gameId);
     	msg.setQueueName(mqName);

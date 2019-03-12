@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.llmj.oss.config.IConsts;
+import com.llmj.oss.config.RedisConsts;
 import com.llmj.oss.config.RespCode;
 import com.llmj.oss.dao.DownDao;
 import com.llmj.oss.dao.UploadDao;
@@ -25,6 +26,7 @@ import com.llmj.oss.model.RespEntity;
 import com.llmj.oss.model.UploadFile;
 import com.llmj.oss.model.oper.FileOperation;
 import com.llmj.oss.util.FileUtil;
+import com.llmj.oss.util.RedisTem;
 import com.llmj.oss.util.StringUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +44,10 @@ public class OssController {
 	private UploadDao uploadDao;
 	@Autowired
 	private DownDao downDao;
+	@Autowired 
+	private RedisTem redis;
+	@Autowired
+	private DownController downcontr;
 	
 	//本地存放路径
 	@Value("${upload.local.basePath}")
@@ -191,7 +197,14 @@ public class OssController {
 			dl.setType(file.getType());
 			dl.setLink(link);
 			dl.setTargetId(id);
+			
+			String downlink = downcontr.getLink(dl);
+			if ("error".equals(downlink)) {
+				return new RespEntity(-2, "保存连接错误，downlink : "+downlink);
+			}
 			downDao.saveLink(dl);
+			redis.setPre(RedisConsts.PRE_LINK_KEY, dlid, downlink);
+			log.info("refureshPack downlink success,downlink : {}",downlink);
 			
 			file.setState(IConsts.UpFileState.online.getState());
 			uploadDao.updateState(tableName,IConsts.UpFileState.online.getState(), IConsts.UpFileState.up2oss.getState(),file);//先更改之前线上状态信息

@@ -3,8 +3,28 @@ spring:
     url: jdbc:mysql://127.0.0.1:31036/oss_server?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false
     username: root
     password: Psg1j!ODYPk99UPc
-
+  
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    username: llmj
+    password: llmj123456
+    publisher-confirms: true
+    virtual-host: /
+    
+  redis:
+    host: 127.0.0.1
+    port: 3011
+    timeout: 1000
+    password: wt6CNJ0n74pMt}JW
+    database: 0
+    pool:
+      max-active: 20
+      max-idle: 20
+      max-wait: 1000 
+  
 upload:
   local:
     basePath: /data/llmj_sp/oss_web/save/
-    tmpsave: /data/llmj_sp/oss_web/save/temp/  
+    tmpsave: /data/llmj_sp/oss_web/save/temp/
+    qrcode: /data/llmj_sp/oss_web/save/qrcode/   
