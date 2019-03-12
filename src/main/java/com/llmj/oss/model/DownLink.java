@@ -24,4 +24,5 @@ public class DownLink implements Serializable {
 	private String link;
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private Date upTime;	//更新时间
+	private int targetId;	//对应file表id
 }

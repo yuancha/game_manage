@@ -190,6 +190,7 @@ public class OssController {
 			dl.setId(dlid);
 			dl.setType(file.getType());
 			dl.setLink(link);
+			dl.setTargetId(id);
 			downDao.saveLink(dl);
 			
 			file.setState(IConsts.UpFileState.online.getState());

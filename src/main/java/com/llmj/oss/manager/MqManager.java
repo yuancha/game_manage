@@ -1,11 +1,20 @@
 package com.llmj.oss.manager;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeoutException;
+
+import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.llmj.oss.model.MqConnect;
+import com.llmj.oss.model.mq.QrcodeMsg;
+import com.llmj.oss.util.StringUtil;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
@@ -24,67 +33,79 @@ public class MqManager {
 	public static void main(String[] args) {
 		MqManager mgr = new MqManager();
 		try {
-			mgr.sendQrLinkToLogic(1, "http://oss/down");
+			mgr.init();
+			mgr.sendMessage("llmj_qrcode_icon_link_"+888888, "hello");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	private String host = "192.168.1.154";
-	private Integer post = 5672;
-	private String username = "MyTest1";
-	private String password = "123456";
-	private String virtualHost = "/";
-	private String channelName = "llmj_qrcode_icon_link";
+	@Value("${spring.rabbitmq.host}")
+	private String host;
+	@Value("${spring.rabbitmq.port}")
+	private Integer port;
+	@Value("${spring.rabbitmq.username}")
+	private String username;
+	@Value("${spring.rabbitmq.password}")
+	private String password;
+	@Value("${spring.rabbitmq.virtual-host}")
+	private String virtualHost;
+	
+	private String channelPrefix = "llmj_qrcode_icon_link_";
 	
     
     //初始化队列 创建连接
-    private Object[] creatConnect() throws Exception{
-    	Channel channel = null;
-    	Connection connection = null;
+	private Channel channel;
+	private Connection connection;
+    private Map<Integer,String> channelMap;
+    
+    @PostConstruct
+    private void init() throws Exception {
+    	initQueue();
+    	mqInit();
+    }
+    
+    private void initQueue() {
+    	//TODO 回头动态加载
+    	channelMap = new HashMap<>();
+    	channelMap.put(65537, "llmj_qrcode_link");
+    	channelMap.put(888888, "llmj_qrcode_link_hb");
+    	if (channelMap.isEmpty()) {
+    		throw new RuntimeException("加载rabbit mq channel error");
+    	}
+    }
+    
+    private void mqInit() throws Exception {
 		//配置参数
 		ConnectionFactory factory = new ConnectionFactory();
 		factory.setHost(host);
-		factory.setPort(post);
+		factory.setPort(port);
 		factory.setUsername(username);
 		factory.setPassword(password);
 		factory.setVirtualHost(virtualHost);
 		//获取连接
 		connection = factory.newConnection();
 		channel = connection.createChannel();
-    	return new Object[]{channel,connection};
-    }
-    
-    public void sendQrLinkToLogic(int gameId,String qrLink) throws Exception {
-    	//TODO 更加gameId获得MqConnect
-    	Object[] objs = null;
-    	Channel channel = null;
-    	Connection connection = null;
-    	try {
-    		objs = creatConnect();
-    		channel = (Channel) objs[0];
-    		connection = (Connection) objs[1];
-    		channel.basicPublish("", channelName, null, qrLink.getBytes("UTF-8"));
-    		log.info("二维码更新到逻辑服成功");
-		} catch (Exception e) {
-			throw e;
-		} finally {
-			if (objs != null) {
-				if (channel != null)
-					try {
-						channel.close();
-					} catch (Exception e) {
-						e.printStackTrace();
-					} 
-				if (connection != null)
-					try {
-						connection.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-			}
+		List<String> channelList = new ArrayList<>(channelMap.values());
+		for( int nIndex = 0 ; nIndex < channelList.size() ; nIndex++){
+			channel.exchangeDeclare(channelList.get(nIndex), "fanout", true, false, null);
+			//channel.queueDeclare(endpointName.get(nIndex), false, false, false, null);
+			log.debug("create channel success======channelName===={}",channelList.get(nIndex));
 		}
-    	
     }
     
+    public void sendMessage(String strName ,String message) throws IOException {
+	    channel.basicPublish(strName, "", null, message.getBytes());
+	}	
+    
+    public void sendQrLinkToLogic(int gameId,String link) throws IOException {
+    	String mqName = channelMap.get(gameId);
+    	QrcodeMsg msg = new QrcodeMsg();
+    	msg.setGameID(gameId);
+    	msg.setQueueName(mqName);
+    	msg.setQrLink(link);
+    	String json = StringUtil.objToJson(msg);
+    	sendMessage(mqName,json);
+    	log.info("mq 通知成功，mqName：{},gameId:{},json:{}",mqName,gameId,json);
+    }
 }

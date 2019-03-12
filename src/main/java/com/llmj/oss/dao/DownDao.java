@@ -10,9 +10,9 @@ import com.llmj.oss.model.DownLink;
 @Mapper
 public interface DownDao {
 	
-	@Insert("insert into down_link ( id,type, link,upTime) "
-			+ "values ( #{id},#{type}, #{link}, now()) "
-			+ "on duplicate key update link=values(link),upTime=values(upTime)")
+	@Insert("insert into down_link ( id,type, link,upTime ,targetId) "
+			+ "values ( #{id},#{type}, #{link}, now() , #{targetId}) "
+			+ "on duplicate key update link=values(link),upTime=values(upTime),targetId=values(targetId)")
 	int saveLink(DownLink dl);
 	
 	@Select("select * from down_link where id=#{id}")

@@ -12,6 +12,7 @@ import com.llmj.oss.dao.DomainDao;
 import com.llmj.oss.dao.DownDao;
 import com.llmj.oss.dao.UploadDao;
 import com.llmj.oss.manager.AliOssManager;
+import com.llmj.oss.manager.SwitchManager;
 import com.llmj.oss.model.Domain;
 import com.llmj.oss.model.DownLink;
 import com.llmj.oss.model.UploadFile;
@@ -42,7 +43,9 @@ public class DownController {
 	private DomainDao domainDao;
 	@Autowired 
 	private AliOssManager ossMgr;
-	
+	@Autowired 
+	private SwitchManager switchMgr;
+			
 	@GetMapping("/link")
 	public String downLink(Model model,HttpServletRequest request) {
 		
@@ -67,7 +70,7 @@ public class DownController {
 				log.error("request info, userAgent -> {}",userAgent);
 				return "error";
 			}
-
+			
 			//连接配置 动态获取
 			DownLink dl = downDao.selectById(linkid);
 			if (dl == null || StringUtil.isEmpty(dl.getLink())) {
@@ -75,14 +78,27 @@ public class DownController {
 				model.addAttribute("message", "server error!");
 				return "error";
 			}
-			//oss域名动态获取
-			List<Domain> domains = domainDao.selectByType(1);
-			if (domains.isEmpty()) {
-				log.error("oss 没有域名存在 数据库为空 ");
-				model.addAttribute("message", "server error!");
-				return "error";
+			
+			String link = "";
+			if (switchMgr.ossSuccess) {
+				//oss域名动态获取
+				List<Domain> domains = domainDao.selectByType(1);
+				if (domains.isEmpty()) {
+					log.error("oss 没有域名存在 数据库为空 ");
+					model.addAttribute("message", "server error!");
+					return "error";
+				}
+				link = domains.get(0).getDomain() + "/" + dl.getLink();
+			} else {
+				//TODO 本地下载
+				List<Domain> domains = domainDao.selectByType(0);
+				if (domains.isEmpty()) {
+					log.error("server 没有域名存在 数据库为空 ");
+					model.addAttribute("message", "server error!");
+					return "error";
+				}
 			}
-			String link = domains.get(0).getDomain() + "/" + dl.getLink();
+			
 			model.addAttribute("downlink", link);
 			log.info("获得动态链接，link:{}",link);
 			return html;

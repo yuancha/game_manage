@@ -10,14 +10,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.llmj.oss.config.IConsts;
 import com.llmj.oss.config.RespCode;
 import com.llmj.oss.dao.DomainDao;
 import com.llmj.oss.dao.QrcodeDao;
 import com.llmj.oss.manager.AliOssManager;
 import com.llmj.oss.manager.MqManager;
+import com.llmj.oss.manager.SwitchManager;
 import com.llmj.oss.model.QRCode;
 import com.llmj.oss.model.RespEntity;
 import com.llmj.oss.model.oper.QrOperation;
+import com.llmj.oss.util.FileUtil;
 import com.llmj.oss.util.QRCodeUtil;
 import com.llmj.oss.util.StringUtil;
 
@@ -40,11 +43,14 @@ public class QRCodeController {
 	
 	private static final int lUse = 1;	//逻辑服使用标识
 	private static final int lNoUse = 0;
+	//sate 0表示测试服 1表示正式线上
 	
 	@Value("${upload.oss.test}")
     public String ossTest;
     @Value("${upload.oss.online}")
     public String ossOnline;
+    @Value("${upload.local.qrcode}")
+    public String qrcodePath;
 	
 	@Autowired
 	private QrcodeDao qrDao;
@@ -54,6 +60,8 @@ public class QRCodeController {
 	private AliOssManager ossMgr;
 	@Autowired
 	private MqManager mqMgr;
+	@Autowired 
+	private SwitchManager switchMgr;
 	
 	@GetMapping("")
 	public String qrCodeHome(Model model,HttpServletRequest request) {
@@ -81,9 +89,8 @@ public class QRCodeController {
 			int gameId = model.getGameId();
 			int state = model.getState();
 			List<QRCode> list = qrDao.getQRs(gameId,state);
-			String ossdomain = ossMgr.ossDomain();
 			for (QRCode qr : list) {
-				qr.setOssPath(ossdomain + qr.getOssPath());
+				switchMgr.getQrcodeLink(qr);
 			}
 			res.setData(list);
 		} catch (Exception e) {
@@ -163,14 +170,20 @@ public class QRCodeController {
 		
 		qr.setLink(link);
 		byte[] tmp = QRCodeUtil.encode(link);
-		String arryStr = Arrays.toString(tmp);
-		arryStr = arryStr.substring(1, arryStr.length() - 1);
+		/*String arryStr = Arrays.toString(tmp);
+		arryStr = arryStr.substring(1, arryStr.length() - 1);*/
 		qr.setPhoto("");
 		//qr.setPhoto(arryStr);
 		
-		String qrSavePath = qrOssPath(state,StringUtil.getUUIDStr());
+		//保存到oss
+		String qrName = StringUtil.getUUIDStr();
+		String qrSavePath = qrOssPath(state,qrName);
 		ossMgr.uploadFileByByte(qrSavePath, tmp);
 		qr.setOssPath(qrSavePath);
+		
+		//保存到本地
+		QRCodeUtil.encode(link,qrcodePath,qrName);
+		qr.setLocalPath(qrcodePath + qrName + ".png");
 		return "";
 	}
 	
@@ -188,6 +201,7 @@ public class QRCodeController {
 			}
 			qrDao.delQR(model.getDomain());
 			ossMgr.removeFile(qr.getOssPath());
+			FileUtil.deleteFile(qr.getLocalPath());
 			log.info("二维码删除成功，link : {}",model.getDomain());
 		} catch (Exception e) {
 			log.error("qrCodeDel error,Exception -> {}",e);
@@ -219,6 +233,10 @@ public class QRCodeController {
 		RespEntity res = new RespEntity();
 		try {
 			int state = model.getState();
+			if (state == 0) {
+				return new RespEntity(-2,"测试无需备份逻辑服");
+			}
+			
 			int gameId = model.getGameId();
 			String link = model.getDomain();
 			QRCode old = qrDao.selectByLogicUse(gameId,lUse,state);
@@ -236,9 +254,10 @@ public class QRCodeController {
 			}
 			qr.setLogicUse(lUse);
 			qrDao.updateLogicUse(qr);
-			String ossqrLink = ossMgr.ossDomain() + qr.getOssPath();
+			String qrLink = switchMgr.getQrcodeLink(qr);;
 			//TDOO 刷新到逻辑服
-			//mqMgr.sendQrLinkToLogic(gameId,ossqrLink);
+			gameId = 65537;
+			mqMgr.sendQrLinkToLogic(gameId,qrLink);
 		} catch (Exception e) {
 			log.error("qrCodeRefresh error,Exception -> {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);
@@ -248,15 +267,19 @@ public class QRCodeController {
 	}
 	
 	//逻辑服主动请求二维码
-	@PostMapping("/getIconLink")
+	@RequestMapping("/getIconLink")
 	@ResponseBody
 	public RespEntity qrCodeRefresh(HttpServletRequest request) {
 		RespEntity res = new RespEntity();
 		try {
 			String gameId = request.getParameter("gameId");
-			String state = request.getParameter("state");
-			System.out.println(gameId+"----"+state);
-			res.setData("http://qrcode.icon.link");
+			log.debug("getIconLink recive param, gameId : {}" , gameId);
+			QRCode qr = qrDao.selectByLogicUse(Integer.parseInt(gameId),lUse,1);
+			if (qr == null) {
+				return new RespEntity(-2,"无可用二维码");
+			}
+			String link = switchMgr.getQrcodeLink(qr);
+			res.setData(link);
 		} catch (Exception e) {
 			log.error("qrCodeRefresh error,Exception -> {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);
@@ -268,9 +291,8 @@ public class QRCodeController {
 	public String onlineIcons(Model model,HttpServletRequest request) {
 		try {
 			List<QRCode> list = qrDao.getOnlineQRs(lUse, 1);
-			String ossdomain = ossMgr.ossDomain();
 			for (QRCode qr : list) {
-				qr.setOssPath(ossdomain + qr.getOssPath());
+				switchMgr.getQrcodeLink(qr);
 			}
 			model.addAttribute("qrs", StringUtil.objToJson(list));
 			return "qrOnlineIcons";

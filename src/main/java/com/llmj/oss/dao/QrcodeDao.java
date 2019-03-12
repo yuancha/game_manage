@@ -16,8 +16,8 @@ import com.llmj.oss.model.QRCode;
 public interface QrcodeDao {
 	
 	@Options(useGeneratedKeys = true, keyProperty = "id")
-	@Insert("insert into qr_code ( gameId, state, content, link, photo, ossPath) "
-			+ "values( #{gameId}, #{state}, #{content}, #{link}, #{photo} , #{ossPath})")
+	@Insert("insert into qr_code ( gameId, state, content, link, photo, ossPath,localPath) "
+			+ "values( #{gameId}, #{state}, #{content}, #{link}, #{photo} , #{ossPath} , #{localPath})")
 	int save(QRCode qr);
 	
 	@Select("select * from qr_code where id=#{id}")
