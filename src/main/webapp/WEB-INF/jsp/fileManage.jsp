@@ -279,7 +279,11 @@
     	<script src="../static/js/app_function.js?v=2"></script>
  		<script>
  		$(document).ready(function(){
- 			var gameId 		= "65537";
+ 			var gameId 		= $('#main-menu').find('li:nth-child(1)>a').attr('id');
+ 			if (!gameId) {
+ 				console.log(gameId);
+ 				return;
+ 			}
  			var gameType 	= "0";
  			var gameState 	= $('#app_state').val();
  			var data 		= '{"gameId":"'+gameId+'","gameType":"'+gameType+'","gameState":"'+gameState+'"}';

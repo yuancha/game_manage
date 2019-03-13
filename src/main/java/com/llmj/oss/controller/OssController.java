@@ -18,10 +18,14 @@ import com.llmj.oss.config.IConsts;
 import com.llmj.oss.config.RedisConsts;
 import com.llmj.oss.config.RespCode;
 import com.llmj.oss.dao.DownDao;
+import com.llmj.oss.dao.GameControlDao;
+import com.llmj.oss.dao.OssConnectDao;
 import com.llmj.oss.dao.UploadDao;
 import com.llmj.oss.manager.AliOssManager;
 import com.llmj.oss.manager.PackManager;
 import com.llmj.oss.model.DownLink;
+import com.llmj.oss.model.GameControl;
+import com.llmj.oss.model.OssConnect;
 import com.llmj.oss.model.RespEntity;
 import com.llmj.oss.model.UploadFile;
 import com.llmj.oss.model.oper.FileOperation;
@@ -48,6 +52,10 @@ public class OssController {
 	private RedisTem redis;
 	@Autowired
 	private DownController downcontr;
+	@Autowired
+	private GameControlDao gameDao;
+	@Autowired
+	private OssConnectDao ossDao;
 	
 	//本地存放路径
 	@Value("${upload.local.basePath}")
@@ -55,7 +63,7 @@ public class OssController {
 	
 	@GetMapping("/home")
 	public String home(Model model,HttpServletRequest request) {
-		return "error";
+		return "ossConnect";
 	}
 	
 	@GetMapping("/fileManage")
@@ -68,6 +76,8 @@ public class OssController {
 				state = 1;
 			}
 			model.addAttribute("gameState", state);
+			model.addAttribute("gameOpens", gameDao.selectOpens());
+			
 			return "fileManage";
 		} catch (Exception e) {
 			model.addAttribute("message", e.toString());
@@ -93,7 +103,7 @@ public class OssController {
 			int gameId = param.getGameId();
 			int type = param.getGameType();
 			int state = param.getGameState();
-			log.debug("getFilesInfo param,gameId:{},type:{},state:{}",gameId,type,state);
+			//log.debug("getFilesInfo param,gameId:{},type:{},state:{}",gameId,type,state);
 			
 			String packName = packMgr.getPackName(gameId,type);
 			if (StringUtil.isEmpty(packName)) {
@@ -133,11 +143,12 @@ public class OssController {
 			if (file.getState() == IConsts.UpFileState.online.getState()) return new RespEntity(-2,"线上版本不允许删除");
 			
 			//删除oss对应文件 plist
+			int gameId = file.getGameId();
 			String ossPath = file.getOssPath();
-			ossMgr.removeFile(ossPath);
+			ossMgr.removeFile(ossPath,gameId);
 			if (file.getType() == IConsts.UpFileType.Ios.getType()) {
 				//删除ios对应plist文件
-				ossMgr.removeFile(ossPath + ".plist");
+				ossMgr.removeFile(ossPath + ".plist",gameId);
 				file.setOssPath("");
 			}
 			file.setState(IConsts.UpFileState.delete.getState());
@@ -165,9 +176,9 @@ public class OssController {
 			}
 			if (file.getState() == IConsts.UpFileState.online.getState())
 				return new RespEntity(-2, "已是线上版本");
-			
+			int gameId = file.getGameId();
 			String ossPath = file.getOssPath();
-			if (!ossMgr.fileIsExist(ossPath)) {
+			if (!ossMgr.fileIsExist(ossPath,gameId)) {
 				log.error("oss上不存在该文件, ossPath : {}",ossPath);
 				return new RespEntity(-2, "oss上不存在该文件");
 			}
@@ -185,20 +196,19 @@ public class OssController {
 				if (StringUtil.isEmpty(plistStr)) {
 					return new RespEntity(-2,"plist 读取错误");
 				}
-				ossMgr.changePlist(plistStr,file.getLocalPath()+".plist",ossPath,ossPath+".plist",file);
+				ossMgr.changePlist(plistStr,file.getLocalPath()+".plist",ossPath,ossPath+".plist",file,gameId);
 				link = ossPath+".plist";
 			}
 			
 			//保存到mysql
-			int gid = packMgr.getGameIdByPack(packName,type);
-			String dlid = gid + "_" + state + "_" + file.getType();
+			String dlid = gameId + "_" + state + "_" + file.getType();
 			DownLink dl = new DownLink();
 			dl.setId(dlid);
 			dl.setType(file.getType());
 			dl.setLink(link);
 			dl.setTargetId(id);
 			
-			String downlink = downcontr.getLink(dl);
+			String downlink = downcontr.getLink(dl,gameId);
 			if ("error".equals(downlink)) {
 				return new RespEntity(-2, "保存连接错误，downlink : "+downlink);
 			}
@@ -239,12 +249,13 @@ public class OssController {
 			} else {
 				return new RespEntity(-2,"初始路径错误，path ："+oldOssPath);
 			}
+			int gameId = file.getGameId();
 			//oss 检查文件是否存在
-			if (ossMgr.fileIsExist(newOssPath)) {
+			if (ossMgr.fileIsExist(newOssPath,gameId)) {
 				return new RespEntity(-2,"文件已存在，path:"+newOssPath);
 			}
 			//oss 复制操作
-			ossMgr.copyFile(oldOssPath, newOssPath);
+			ossMgr.copyFile(oldOssPath, newOssPath,gameId);
 			String targetTable = getTableName(Math.abs(state - 1));
 			//insert file
 			file.setOssPath(newOssPath);
@@ -258,4 +269,95 @@ public class OssController {
 		
 		return new RespEntity(RespCode.SUCCESS);
 	}
+	
+	@PostMapping("/connects") 
+    @ResponseBody
+    public RespEntity ossConnectlist() {
+    	RespEntity res = new RespEntity();
+		try {
+			List<OssConnect> list = ossDao.getAll();
+			res.setData(list);
+		} catch (Exception e) {
+			log.error("ossConnectlist error,Exception -> {}",e);
+			return new RespEntity(RespCode.SERVER_ERROR);
+		}
+		return res;
+    }
+	
+	@PostMapping("/add") 
+    @ResponseBody
+    public RespEntity ossAdd(@RequestBody OssConnect model) {
+        try {
+        	if (!chenkOssConnect(model)) {
+        		return new RespEntity(-2,"有空数据");
+        	}
+        	ossDao.save(model);
+        	log.info("ossAdd success,info : {}",StringUtil.objToJson(model));
+        } catch (Exception e) {
+            log.error("ossAdd error,Exception -> {}",e);
+            return new RespEntity(RespCode.SERVER_ERROR);
+        }
+        return new RespEntity(RespCode.SUCCESS);
+    }
+    
+    @PostMapping("/update") 
+    @ResponseBody
+    public RespEntity ossUpdate(@RequestBody OssConnect model) {
+
+        try {
+        	if (!chenkOssConnect(model)) {
+        		return new RespEntity(-2,"有空数据");
+        	}
+        	int id = model.getId();
+        	OssConnect old = ossDao.selectById(id);
+        	if (old == null) {
+        		log.error("OssConnect not find,id : {}",id);
+        		return new RespEntity(-2,"更新数据未找到");
+        	}
+        	ossDao.update(model);
+        	log.info("OssConnect update success,json : {}",StringUtil.objToJson(model));
+        	
+        	if (!model.getDomain().equals(old.getDomain())) {
+        		//域名更改
+        		List<GameControl> use = gameDao.selectByOssId(id);
+        		if (!use.isEmpty()) {
+        			//删除对应的redis
+        			for (GameControl g : use) {
+        				redis.vagueDel(RedisConsts.PRE_LINK_KEY, g.getGameId() + "_*");
+        			}
+        		}
+        	}
+        } catch (Exception e) {
+            log.error("ossUpdate error,Exception -> {}",e);
+            return new RespEntity(RespCode.SERVER_ERROR);
+        }
+        return new RespEntity(RespCode.SUCCESS);
+    }
+    
+    private boolean chenkOssConnect(OssConnect obj) {
+    	if (StringUtil.isEmpty(obj.getAccessKeyId()) || StringUtil.isEmpty(obj.getAccessKeySecret()) || StringUtil.isEmpty(obj.getBucketName())
+    			|| StringUtil.isEmpty(obj.getDomain()) || StringUtil.isEmpty(obj.getEndpoint()) ||  StringUtil.isEmpty(obj.getDetail())) {
+    		return false;
+    	}
+    	return true;
+    }
+    
+    @PostMapping("/del") 
+    @ResponseBody
+    public RespEntity ossDel(@RequestBody OssConnect model) {
+
+        try {
+        	int id = model.getId();
+        	//检查是否有game引用
+        	if (!gameDao.selectByOssId(id).isEmpty()) {
+        		return new RespEntity(-2,"有游戏引用，不可删除");
+        	}
+        	ossDao.delete(id);
+        	log.info("del oss connect success,id : {}",id);
+        } catch (Exception e) {
+            log.error("ossDel error,Exception -> {}",e);
+            return new RespEntity(RespCode.SERVER_ERROR);
+        }
+        return new RespEntity(RespCode.SUCCESS);
+    }
 }

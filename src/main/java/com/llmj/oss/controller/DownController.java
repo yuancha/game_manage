@@ -12,11 +12,15 @@ import com.llmj.oss.config.IConsts;
 import com.llmj.oss.config.RedisConsts;
 import com.llmj.oss.dao.DomainDao;
 import com.llmj.oss.dao.DownDao;
+import com.llmj.oss.dao.GameControlDao;
+import com.llmj.oss.dao.OssConnectDao;
 import com.llmj.oss.dao.UploadDao;
 import com.llmj.oss.manager.AliOssManager;
 import com.llmj.oss.manager.SwitchManager;
 import com.llmj.oss.model.Domain;
 import com.llmj.oss.model.DownLink;
+import com.llmj.oss.model.GameControl;
+import com.llmj.oss.model.OssConnect;
 import com.llmj.oss.model.UploadFile;
 import com.llmj.oss.util.RedisTem;
 import com.llmj.oss.util.StringUtil;
@@ -50,6 +54,10 @@ public class DownController {
 	private SwitchManager switchMgr;
 	@Autowired 
 	private RedisTem redis;
+	@Autowired
+	private GameControlDao gameDao;
+	@Autowired
+	private OssConnectDao ossDao;
 			
 	@GetMapping("/link")
 	public String downLink(Model model,HttpServletRequest request) {
@@ -80,7 +88,12 @@ public class DownController {
 			if (StringUtil.isEmpty(link)) {
 				//连接配置 动态获取
 				DownLink dl = downDao.selectById(linkid);
-				link = getLink(dl);
+				if (dl == null) {
+					log.error("DownLink not find,linkid:{}",linkid);
+					model.addAttribute("message", "server error!");
+					return "error";
+				}
+				link = getLink(dl,Integer.parseInt(gameId));
 				if ("error".equals(link)) {
 					model.addAttribute("message", "server error!");
 					return "error";
@@ -97,7 +110,7 @@ public class DownController {
 		return "error";
 	}
 	
-	public String getLink(DownLink dl) {
+	public String getLink(DownLink dl,int gameId) {
 		String link = "";
 		if (dl == null || StringUtil.isEmpty(dl.getLink())) {
 			log.error("DownLink error,dl : {}",StringUtil.objToJson(dl));
@@ -106,12 +119,17 @@ public class DownController {
 		
 		if (switchMgr.ossSuccess) {
 			//oss域名动态获取
-			List<Domain> domains = domainDao.selectByType(1);
-			if (domains.isEmpty()) {
-				log.error("oss 没有域名存在 数据库为空 ");
+			GameControl game = gameDao.selectById(gameId);
+			if (game == null) {
+				log.error("GameControl not find,gameId : {} ",gameId);
 				return "error";
 			}
-			link = domains.get(0).getDomain() + "/" + dl.getLink();
+			OssConnect oss = ossDao.selectById(game.getOssId());
+			if (oss == null || StringUtil.isEmpty(oss.getDomain())) {
+				log.error("OssConnect error,ossId : {} ",game.getOssId());
+				return "error";
+			}
+			link = oss.getDomain() + "/" + dl.getLink();
 		} else {
 			//TODO 本地下载
 			List<Domain> domains = domainDao.selectByType(0);
@@ -140,7 +158,7 @@ public class DownController {
         		return;
         	}
         	//直接转发oss
-        	String osslink = ossMgr.ossDomain() + info.getOssPath();
+        	String osslink = ossMgr.ossDomain(info.getGameId()) + "/" + info.getOssPath();
         	response.sendRedirect(osslink);
 		} catch (Exception e) {
 			log.error("singleFileDown error, Exception -> {}",e);

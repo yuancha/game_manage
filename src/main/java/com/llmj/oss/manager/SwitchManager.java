@@ -21,10 +21,10 @@ public class SwitchManager {
 	
     public boolean ossSuccess = true;		//oss是否正常
     
-    public String getQrcodeLink(QRCode qr) {
+    public String getQrcodeLink(QRCode qr) throws Exception {
     	String link = "";
     	if (ossSuccess) {
-    		link = ossMgr.ossDomain() + qr.getOssPath();
+    		link = ossMgr.ossDomain(qr.getGameId()) + "/" + qr.getOssPath();
     	} else {
     		//
     	}

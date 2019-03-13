@@ -72,4 +72,27 @@ public interface IConsts {
 		}
 
 	}
+	
+	enum GameOpenState {
+
+		close(0, "关闭"), 
+		open(1, "开放"),
+		;
+		private int state;
+		private String desc;
+
+		private GameOpenState(int state, String desc) {
+			this.state = state;
+			this.desc = desc;
+		}
+
+		public int getState() {
+			return state;
+		}
+
+		public String getDesc() {
+			return desc;
+		}
+
+	}
 }

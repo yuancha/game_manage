@@ -37,7 +37,12 @@
 			<div class="wrap-login100 p-l-55 p-r-55 p-t-65 p-b-54">
 				<div class="login100-form validate-form">
 					<span class="login100-form-title p-b-49">选择</span>
-
+					<div class="box" id="btn_game_control">
+						游戏管理
+					</div>
+					<div class="box" id="btn_oss_connect">
+						oss连接管理
+					</div>
 					<div class="box" id="btn_app_upload">
 						APP上传
 					</div>
@@ -66,6 +71,12 @@
 	<script src="../static/js/jquery-1.11.1.min.js"></script>
 	<script type="text/javascript">
 	
+		$('#btn_game_control').on('click',function(){
+			window.location.href = "/game";
+		});
+		$('#btn_oss_connect').on('click',function(){
+			window.location.href = "/oss/home";
+		});
 		$('#btn_app_upload').on('click',function(){
 			window.location.href = "/upload";
 		});

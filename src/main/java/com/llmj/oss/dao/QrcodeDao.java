@@ -41,6 +41,6 @@ public interface QrcodeDao {
 	@Select("select * from qr_code where gameId=#{gameId} and logicUse=#{logicUse} and state=#{state}")
 	QRCode selectByLogicUse(@Param("gameId") int gameId,@Param("logicUse") int logicUse,@Param("state") int state);
 	
-	@Select("select content,link,ossPath from qr_code where logicUse = #{logicUse} and state = #{state} ")
+	@Select("select gameId,content,link,ossPath from qr_code where logicUse = #{logicUse} and state = #{state} ")
 	List<QRCode> getOnlineQRs(@Param("logicUse") int logicUse,@Param("state") int state);
 }

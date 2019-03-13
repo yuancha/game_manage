@@ -3,6 +3,7 @@ package com.llmj.oss.manager;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -10,8 +11,13 @@ import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.model.GetObjectRequest;
 import com.aliyun.oss.model.ObjectMetadata;
 import com.aliyun.oss.model.PutObjectResult;
+import com.llmj.oss.dao.GameControlDao;
+import com.llmj.oss.dao.OssConnectDao;
+import com.llmj.oss.model.GameControl;
+import com.llmj.oss.model.OssConnect;
 import com.llmj.oss.model.UploadFile;
 import com.llmj.oss.util.FileUtil;
+import com.llmj.oss.util.StringUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,106 +25,103 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j(topic = "ossLogger")
 public class AliOssManager {
 	
-	public static void main(String[] args) {
-	}
+	@Autowired
+	private GameControlDao gameDao;
+	@Autowired
+	private OssConnectDao ossDao;
 	
-	@Value("${upload.oss.endpoint}")
-	private String endpoint;
-	@Value("${upload.oss.accessKeyId}")
-	private String accessKeyId;
-	@Value("${upload.oss.accessKeySecret}")
-    private String accessKeySecret;
-	@Value("${upload.oss.bucketName}")
-    private String bucketName;
     @Value("${upload.oss.test}")
     public String ossTest;
     @Value("${upload.oss.online}")
     public String ossOnline;
     
+    private OssConnect getOssConnectInfo(int gameId) {
+    	GameControl game = gameDao.selectById(gameId);
+    	return ossDao.selectById(game.getOssId());
+    }
+    
     //暂时每次都新建 也可以设置成单列（可并发使用）
-    private OSSClient getClient() {
-    	OSSClient ossClient = new OSSClient(endpoint, accessKeyId, accessKeySecret);
-    	if (ossClient.doesBucketExist(bucketName)) {
+    private OSSClient getClient(OssConnect oss) throws Exception {
+    	OSSClient ossClient = new OSSClient(oss.getEndpoint(), oss.getAccessKeyId(), oss.getAccessKeySecret());
+    	if (ossClient.doesBucketExist(oss.getBucketName())) {
             //System.out.println("您已经创建Bucket：" + bucketName + "。");
         } else {
-            //System.out.println("您的Bucket不存在，创建Bucket：" + bucketName + "。");
-            //ossClient.createBucket(bucketName);
-        	throw new RuntimeException("Bucket不存在,"+bucketName);
+        	log.error("OssConnect info ： {}",StringUtil.objToJson(oss));
+        	throw new Exception("Bucket不存在,"+oss.getBucketName());
         }
     	return ossClient;
     }
     
-    public String ossDomain() {
-    	StringBuilder sb = new StringBuilder(endpoint);
-		sb.insert(7, bucketName+".").append("/");
-    	return sb.toString(); 
+    public String ossDomain(int gameId) throws Exception {
+    	OssConnect oss = getOssConnectInfo(gameId);
+    	if (oss == null) {
+    		throw new Exception("OssConnect not fine,gameId : "+gameId);
+    	}
+    	return oss.getDomain();
     }
     
-    public boolean uploadFile(String ossPath,String localPath) {
+    public boolean uploadFile(String ossPath,String localPath,int gameId) throws Exception {
     	OSSClient ossClient = null;
     	boolean success = false;
     	try {
-    		ossClient = getClient();
-    		PutObjectResult  result = ossClient.putObject(bucketName, ossPath, new File(localPath));
+    		OssConnect oss =  getOssConnectInfo(gameId);
+    		ossClient = getClient(oss);
+    		PutObjectResult  result = ossClient.putObject(oss.getBucketName(), ossPath, new File(localPath));
     		//TODO result判断是否成功
         	log.debug("上传文件成功，"+ossPath);
         	success = true;
-    	} catch (Exception e) {
-        	log.error("oss uploadFile error,Exception -> {}",e);
-        } finally {
+    	} finally {
 			if (ossClient != null) 
 				ossClient.shutdown();
 		}
     	return success;
     }
     
-    public boolean downFile(String ossPath,String localPath) {
+    public boolean downFile(String ossPath,String localPath,int gameId) throws Exception {
     	OSSClient ossClient = null;
     	boolean success = false;
     	try {
-    		ossClient = getClient();
-    		ObjectMetadata  result = ossClient.getObject(new GetObjectRequest(bucketName, ossPath), new File(localPath));
+    		OssConnect oss =  getOssConnectInfo(gameId);
+    		ossClient = getClient(oss);
+    		ObjectMetadata  result = ossClient.getObject(new GetObjectRequest(oss.getBucketName(), ossPath), new File(localPath));
     		//TODO result判断是否成功
         	log.debug("下载文件成功，"+ossPath);
         	success = true;
-    	} catch (Exception e) {
-        	log.error("oss downFile error,Exception -> {}",e);
-        } finally {
+    	} finally {
 			if (ossClient != null) 
 				ossClient.shutdown();
 		}
     	return success;
     }
     
-    public void removeFile(String ossPath) {
-    	OSSClient ossClient = getClient();
+    public void removeFile(String ossPath,int gameId) throws Exception {
+    	OSSClient ossClient = null;
     	try {
-    		ossClient.deleteObject(bucketName, ossPath);
+    		OssConnect oss =  getOssConnectInfo(gameId);
+    		ossClient = getClient(oss);
+    		ossClient.deleteObject(oss.getBucketName(), ossPath);
     		log.debug("删除文件成功，path :{}",ossPath);
-		} catch (Exception e) {
-        	log.error("oss removeFile error,Exception -> {}",e);
-        } finally {
+		} finally {
         	if (ossClient != null) 
 				ossClient.shutdown();
 		}
     }
     
-    public boolean uploadFileByByte(String ossPath,String str) {
-    	return uploadFileByByte(ossPath,str.getBytes());
+    public boolean uploadFileByByte(String ossPath,String str,int gameId) throws Exception {
+    	return uploadFileByByte(ossPath,str.getBytes(),gameId);
     }
     
-    public boolean uploadFileByByte(String ossPath,byte[] content) {
+    public boolean uploadFileByByte(String ossPath,byte[] content,int gameId) throws Exception {
     	OSSClient ossClient = null;
     	boolean success = false;
     	try {
-    		ossClient = getClient();
-    		PutObjectResult  result = ossClient.putObject(bucketName, ossPath, new ByteArrayInputStream(content));
+    		OssConnect oss =  getOssConnectInfo(gameId);
+    		ossClient = getClient(oss);
+    		PutObjectResult  result = ossClient.putObject(oss.getBucketName(), ossPath, new ByteArrayInputStream(content));
     		//TODO result判断是否成功
         	log.debug("上传byte数据成功，"+ossPath);
         	success = true;
-    	} catch (Exception e) {
-        	log.error("oss uploadFileByByte error,Exception -> {}",e);
-        } finally {
+    	} finally {
 			if (ossClient != null) 
 				ossClient.shutdown();
 		}
@@ -129,16 +132,16 @@ public class AliOssManager {
      * 判断文件是否存在
      * @param ossPath
      * @return
+     * @throws Exception 
      */
-    public boolean fileIsExist(String ossPath) {
+    public boolean fileIsExist(String ossPath,int gameId) throws Exception {
     	OSSClient ossClient = null;
     	boolean success = false;
     	try {
-    		ossClient = getClient();
-    		success = ossClient.doesObjectExist(bucketName, ossPath);
-    	} catch (Exception e) {
-        	log.error("oss fileIsExist error,Exception -> {}",e);
-        } finally {
+    		OssConnect oss =  getOssConnectInfo(gameId);
+    		ossClient = getClient(oss);
+    		success = ossClient.doesObjectExist(oss.getBucketName(), ossPath);
+    	} finally {
 			if (ossClient != null) 
 				ossClient.shutdown();
 		}
@@ -156,17 +159,17 @@ public class AliOssManager {
 	 * 复制文件
 	 * @param ossPath
 	 * @return
+	 * @throws Exception 
 	 */
-	public boolean copyFile(String sourcePath,String targetPath) {
+	public boolean copyFile(String sourcePath,String targetPath,int gameId) throws Exception {
     	OSSClient ossClient = null;
     	boolean success = false;
     	try {
-    		ossClient = getClient();
-    		ossClient.copyObject(bucketName, sourcePath, bucketName, targetPath);
+    		OssConnect oss =  getOssConnectInfo(gameId);
+    		ossClient = getClient(oss);
+    		ossClient.copyObject(oss.getBucketName(), sourcePath, oss.getBucketName(), targetPath);
     		success = true;
-    	} catch (Exception e) {
-        	log.error("oss copyFile error,Exception -> {}",e);
-        } finally {
+    	} finally {
 			if (ossClient != null) 
 				ossClient.shutdown();
 		}
@@ -175,21 +178,17 @@ public class AliOssManager {
     
 	/**
 	 * 替换plist指定内容
+	 * @throws Exception 
 	 */
-	public void changePlist(String content,String saveLocalPath,String ossIpaPath,String ossPlistPath,UploadFile file) {
-		try {
-			StringBuilder sb = new StringBuilder(endpoint);
-			sb.insert(7, bucketName+".");
-			sb.append("/").append(ossIpaPath);
-			String change = content.replaceAll("<string>http:.*</string>", "<string>"+sb.toString()+"</string>");//plist path
-			change = change.replaceAll("<string>com.*</string>", "<string>"+file.getPackName()+"</string>");
-			change = change.replaceAll("<string>六六.*</string>", "<string>"+file.getGame()+"</string>");
-			FileUtil.stringToFile(change,saveLocalPath);
-			uploadFileByByte(ossPlistPath,change);
-			log.info("plist 操作成功，本地保存路径->{},oss保存路径->{}",saveLocalPath,ossPlistPath);
-		} catch (Exception e) {
-			log.error("changePlist error,Exception --> {}",e);
-		}
+	public void changePlist(String content,String saveLocalPath,String ossIpaPath,String ossPlistPath,UploadFile file,int gameId) throws Exception {
+		OssConnect oss =  getOssConnectInfo(gameId);
+		String sb = oss.getDomain() + "/" + ossIpaPath;
+		String change = content.replaceAll("<string>http:.*</string>", "<string>"+sb+"</string>");//plist path
+		change = change.replaceAll("<string>com.*</string>", "<string>"+file.getPackName()+"</string>");
+		change = change.replaceAll("<string>六六.*</string>", "<string>"+file.getGame()+"</string>");
+		FileUtil.stringToFile(change,saveLocalPath);
+		uploadFileByByte(ossPlistPath,change,gameId);
+		log.info("plist 操作成功，本地保存路径->{},oss保存路径->{}",saveLocalPath,ossPlistPath);
 	}
 	
 }

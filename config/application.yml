@@ -16,10 +16,6 @@ upload:
   oss:
     test: down/test/
     online: down/online/
-    endpoint: http://oss-cn-beijing.aliyuncs.com
-    accessKeyId: LTAIMO9xn64DcMJ6
-    accessKeySecret: lpcoQYwaiv7LugHOUe8y0LiWjf6r6G
-    bucketName: bj-fftl-tongliao
     
 mybatis:
   type-aliases-package: com.llmj.oss.model

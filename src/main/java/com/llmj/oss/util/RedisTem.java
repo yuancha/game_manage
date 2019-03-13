@@ -110,4 +110,54 @@ public class RedisTem {
 		}
 		return value;
 	}
+	
+	public void delete(String key) throws Exception {
+		Jedis jedis = null;
+		try {
+			jedis = getJedis();
+			jedis.del(key);
+		} finally {
+			// 返还到连接池
+			returnResource(jedisPool, jedis);
+		}
+	}
+	
+	public Long del(String prefix, String key) throws Exception {
+
+		Jedis jedis = null;
+		Long res = 0l;
+		try {
+			jedis = getJedis();
+			res = jedis.del(prefix + KEY_SPLIT + key);
+		} finally {
+			// 返还到连接池
+			returnResource(jedisPool, jedis);
+		}
+		return res;
+	}
+	
+	/**
+	 * 模糊删除
+	 * @param prefix
+	 * @param match
+	 * @throws Exception
+	 */
+	public void vagueDel(String prefix, String match) throws Exception {
+
+		Jedis jedis = null;
+		try {
+			jedis = getJedis();
+			String key = prefix + KEY_SPLIT + match;
+			Set<String> keys=jedis.keys(key);
+			String[] tmp = new String[keys.size()];
+			tmp = keys.toArray(tmp);
+			if (tmp == null || tmp.length == 0) {
+				return;
+			}
+			jedis.del(tmp);
+		} finally {
+			// 返还到连接池
+			returnResource(jedisPool, jedis);
+		}
+	}
 }

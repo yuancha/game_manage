@@ -265,12 +265,15 @@
     $(document).ready(function(){
     	getDomain();
     	
-    	var gameId 	= "65537";
+    	var gameId 	= $('#main-menu').find('li:nth-child(1)>a').attr('id');
+    	if (!gameId) {
+			console.log(gameId);
+			return;
+		}
     	$("#gameId").val(gameId);
 		var state = $("#app_state").val();
 		var data = '{"gameId":"'+gameId+'","state":"'+state+'"}';
 		
-		console.log(data);
     	getListByAjax(data);
     });
     

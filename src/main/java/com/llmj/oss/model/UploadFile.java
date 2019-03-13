@@ -21,6 +21,7 @@ public class UploadFile implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private int id;
+	private int gameId;
 	private String game;
 	private String fileName;
 	private String packName;

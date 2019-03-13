@@ -8,9 +8,13 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.llmj.oss.config.IConsts;
+import com.llmj.oss.dao.GameControlDao;
+import com.llmj.oss.model.GameControl;
 import com.llmj.oss.model.mq.QrcodeMsg;
 import com.llmj.oss.util.FileUtil;
 import com.llmj.oss.util.StringUtil;
@@ -45,6 +49,9 @@ public class MqManager {
 	private Connection connection;
     private Map<Integer,String> channelMap;
     
+    @Autowired
+    private GameControlDao gameDao;
+    
     @PostConstruct
     private void init() throws Exception {
     	initQueue();
@@ -52,14 +59,17 @@ public class MqManager {
     }
     
     private void initQueue() throws Exception {
-    	//TODO 有待改善
     	channelMap = new HashMap<>();
-    	Map<String,String> tmp = FileUtil.LoadPopertiesFile("config/channel.properties");
-    	for(Map.Entry<String, String> entry : tmp.entrySet()) {
-    		channelMap.put(Integer.parseInt(entry.getKey()), entry.getValue());
+    	List<GameControl> games = gameDao.getAll();
+    	for (GameControl gc : games) {
+    		if (StringUtil.isEmpty(gc.getChannel())) {
+    			log.error("qrcode channel 为空,gameId : {}",gc.getGameId());
+    			continue;
+    		}
+    		channelMap.put(gc.getGameId(), gc.getChannel());
     	}
     	if (channelMap.isEmpty()) {
-    		throw new RuntimeException("加载rabbit mq channel error");
+    		log.debug("加载rabbit mq channel 为空");
     	}
     }
     
@@ -99,5 +109,11 @@ public class MqManager {
     	String json = StringUtil.objToJson(msg);
     	sendMessage(mqName,json);
     	log.info("mq 通知成功，mqName：{},gameId:{},json:{}",mqName,gameId,json);
+    }
+    
+    public void createChannel(int gameId,String channelName) throws Exception {
+    	channel.exchangeDeclare(channelName, "fanout", true, false, null);
+		log.info("create channel success======channelName===={}",channelName);
+		channelMap.put(gameId,channelName);
     }
 }

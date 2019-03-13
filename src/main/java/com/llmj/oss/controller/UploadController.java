@@ -11,10 +11,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.llmj.oss.config.IConsts;
 import com.llmj.oss.config.RespCode;
+import com.llmj.oss.dao.GameControlDao;
 import com.llmj.oss.dao.UploadDao;
 import com.llmj.oss.mail.DingDingNotice;
 import com.llmj.oss.manager.AliOssManager;
 import com.llmj.oss.manager.PackManager;
+import com.llmj.oss.model.GameControl;
+import com.llmj.oss.model.PackageName;
 import com.llmj.oss.model.RespEntity;
 import com.llmj.oss.model.UploadFile;
 import com.llmj.oss.util.DateUtil;
@@ -42,6 +45,8 @@ public class UploadController {
 	private PackManager packMgr;
 	@Autowired
 	private AliOssManager ossMgr;
+	@Autowired
+	private GameControlDao gameDao;
 	
 	//本地存放路径
 	@Value("${upload.local.basePath}")
@@ -102,9 +107,16 @@ public class UploadController {
             FileUtil.deleteFile(filePath);	//删除临时存放
             String packName = (String) tmpMap.get("package");
             //包名验证
-            if (packName == null || !packMgr.isContainPackage(packName,type) ) {
+            PackageName pn = packMgr.isContainPackage(packName,type);
+            if (packName == null || pn == null) {
             	log.error("文件非法，packName : {}",packName);
             	return new RespEntity(RespCode.FILE_ERROR);
+            }
+            
+            int gameId = pn.getGameId();
+            GameControl gc = gameDao.selectById(gameId);
+            if (gc == null || gc.getOpen() == 0) {
+            	return new RespEntity(-2,"游戏不存在，或是已关闭");
             }
             
             //最终保存
@@ -114,21 +126,22 @@ public class UploadController {
             String gmPy = packName.split("\\.")[1];
             String saveName = gmPy+"_"+tmpMap.get("versionName").toString()+"_" + dateStr;
             if (suffix.equalsIgnoreCase("ipa")) {
-            	FileUtil.makeDir(basePath + packName + "/" + IConsts.UpFileType.Ios.getDesc() + "/" + dateStr);
-            	filePath = basePath + packName + "/" + IConsts.UpFileType.Ios.getDesc() + "/" + dateStr + "/" +  saveName + ".ipa";
-            	ossPath = ossMgr.ossTest + packName + "/" + IConsts.UpFileType.Ios.getDesc() + "/" +  saveName + ".ipa";
+            	FileUtil.makeDir(basePath + IConsts.UpFileType.Ios.getDesc() + "/" + packName + "/" + dateStr);
+            	filePath = basePath + IConsts.UpFileType.Ios.getDesc() + "/" + packName + "/" + dateStr + "/" +  saveName + ".ipa";
+            	ossPath = ossMgr.ossTest + IConsts.UpFileType.Ios.getDesc() + "/" + packName + "/" +  saveName + ".ipa";
             } else {
-            	FileUtil.makeDir(basePath + packName + "/" + IConsts.UpFileType.Android.getDesc() + "/" + dateStr);
-            	filePath = basePath + packName + "/" + IConsts.UpFileType.Android.getDesc() + "/" + dateStr + "/" +  saveName + ".apk";
-            	ossPath = ossMgr.ossTest + packName + "/" + IConsts.UpFileType.Android.getDesc() + "/" +  saveName + ".apk";
+            	FileUtil.makeDir(basePath + IConsts.UpFileType.Android.getDesc() + "/" + packName + "/" + dateStr);
+            	filePath = basePath + IConsts.UpFileType.Android.getDesc() + "/" + packName + "/" + dateStr + "/" +  saveName + ".apk";
+            	ossPath = ossMgr.ossTest + IConsts.UpFileType.Android.getDesc() + "/" + packName + "/" +  saveName + ".apk";
             }
             tmpMap.put("localPath", filePath);
+            
             path = Paths.get(filePath);
             Files.write(path, bytes);
             
             //上传到oss 测试路径
-            ossMgr.uploadFileByByte(ossPath,bytes);
-            
+            ossMgr.uploadFileByByte(ossPath,bytes,gameId);
+            tmpMap.put("gameId", gameId);
             tmpMap.put("ossPath", ossPath);
             tmpMap.put("fileName", filename);
             //日志信息存储
@@ -152,6 +165,7 @@ public class UploadController {
     	info.setOssPath(map.get("ossPath").toString());
     	info.setState(IConsts.UpFileState.up2oss.getState());
     	info.setFileName(map.get("fileName").toString());
+    	info.setGameId(Integer.parseInt(map.get("gameId").toString()));
     	uploadDao.saveFile(info,IConsts.UpFileTable.test.getTableName());
     	log.info("upload file success -> info : {}",StringUtil.objToJson(info));
     	return info.getId();

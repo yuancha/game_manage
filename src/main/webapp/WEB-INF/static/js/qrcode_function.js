@@ -105,7 +105,6 @@ function getDomain(){
       url: "/qrCode/domain" ,//url
       data: "",
       success: function (result) {
-          console.log(result);//打印服务端返回的数据(调试用)
           if (result.code == 0) {
         	  $("#domain").empty();
         	  var ary = result.data;

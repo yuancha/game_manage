@@ -55,14 +55,14 @@ public class PackManager {
 	 * @param packName
 	 * @return
 	 */
-	public boolean isContainPackage(String packName,int type) {
+	public PackageName isContainPackage(String packName,int type) {
 		PackageName pn = null;
 		if (type == IConsts.UpFileType.Android.getType()) {
 			pn = packDao.selectByAndroid(packName);
 		} else {
 			pn = packDao.selectByIos(packName);
 		}
-		return pn != null;
+		return pn;
 	}
 	
 	/**

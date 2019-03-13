@@ -13,10 +13,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.llmj.oss.config.IConsts;
 import com.llmj.oss.config.RespCode;
 import com.llmj.oss.dao.DomainDao;
+import com.llmj.oss.dao.GameControlDao;
 import com.llmj.oss.dao.QrcodeDao;
 import com.llmj.oss.manager.AliOssManager;
 import com.llmj.oss.manager.MqManager;
 import com.llmj.oss.manager.SwitchManager;
+import com.llmj.oss.model.GameControl;
 import com.llmj.oss.model.QRCode;
 import com.llmj.oss.model.RespEntity;
 import com.llmj.oss.model.oper.QrOperation;
@@ -64,6 +66,8 @@ public class QRCodeController {
 	private MqManager mqMgr;
 	@Autowired 
 	private SwitchManager switchMgr;
+	@Autowired
+    private GameControlDao gameDao;
 	
 	@GetMapping("")
 	public String qrCodeHome(Model model,HttpServletRequest request) {
@@ -75,6 +79,7 @@ public class QRCodeController {
 				state = 1;
 			}
 			model.addAttribute("gameState", state);
+			model.addAttribute("gameOpens", gameDao.selectOpens());
 			return "qrcodeManage";
 		} catch (Exception e) {
 			model.addAttribute("message", "server error");
@@ -182,7 +187,7 @@ public class QRCodeController {
 			//保存到oss
 			String qrName = StringUtil.getUUIDStr();
 			String qrSavePath = qrOssPath(state,qrName);
-			ossMgr.uploadFileByByte(qrSavePath, tmp);
+			ossMgr.uploadFileByByte(qrSavePath, tmp,gameId);
 			qr.setOssPath(qrSavePath);
 			
 			//保存到本地
@@ -210,7 +215,7 @@ public class QRCodeController {
 				return new RespEntity(-2,"已在逻辑服备份，请先刷新其它二维码备份后再删除");
 			}
 			qrDao.delQR(model.getDomain());
-			ossMgr.removeFile(qr.getOssPath());
+			ossMgr.removeFile(qr.getOssPath(),qr.getGameId());
 			FileUtil.deleteFile(qr.getLocalPath());
 			log.info("二维码删除成功，link : {}",model.getDomain());
 		} catch (Exception e) {
@@ -248,6 +253,12 @@ public class QRCodeController {
 			}
 			
 			int gameId = model.getGameId();
+			GameControl game =  gameDao.selectById(gameId);
+	    	if (game == null || game.getOpen() == IConsts.GameOpenState.close.getState()) {
+	    		log.error("GameControl 数据错误，为null 或是 为开启,gameId : {}",gameId);
+	    		return new RespEntity(-2,"游戏数据错误或是未开放");
+	    	}
+			
 			String link = model.getDomain();
 			QRCode old = qrDao.selectByLogicUse(gameId,lUse,state);
 			QRCode qr = qrDao.selectByLink(link);

@@ -13,7 +13,8 @@ if($('#app_state').val() == 0){
 //oss路径名称截取
 function filePathSplit(str){
 	if(str){
-		var name = str.split("/")[4];
+		var ary = str.split("/");
+		var name = ary[ary.length - 1];
 		return name;
 	}else{
 		return "无";
