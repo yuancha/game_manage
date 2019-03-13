@@ -151,7 +151,7 @@
                                 <thead>
                                     <tr>
                                     	<th width="30%"  style="text-align: center">游戏包名称</th>
-                                        <th width="30%"  style="text-align: center">版本</th>
+                                        <th width="30%"  style="text-align: center">状态</th>
                                         <th style="text-align: center">操作</th>
                                     </tr>
                                 </thead>

@@ -74,6 +74,7 @@ function getListByAjax(data){
 					trHTML += "<tr>\
 							<td style='vertical-align: middle;'><img src='"+obj.ossPath+"'></td>\
 							<td style='vertical-align: middle;' class='content'>"+ obj.content+ "</td>\
+							<td style='vertical-align: middle;'>"+ stateToStr(obj.logicUse)+ "</td>\
 							<td style='vertical-align: middle;'>\
 							<button class='btn btn-secondary btn-single btn-sm btn_look'>查看</button>\
 							<button class='btn btn-turquoise btn-single btn-sm btn_refresh'>刷新</button>\
@@ -94,6 +95,13 @@ function getListByAjax(data){
           alert("异常！");
       }
   });
+}
+
+function stateToStr(logic) {
+	if (logic == 1) {
+		return "线上";
+	}
+	return "";
 }
 
 function getDomain(){

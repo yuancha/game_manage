@@ -196,6 +196,13 @@ $(document).on('click','#app_down',function(){
            '</form>').appendTo('body').submit().remove();
 });
 
+function stateToStr(state) {
+	if (state == 2) {
+		return "线上";
+	}
+	return "";
+}
+
 //获取游戏包数据详情
 function getFilesInfoByAjax(data){	
 	$('#online_osspath').text("");
@@ -220,7 +227,7 @@ function getFilesInfoByAjax(data){
                
                	 $('#app_box').append("<tr>\
                		<td class='middle-align'>"+filePathSplit(data[i].ossPath)+"</td>\
-                       <td class='middle-align'>"+data[i].vision+"</td>\
+                       <td class='middle-align'>"+stateToStr(data[i].state)+"</td>\
                        <td>\
                            <a href='#' class='btn btn-secondary btn-single btn-sm ev_look'>查看</a>\
                            <a href='#' class='btn btn-turquoise btn-single btn-sm ev_refresh'>刷包</a>\
