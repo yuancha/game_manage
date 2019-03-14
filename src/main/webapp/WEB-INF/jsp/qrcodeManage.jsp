@@ -74,8 +74,7 @@
                         <li class="dropdown user-profile" style="min-height: 76px;">
                             <a href="#" data-toggle="dropdown">
                                 <img src="http://demo.cssmoban.com/cssthemes3/mstp_115_enonadmin/assets/images/user-4.png" alt="user-image" class="img-circle img-inline userpic-32" width="28">
-                                <span>
-                                    袁超
+                                <span>${account}
                                     <i class="fa-angle-down"></i>
                                 </span>
                             </a>

@@ -31,6 +31,7 @@ public class UrlInterceptor implements HandlerInterceptor {
 			flag = false;
 		} else {
 			request.getSession().setAttribute("user", user);
+			request.getSession().setAttribute("account", user.getName());
 		}
 		
 		return flag;

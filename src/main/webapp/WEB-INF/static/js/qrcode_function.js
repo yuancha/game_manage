@@ -6,7 +6,8 @@ $('#main-menu').find('a').on('click',function(){
 	var state 	= $('#app_state').val();
 	var data  = '{"gameId":"'+gameId+'","state":"'+state+'"}';
 	$('#gameId').val(gameId);
-	$('.page-title').find('.active').find('a').html(getNavTitle(gameId));
+	var name 		= $(this).find('span').text();
+	$('.page-title').find('.active').find('a').html(name);
 	getListByAjax(data); 
 });
     	

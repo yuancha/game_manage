@@ -71,8 +71,7 @@
                         <li class="dropdown user-profile" style="min-height: 76px;">
                             <a href="#" data-toggle="dropdown">
                                 <img src="http://demo.cssmoban.com/cssthemes3/mstp_115_enonadmin/assets/images/user-4.png" alt="user-image" class="img-circle img-inline userpic-32" width="28">
-                                <span>
-                                    袁超
+                                <span>${account}
                                     <i class="fa-angle-down"></i>
                                 </span>
                             </a>
@@ -280,6 +279,7 @@
  		<script>
  		$(document).ready(function(){
  			var gameId 		= $('#main-menu').find('li:nth-child(1)>a').attr('id');
+ 			var name 		= $('#main-menu').find('li:nth-child(1)>a').find('span').text();
  			if (!gameId) {
  				console.log(gameId);
  				return;
@@ -288,8 +288,7 @@
  			var gameState 	= $('#app_state').val();
  			var data 		= '{"gameId":"'+gameId+'","gameType":"'+gameType+'","gameState":"'+gameState+'"}';
  			$('#gameId').val(gameId);
- 			$('.page-title').find('.active').find('a').html(getNavTitle(gameId));
- 			console.log(data);
+ 			$('.page-title').find('.active').find('a').html(name);
  			getFilesInfoByAjax(data);
  		})
  		

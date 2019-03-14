@@ -16,7 +16,8 @@ $('#main-menu').find('a').on('click',function(){
 	var gameState 	= $('#app_state').val();
 	var data 		= '{"gameId":"'+gameId+'","gameType":"'+gameType+'","gameState":"'+gameState+'"}';
 	$('#gameId').val(gameId);
-	$('.page-title').find('.active').find('a').html(getNavTitle(gameId));
+	var name 		= $(this).find('span').text();
+	$('.page-title').find('.active').find('a').html(name);
 	getFilesInfoByAjax(data); 
 });
 

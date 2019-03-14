@@ -61,7 +61,10 @@ function getNavTitle(gameId){
 	  break;
 	case "524289":
 	  return "大师兄";
-	  break;  
+	  break;
+	case "66049":
+	  return "蔚县";
+	  break;
 	default:
 	  return "未识别";
 	}
