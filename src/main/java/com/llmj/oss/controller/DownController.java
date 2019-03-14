@@ -63,25 +63,8 @@ public class DownController {
 			
 	@GetMapping("/link")
 	public String downLink(Model model,HttpServletRequest request) {
-		model.addAttribute("downlink", "www.baidu.com");
 		
 		try {
-			String str = redis.getPre(RedisConsts.PRE_HTML_KEY, "660491");
-			JSONObject obj = JSON.parseObject(str);
-			if (obj != null) {
-				model.addAttribute("title", obj.get("title"));
-				model.addAttribute("h1", obj.get("h1"));
-				model.addAttribute("p1", obj.get("p1"));
-				model.addAttribute("p2", obj.get("p2"));
-				model.addAttribute("p3", obj.get("p3"));
-				model.addAttribute("icon", obj.get("icon"));
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return "html/links/ffyl/android";
-		/*try {
 			String gameState = request.getParameter("gameState");
 			String gameId = request.getParameter("gameId");
 			
@@ -101,6 +84,17 @@ public class DownController {
 			    //电脑
 				log.error("request info, userAgent -> {}",userAgent);
 				return "error";
+			}
+			
+			String str = redis.getPre(RedisConsts.PRE_HTML_KEY, gameId);
+			JSONObject obj = JSON.parseObject(str);
+			if (obj != null) {
+				model.addAttribute("title", obj.get("title"));
+				model.addAttribute("h1", obj.get("h1"));
+				model.addAttribute("p1", obj.get("p1"));
+				model.addAttribute("p2", obj.get("p2"));
+				model.addAttribute("p3", obj.get("p3"));
+				model.addAttribute("icon", obj.get("icon"));
 			}
 			
 			String link = redis.getPre(RedisConsts.PRE_LINK_KEY, linkid);
@@ -126,7 +120,7 @@ public class DownController {
 		} catch (Exception e) {
 			log.error("downLink error,Exception -> {}",e);
 		}
-		return "error";*/
+		return "error";
 	}
 	
 	public String getLink(DownLink dl,int gameId) {
