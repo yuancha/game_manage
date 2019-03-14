@@ -48,8 +48,8 @@ $(document).on('click','.ev_look',function(){
 			<p>包名："+app_packName+"</p>\
 			<p>版本："+app_vision+"</p>\
 			<p>系统："+type+"</p>\
-			<p>状态："+app_state+"</p>\
-			<p>更新时间："+app_upTime+"</p>\
+			<p>oss路径："+app_ossPath+"</p>\
+			<p>更新时间："+app_operTime+"</p>\
 			<input type='hidden' id='show_app_id' value='"+app_id+"'>\
 	");
 	

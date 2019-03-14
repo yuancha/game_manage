@@ -15,6 +15,7 @@ import com.llmj.oss.manager.PackManager;
 import com.llmj.oss.model.PackageName;
 import com.llmj.oss.model.RespEntity;
 import com.llmj.oss.model.oper.PackOperation;
+import com.llmj.oss.util.StringUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -63,6 +64,7 @@ public class PackageController {
 		try {
 			PackageName pn = objChange(model);
 			packDao.savePack(pn);
+			log.info("pack add success,info : {}",StringUtil.objToJson(pn));
 		} catch (Exception e) {
 			log.error("packAdd error,Exception -> {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);
@@ -75,7 +77,12 @@ public class PackageController {
 	public RespEntity packUpdate(@RequestBody PackOperation model) {
 		try {
 			PackageName pn = objChange(model);
+			PackageName old = packDao.selectById(pn.getGameId());
+			if (old == null) {
+				return new RespEntity(-2,"数据错误");
+			}
 			packDao.updatePack(pn);
+			log.info("pack update success,info : {}",StringUtil.objToJson(pn));
 		} catch (Exception e) {
 			log.error("packUpdate error,Exception -> {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);
@@ -88,6 +95,7 @@ public class PackageController {
 	public RespEntity packDel(@RequestBody PackOperation model) {
 		try {
 			packDao.delPack(model.getGameId());
+			log.info("pack del success,gameId : {}",model.getGameId());
 		} catch (Exception e) {
 			log.error("packDel error,Exception -> {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);

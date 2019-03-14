@@ -208,6 +208,7 @@
 			$("#myModalLabel").text("新增");
 			$('#myModal').modal();
 			$('#gameId').val("");
+			$("#gameId").attr("readonly",false);
 			$('#name').val("");
 			$('#open').val("");
 			$('#channel').val("");
@@ -226,6 +227,7 @@
 			var channel = $(this).parents('tr').find('.channel').text();
 			var ossId = $(this).parents('tr').find('.ossId').val();
 			$('#gameId').val(gameId);
+			$("#gameId").attr("readonly",true)
 			$('#name').val(name);
 			$('#channel').val(channel);
 			$("#open option[value='"+open+"']").prop("selected","selected");

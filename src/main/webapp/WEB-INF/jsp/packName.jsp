@@ -162,6 +162,7 @@
 			$("#myModalLabel").text("新增");
 			$('#myModal').modal();
 			$('#gameId').val("");
+			$("#gameId").attr("readonly",false);
 			$('#content').val("");
 			$('#android').val("");
 			$('#ios').val("");
@@ -177,6 +178,7 @@
 			var android = $(this).parents('tr').find('.android').text();
 			var ios = $(this).parents('tr').find('.ios').text();
 			$('#gameId').val(gameId);
+			$("#gameId").attr("readonly",true);
 			$('#content').val(content);
 			$('#android').val(android);
 			$('#ios').val(ios);
