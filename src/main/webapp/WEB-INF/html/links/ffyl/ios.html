@@ -2,7 +2,7 @@
 <!-- saved from url=(0064)http://llmj.cdn.xianyugame.com/down/hainan/ios/ios_download.html -->
 <html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-<title>六六发发麻将</title>
+<title id = "title">六六娱乐麻将</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=0, viewport-fit=cover">
 
 <meta name="Robots" contect="none">
@@ -11,9 +11,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="format-detection" content="telephone=no">
-<link type="image/x-icon" rel="Icon" href="http://llmj.cdn.xianyugame.com/down/hainan/ios/etongdai.ico">
+<!-- <link type="image/x-icon" rel="Icon" href="http://llmj.cdn.xianyugame.com/down/hainan/ios/etongdai.ico">
 <link type="image/x-icon" rel="Shortcut Icon" href="http://llmj.cdn.xianyugame.com/down/hainan/ios/etongdai.ico">
-<link type="image/x-icon" rel="Bookmark" href="http://llmj.cdn.xianyugame.com/down/hainan/ios/etongdai.ico">
+<link type="image/x-icon" rel="Bookmark" href="http://llmj.cdn.xianyugame.com/down/hainan/ios/etongdai.ico"> -->
 <link rel="stylesheet" href="../static/links/com.css" type="text/css">
 <link rel="stylesheet" href="../static/links/m_size.css">
 <script type="text/javascript">
@@ -31,8 +31,30 @@
 		var link = document.getElementById("link").value;
 		var install = document.getElementById("install");
 		install.href = "itms-services://?action=download-manifest&url="+link;
-		//itms-services://?action=download-manifest&url=https://llmj.cdn.xianyugame.com/down/hainan/ios/ios_hn_plist_1549678713.plist
-		//install.href = "http://"+link;
+		var icon = document.getElementById("aicon").value;
+		if (icon) {
+			document.getElementById("icon").src = icon;
+		}
+		var title = document.getElementById("atitle").value;
+		if (title) {
+			document.getElementById("title").innerText = title;
+		}
+		var h1 = document.getElementById("ah1").value;
+		if (h1) {
+			document.getElementById("h1").innerText = h1;
+		}
+		var p1 = document.getElementById("ap1").value;
+		if (p1) {
+			document.getElementById("p1").innerText = p1;
+		}
+		var p2 = document.getElementById("ap2").value;
+		if (p2) {
+			document.getElementById("p2").innerText = p2;
+		}
+		var p3 = document.getElementById("ap3").value;
+		if (p3) {
+			document.getElementById("p3").innerText = p3;
+		}
 	}
 	</script>
 </head>
@@ -41,14 +63,20 @@
         <h1 id="logo"></h1>
     </header>
 	<section class="ibd lvbd">
-    <h1>六六娱乐麻将约局神器</h1>
+    <h1 id="h1">六六娱乐麻将约局神器</h1>
     <div class="h1bd graya">
-     	<p>地球人最爱玩的麻将</p>
-        <p>原汁原味复现正宗本地玩法，防作弊，更放心</p>
-        <p>全面支持安卓、iOS手机，好友约局随时随地想玩就玩</p>
+     	<p id="p1">中国人最爱玩的麻将</p>
+        <p id="p2">原汁原味复现正宗本地玩法，防作弊，更放心</p>
+        <p id="p3">全面支持安卓、iOS手机，好友约局随时随地想玩就玩</p>
     </div>
     <input type="hidden" th:value="${downlink}" id="link"/>
-    <p id="icon"></p>
+    <input type="hidden" th:value="${title}" id="atitle"/>
+    <input type="hidden" th:value="${h1}" id="ah1"/>
+    <input type="hidden" th:value="${p1}" id="ap1"/>
+    <input type="hidden" th:value="${p2}" id="ap2"/>
+    <input type="hidden" th:value="${p3}" id="ap3"/>
+    <input type="hidden" th:value="${icon}" id="aicon"/>
+    <div><img id="icon" src="../static/links/icon-154.png" style="width: 80px; height: 80px; margin-top: 20px;"></div>
           <p class="tztool"> <a id="install" class="btn" href="">立即下载</a></p>
 			<section class="ios">
                 <p>

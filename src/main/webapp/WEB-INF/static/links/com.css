@@ -1,11 +1,11 @@
 html, body, div, h1, h2, h3, h4, h5, h6, ul, ol, dl, li, dt, dd, p, blockquote,
-pre, form, fieldset, table, th, td{margin:0;padding:0;font-family:"微软雅黑",Tahoma,Arial,sans-serif;}
+pre, form, fieldset, table, th, td{margin:0;padding:0;font-family:"寰蒋闆呴粦",Tahoma,Arial,sans-serif;}
 body{background-color:#fff;color:#3f3a39;line-height:1.5;font-size:16px; }
-h1, h2, h3, h4, h5,h6,.s_btn{font:normal 18px/35px "微软雅黑"}
+h1, h2, h3, h4, h5,h6,.s_btn{font:normal 18px/35px "寰蒋闆呴粦"}
 body{background:#f0f0f0; background-attachment:fixed;background-size:100%;text-align:center}
-a,a:visited,object,object:focus{color: #555;cursor: pointer;text-decoration: none;cursor:pointer;bblr:expression(this.onFocus=this.blur());/*IE使用*/outline-style:none;/*FF使用*/}a:hover {text-decoration: none;color:#2ea7e0;}a:active, a:focus{text-decoration: none;color:#555;}a:focus{color:#2ea7e0;}
+a,a:visited,object,object:focus{color: #555;cursor: pointer;text-decoration: none;cursor:pointer;bblr:expression(this.onFocus=this.blur());/*IE浣跨敤*/outline-style:none;/*FF浣跨敤*/}a:hover {text-decoration: none;color:#2ea7e0;}a:active, a:focus{text-decoration: none;color:#555;}a:focus{color:#2ea7e0;}
 
-img{display:block;border:none;width:100%;min-height:20px;min-width:20px}
+img{border:none;width:100%;min-height:20px;min-width:20px}
 /*** FORMS ***/
 textarea:active, input[type='text']:active,input[type='password']:active, select:active {border-color: #2ea7e0;}
 textarea:focus, input[type='text']:focus,input[type='password']:focus, select:focus {outline: none;border-color:#2ea7e0!important;-webkit-appearance:none;}
@@ -48,11 +48,9 @@ html[xmlns] .clearfix,html[xmlns] .ul_h{display:block;}
 .red,.red:visited,.red a,.red a:visited{color:#de110c;}a.red:hover,a.red:active,a.red:focus,.red a:hover,.red a:active,.red a:focus{color:#f30;}
 /**end:color**/
 
-/***重定义****/
-#logo{background:url(../img/logo.png) center center no-repeat;-webkit-background-size:70px 40px;background-size:70px 40px}
+/***閲嶅畾涔�****/
+#logo{background:url(../links/66logo.png) center center no-repeat;-webkit-background-size:70px 40px;background-size:70px 40px}
 #logo{height:110px;background-color:#fff;-webkit-box-shadow:0 1px 2px rgba(0, 0, 0, 0.3);-moz-box-shadow:0 1px 2px rgba(0, 0, 0, 0.3);box-shadow:0 1px 2px rgba(0, 0, 0, 0.3);border-bottom:1px solid #fff;}
-#icon{background:url(../img/icon.png) center center no-repeat;-webkit-background-size:80px 80px;background-size:80px 80px}
-#icon{height:130px;}
 .tc_f .bd{background:url(../img/instruction.png) top right no-repeat;-webkit-background-size:3171px 117px;background-size:171px 117px}
 body{background-color:#f8f8f8;}
 #head{position:relative}
@@ -68,7 +66,7 @@ h1{padding-top:10px;font-size:23px;line-height:60px;}
 .tztool .btn{height:43px;width:90%;line-height:39px;max-width:200px;font-size:16px;}
 .tztool .btn2:hover{line-height:39px;background:#2ea7e0;color:#fff}
 p.v20{height:40px;}
-/***弹出框****/
+/***寮瑰嚭妗�****/
 .tc_f .opa,.tc_f{z-index:99999;position: fixed;top:0;left:0;right:0;bottom:0;_position:absolute;}
 .tc_f .opa{display:block;background:#333;}
 .tc_f .bd{position:fixed;top:0px;right:0;width:200px;height:200px;z-index:199999;}

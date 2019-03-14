@@ -340,10 +340,14 @@ public class QRCodeController {
 		InputStream is = null;
 		try {
 			ServletContext context = request.getSession().getServletContext();
-			String path = "WEB-INF/static/images/";
+			String path = "WEB-INF/static/links/";
 			switch (gameId) {
+				case 66049:  {
+					path += "icon-yx.png";
+					break;
+				}
 				default : {
-					path += "test.png";
+					path += "icon-154.png";
 					break;
 				}
 			}
