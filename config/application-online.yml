@@ -28,8 +28,6 @@ upload:
     basePath: /data/llmj_sp/oss_web/save/
     tmpsave: /data/llmj_sp/oss_web/save/temp/
     qrcode: /data/llmj_sp/oss_web/save/qrcode/
-    
-upload:
   oss:
-    test: down/test/
-    online: down/online/
+    test: down/package/test/
+    online: down/package/online/
