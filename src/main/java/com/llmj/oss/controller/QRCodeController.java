@@ -29,7 +29,6 @@ import com.llmj.oss.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -211,9 +210,9 @@ public class QRCodeController {
 			if (qr == null) {
 				return new RespEntity(RespCode.SUCCESS);
 			}
-			if (qr.getLogicUse() == lUse) {
+			/*if (qr.getLogicUse() == lUse) {
 				return new RespEntity(-2,"已在逻辑服备份，请先刷新其它二维码备份后再删除");
-			}
+			}*/
 			qrDao.delQR(model.getDomain());
 			ossMgr.removeFile(qr.getOssPath(),qr.getGameId());
 			FileUtil.deleteFile(qr.getLocalPath());
@@ -296,7 +295,12 @@ public class QRCodeController {
 			log.debug("getIconLink recive param, gameId : {}" , gameId);
 			QRCode qr = qrDao.selectByLogicUse(Integer.parseInt(gameId),lUse,1);
 			if (qr == null) {
+				log.error("QRcode not fine,gameId : {}",gameId);
 				return new RespEntity(-2,"无可用二维码");
+			}
+			if (!ossMgr.fileIsExist(qr.getOssPath(), Integer.parseInt(gameId))) {
+				log.error("qrcode not find in oss,gameId : {},ossPath : {}",gameId,qr.getOssPath());
+				return new RespEntity(-2,"oss 上二维码不存在");
 			}
 			String link = switchMgr.getQrcodeLink(qr);
 			res.setData(link);

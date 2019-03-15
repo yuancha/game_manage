@@ -186,6 +186,9 @@
 		
 		//del
 		$(document).on('click','.btn_del',function() {
+			
+			if (window.confirm('确定删除吗？')) {
+			
 			var gameId = $(this).parents('tr').find('.gameId').text();
 			var data = '{"gameId":"'+gameId+'"}'
 			$.ajax({
@@ -205,6 +208,8 @@
 					alert("异常！");
 				}
 			});
+			
+			}
 		});
 	</script>
 </body>

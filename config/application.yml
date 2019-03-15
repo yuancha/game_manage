@@ -10,12 +10,7 @@ spring:
   servlet:
     multipart:
       max-file-size: 120MB
-      max-request-size: 200MB
-      
-upload:
-  oss:
-    test: down/test/
-    online: down/online/
+      max-request-size: 200MB      
     
 mybatis:
   type-aliases-package: com.llmj.oss.model

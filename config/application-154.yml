@@ -28,3 +28,8 @@ upload:
     basePath: F:/save/
     tmpsave: F:/save/temp/   
     qrcode: F:/save/qrcode/ 
+    
+upload:
+  oss:
+    test: yctest/test/
+    online: yctest/online/

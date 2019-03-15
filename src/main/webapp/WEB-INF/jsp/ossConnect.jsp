@@ -193,25 +193,27 @@
 		});
 		//del
 		$(document).on('click','.btn_del',function() {
-			var id = $(this).parents('tr').find('.id').text();
-			var data = '{"id":"'+id+'"}'
-			$.ajax({
-				type : "POST",//方法类型
-				dataType : "json",//预期服务器返回的数据类型
-				contentType : "application/json; charset=utf-8",
-				url : "/oss/del",//url
-				data : data,
-				success : function(result) {
-					if (result.code == 0) {
-						init();
-					} else {
-						alert(result.message);
+			if (window.confirm('确定删除吗？')) {
+				var id = $(this).parents('tr').find('.id').text();
+				var data = '{"id":"'+id+'"}'
+				$.ajax({
+					type : "POST",//方法类型
+					dataType : "json",//预期服务器返回的数据类型
+					contentType : "application/json; charset=utf-8",
+					url : "/oss/del",//url
+					data : data,
+					success : function(result) {
+						if (result.code == 0) {
+							init();
+						} else {
+							alert(result.message);
+						}
+					},
+					error : function() {
+						alert("异常！");
 					}
-				},
-				error : function() {
-					alert("异常！");
-				}
-			});
+				});
+			}
 		});
 	</script>
 </body>
