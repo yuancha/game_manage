@@ -28,7 +28,7 @@ public class GlobalConfig {
 	private void init() {
 		try {
 			urlFilter = FileUtil.readTxtFile("config/urlFilter.txt");
-			log.info("webDomains load success, -> {}",urlFilter);
+			log.info("url not filter load success, -> {}",urlFilter);
 		} catch (Exception e) {
 			log.error("GlobalConfig init error,Exception -> {}",e);
 		}

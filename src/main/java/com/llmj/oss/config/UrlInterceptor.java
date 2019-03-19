@@ -27,11 +27,11 @@ public class UrlInterceptor implements HandlerInterceptor {
 		
 		User user = (User) request.getSession().getAttribute("user");
 		if (user == null) {
-			response.sendRedirect(request.getContextPath()+"/login");
+			response.sendRedirect(request.getContextPath()+"/");
 			flag = false;
 		} else {
 			request.getSession().setAttribute("user", user);
-			request.getSession().setAttribute("account", user.getName());
+			request.getSession().setAttribute("account", user.getAccount());
 		}
 		
 		return flag;

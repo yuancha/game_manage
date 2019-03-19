@@ -95,4 +95,28 @@ public interface IConsts {
 		}
 
 	}
+	
+	enum RoleType {
+
+		test(1, "测试管理人员"), 
+		online(2, "线上管理人员"),
+		admin(3, "系统管理员"),
+		;
+		private int type;
+		private String desc;
+
+		private RoleType(int type, String desc) {
+			this.type = type;
+			this.desc = desc;
+		}
+
+		public int getType() {
+			return type;
+		}
+
+		public String getDesc() {
+			return desc;
+		}
+
+	}
 }

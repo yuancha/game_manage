@@ -14,8 +14,7 @@
 	<link rel="stylesheet" type="text/css" href="../static/css/login/util.css">
 	<link rel="stylesheet" type="text/css" href="../static/css/login/main.css">
 	<style>
-		.box{font-size: 30px;
-		padding: 20px;
+		.box{
 		line-height: 1.2;
 		text-align: center;
 		border: 1px solid #000;
@@ -25,6 +24,7 @@
 		-webkit-transition: color 0.5s,background-color 0.5s;	/* Safari 和 Chrome */
 		-o-transition: color 0.5s,background-color 0.5s;	/* Opera */
 		}
+		.box a{font-size: 30px;text-decoration: none;   display: block;  margin: 20px;}
 	.box:hover{
 		color: #fff;background: #46E8D1;
 		
@@ -33,102 +33,29 @@
 </head>
 <body>
 <div class="limiter">
+		<input type="hidden" th:value="${powers}" id="powers"/>
 		<div class="container-login100" style="background-image: url('../static/images/bg-01.jpg');">
 			<div class="wrap-login100 p-l-55 p-r-55 p-t-65 p-b-54">
-				<div class="login100-form validate-form">
-					<span class="login100-form-title p-b-49">功能列表</span>
-					<div class="box" id="btn_game_control">
-						游戏管理
-					</div>
-					<div class="box" id="btn_oss_connect">
-						oss连接管理
-					</div>
-					<div class="box" id="btn_app_upload">
-						APP上传
-					</div>
-					<div class="box" id="btn_app_test_info">
-						APP(<span style="color:#FA552C">测试</span>)详情
-					</div>
-					<div class="box" id="btn_app_on_info">
-						APP(<span style="color:#FA552C">正式</span>)详情
-					</div>
-					<div class="box" id="btn_app_manage">
-						APP包名管理
-					</div>
-					<div class="box" id="btn_qr_test_info">
-						二维码(<span style="color:#FA552C">测试</span>)
-					</div>
-					<div class="box" id="btn_qr_on_info">
-						二维码(<span style="color:#FA552C">正式</span>)
-					</div>
-					<div class="box" id="btn_qr_on_show">
-						线上二维码预览
-					</div>
+				<div class="login100-form validate-form" id="show">
 				</div>
 			</div>
 		</div>
 	</div>
 	<script src="../static/js/jquery-1.11.1.min.js"></script>
 	<script type="text/javascript">
-	
-		$('#btn_game_control').on('click',function(){
-			window.location.href = "/game";
-		});
-		$('#btn_oss_connect').on('click',function(){
-			window.location.href = "/oss/home";
-		});
-		$('#btn_app_upload').on('click',function(){
-			window.location.href = "/upload";
-		});
-	
-		$('#btn_app_test_info').on('click',function(){
-			window.location.href = "/oss/fileManage?state=test";
-		});
 		
-		$('#btn_app_on_info').on('click',function(){
-			window.location.href = "/oss/fileManage?state=online";
-		});
-		$('#btn_app_manage').on('click',function(){
-			window.location.href = "/package";
-		});
-		$('#btn_qr_test_info').on('click',function(){
-			window.location.href = "/qrCode?state=test";
-		});
+		window.onload = function(){
+		    var str = $("#powers").val();
+		    var data = JSON.parse(str);
+		    $("#show").empty();
+		    var trHTML = "<span class='login100-form-title p-b-49'>功能列表</span>";
+		    for (var i=0;i<data.length;i++) {
+		    	var obj = data[i];
+		    	trHTML += "<div class='box'><a href="+obj.url+">"+obj.name+"</a></div>";
+		    }
+		    $("#show").append(trHTML);
+		}
 		
-		$('#btn_qr_on_info').on('click',function(){
-			window.location.href = "/qrCode?state=online";
-		});
-		
-		$('#btn_qr_on_show').on('click',function(){
-			window.location.href = "/qrCode/icons";
-		});
-
-        function login() {
-        	var name = $("#user_name").val();
-        	var pwd = $("#user_password").val();
-        	var data = '{"name":"'+name+'","pwd":"'+pwd+'"}';
-        	console.log(data);
-             $.ajax({
-            //几个参数需要注意一下
-                type: "POST",//方法类型
-                dataType: "json",//预期服务器返回的数据类型
-                contentType: "application/json; charset=utf-8",
-                url: "/login" ,//url
-                data: data,
-                success: function (result) {
-                    console.log(result);//打印服务端返回的数据(调试用)
-                    if (result.code == 0) {
-                    	window.location.href = "/home";
-                    } else {
-                    	alert(result.message);
-                    }
-                    ;
-                },
-                error : function() {
-                    alert("异常！");
-                }
-            }); 
-        }
     </script>
 </body>
 </html>
