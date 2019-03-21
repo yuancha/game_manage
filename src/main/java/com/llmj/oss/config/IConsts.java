@@ -2,6 +2,8 @@ package com.llmj.oss.config;
 
 public interface IConsts {
 	
+	public static final String LOCALDOWN="/localdown/";		//本地下载路径别名
+	
 	enum UpFileType {
 
 		Android(0,"android"),

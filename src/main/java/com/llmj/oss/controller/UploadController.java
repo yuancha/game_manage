@@ -85,6 +85,10 @@ public class UploadController {
             	return new RespEntity(RespCode.FILE_ERROR);
             }
             
+            File tmp = new File(tmpSave);
+            if (!tmp.exists() || !tmp.isDirectory()) {
+            	tmp.mkdir();
+            }
             String filePath = tmpSave + filename;
             byte[] bytes = file.getBytes();
             

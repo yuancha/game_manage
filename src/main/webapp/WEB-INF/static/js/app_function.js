@@ -50,6 +50,7 @@ $(document).on('click','.ev_look',function(){
 			<p>版本："+app_vision+"</p>\
 			<p>系统："+type+"</p>\
 			<p>oss路径："+app_ossPath+"</p>\
+			<p>本地路径："+app_localPath+"</p>\
 			<p>更新时间："+app_operTime+"</p>\
 			<input type='hidden' id='show_app_id' value='"+app_id+"'>\
 	");

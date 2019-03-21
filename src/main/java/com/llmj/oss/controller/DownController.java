@@ -1,6 +1,7 @@
 package com.llmj.oss.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,17 +20,15 @@ import com.llmj.oss.dao.OssConnectDao;
 import com.llmj.oss.dao.UploadDao;
 import com.llmj.oss.manager.AliOssManager;
 import com.llmj.oss.manager.SwitchManager;
-import com.llmj.oss.model.Domain;
 import com.llmj.oss.model.DownLink;
 import com.llmj.oss.model.GameControl;
 import com.llmj.oss.model.OssConnect;
 import com.llmj.oss.model.UploadFile;
+import com.llmj.oss.util.FileUtil;
 import com.llmj.oss.util.RedisTem;
 import com.llmj.oss.util.StringUtil;
 
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -43,6 +42,9 @@ import javax.servlet.http.HttpServletResponse;
 @Slf4j(topic = "ossLogger")
 @RequestMapping("/down")
 public class DownController {
+	
+	@Value("${upload.local.basePath}")
+	private String localPath;
 	
 	@Autowired
 	private UploadDao uploadDao;
@@ -63,7 +65,6 @@ public class DownController {
 			
 	@GetMapping("/link")
 	public String downLink(Model model,HttpServletRequest request) {
-		
 		try {
 			String gameState = request.getParameter("gameState");
 			String gameId = request.getParameter("gameId");
@@ -73,11 +74,11 @@ public class DownController {
 			String linkid = "";
 			if(userAgent.indexOf("android") != -1){
 			    //安卓
-				html = "html/links/ffyl/android";
+				html = "html/links/android";
 				linkid = gameId + "_" + gameState + "_" + IConsts.UpFileType.Android.getType();
 			}else if(userAgent.indexOf("iphone") != -1 || userAgent.indexOf("ipad") != -1 || userAgent.indexOf("ipod") != -1){
 			   //苹果
-				html = "html/links/ffyl/ios";
+				html = "html/links/ios";
 				linkid = gameId + "_" + gameState + "_" + IConsts.UpFileType.Ios.getType();
 			}else{
 				//userAgent.indexOf("micromessenger")!= -1 微信
@@ -100,13 +101,7 @@ public class DownController {
 			String link = redis.getPre(RedisConsts.PRE_LINK_KEY, linkid);
 			if (StringUtil.isEmpty(link)) {
 				//连接配置 动态获取
-				DownLink dl = downDao.selectById(linkid);
-				if (dl == null) {
-					log.error("DownLink not find,linkid:{}",linkid);
-					model.addAttribute("message", "server error!");
-					return "error";
-				}
-				link = getLink(dl,Integer.parseInt(gameId));
+				link = getLink(linkid,Integer.parseInt(gameId),request,gameState);
 				if ("error".equals(link)) {
 					model.addAttribute("message", "server error!");
 					return "error";
@@ -115,7 +110,7 @@ public class DownController {
 			}
 			
 			model.addAttribute("downlink", link);
-			log.info("获得动态链接，link:{}",link);
+			log.debug("获得动态链接，gameId:{},gameState:{},link:{}",gameId,gameState,link);
 			return html;
 		} catch (Exception e) {
 			log.error("downLink error,Exception -> {}",e);
@@ -123,35 +118,61 @@ public class DownController {
 		return "error";
 	}
 	
-	public String getLink(DownLink dl,int gameId) {
-		String link = "";
+	public String getLink(String linkId,int gameId,HttpServletRequest request,String gameState) {
+		String link = "error";
+		
+		DownLink dl = downDao.selectById(linkId);
 		if (dl == null || StringUtil.isEmpty(dl.getLink())) {
-			log.error("DownLink error,dl : {}",StringUtil.objToJson(dl));
-			return "error";
+			log.error("DownLink error,dl : {},linkId:{}",StringUtil.objToJson(dl),linkId);
+			return link;
 		}
 		
-		if (switchMgr.ossSuccess) {
+		if (switchMgr.getOssSwitch(gameId)) {
 			//oss域名动态获取
 			GameControl game = gameDao.selectById(gameId);
 			if (game == null) {
 				log.error("GameControl not find,gameId : {} ",gameId);
-				return "error";
+				return link;
 			}
 			OssConnect oss = ossDao.selectById(game.getOssId());
 			if (oss == null || StringUtil.isEmpty(oss.getDomain())) {
 				log.error("OssConnect error,ossId : {} ",game.getOssId());
-				return "error";
+				return link;
 			}
 			link = oss.getDomain() + "/" + dl.getLink();
 		} else {
-			//TODO 本地下载
-			List<Domain> domains = domainDao.selectByType(0);
-			if (domains.isEmpty()) {
-				log.error("server 没有域名存在 数据库为空 ");
-				return "error";
+			//本地下载
+			StringBuffer url = request.getRequestURL();
+			String tmp = url.toString();
+			String domain = url.delete(url.length() - request.getRequestURI().length(), url.length()).toString();
+			if (StringUtil.isEmpty(domain)) {
+				log.error("error server domain,url:{}",tmp);
+				return link;
 			}
+			
+			link = domain + getLoaclDownPath(dl,gameState); //到本地下载
 		}
 		return link;
+	}
+	
+	private String getLoaclDownPath(DownLink dl,String gameState) {
+		String path = "";
+		String tableName = OssController.getTableName(Integer.parseInt(gameState));
+		UploadFile file = uploadDao.selectById(dl.getTargetId(),tableName);
+		String filePath = file.getLocalPath();
+		if (file == null || StringUtil.isEmpty(filePath)) {
+			log.error("UploadFile error,info : {}",StringUtil.objToJson(file));
+			return path;
+		} 
+		if (dl.getType() == IConsts.UpFileType.Ios.getType()) {//ios
+			filePath += ".plist"; 
+		}
+		if (!FileUtil.fileExist(filePath)) {
+			log.error("本地文件不存在，path : {}",filePath);
+			return path;
+		}
+		path = IConsts.LOCALDOWN + filePath.substring(localPath.length());
+		return path;
 	}
 	
 	/**
@@ -171,85 +192,17 @@ public class DownController {
         		return;
         	}
         	//直接转发oss
-        	String osslink = ossMgr.ossDomain(info.getGameId()) + "/" + info.getOssPath();
-        	response.sendRedirect(osslink);
+        	String link = ossMgr.ossDomain(info.getGameId()) + "/" + info.getOssPath();
+        	if (!switchMgr.getOssSwitch(info.getGameId())) {
+        		String domain = switchMgr.getUseDomain(info.getGameId(),Integer.parseInt(state));
+        		if (!StringUtil.isEmpty(domain)) {
+        			link = domain + IConsts.LOCALDOWN + info.getLocalPath().substring(localPath.length());
+        		}
+        	} 
+        	response.sendRedirect(link);
 		} catch (Exception e) {
 			log.error("singleFileDown error, Exception -> {}",e);
 		}
 	}
 	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-    /*@GetMapping("/downFile/{fileId}") // //new annotation since 4.3
-    public void singleFileDown(HttpServletRequest request, HttpServletResponse response,
-    		@PathVariable String fileId) {
-        if (fileId != null) {
-        	try {
-        		int id = Integer.parseInt(fileId);
-            	UploadFile info = uploadDao.selectById(id);
-            	String filePath = info.getLocalPath();
-                //设置文件路径
-                File file = new File(filePath);
-                //File file = new File(realPath , fileName);
-                if (file.exists()) {
-                    response.setContentType("application/force-download");// 设置强制下载不打开
-                    response.addHeader("Content-Disposition", "attachment;fileName=" + info.getGame());// 设置文件名
-                    byte[] buffer = new byte[1024];
-                    FileInputStream fis = null;
-                    BufferedInputStream bis = null;
-                    try {
-                        fis = new FileInputStream(file);
-                        bis = new BufferedInputStream(fis);
-                        OutputStream os = response.getOutputStream();
-                        int i = bis.read(buffer);
-                        while (i != -1) {
-                            os.write(buffer, 0, i);
-                            i = bis.read(buffer);
-                        }
-                    } catch (Exception e) {
-                    	throw e;
-                    } finally {
-                        if (bis != null) {
-                            try {
-                                bis.close();
-                            } catch (IOException e) {
-                            	throw e;
-                            }
-                        }
-                        if (fis != null) {
-                            try {
-                                fis.close();
-                            } catch (IOException e) {
-                                throw e;
-                            }
-                        }
-                    }
-                }
-			} catch (Exception e) {
-				log.error("singleFileDown error, Exception -> {}",e);
-			}
-        }
-    }*/
-
 }

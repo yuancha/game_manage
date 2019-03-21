@@ -11,6 +11,7 @@ import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.model.GetObjectRequest;
 import com.aliyun.oss.model.ObjectMetadata;
 import com.aliyun.oss.model.PutObjectResult;
+import com.llmj.oss.config.IConsts;
 import com.llmj.oss.dao.GameControlDao;
 import com.llmj.oss.dao.OssConnectDao;
 import com.llmj.oss.model.GameControl;
@@ -29,11 +30,15 @@ public class AliOssManager {
 	private GameControlDao gameDao;
 	@Autowired
 	private OssConnectDao ossDao;
+	@Autowired
+	private SwitchManager switchMgr;
 	
     @Value("${upload.oss.test}")
     public String ossTest;
     @Value("${upload.oss.online}")
     public String ossOnline;
+    @Value("${upload.local.basePath}")
+	private String localPath;
     
     private OssConnect getOssConnectInfo(int gameId) {
     	GameControl game = gameDao.selectById(gameId);
@@ -180,15 +185,24 @@ public class AliOssManager {
 	 * 替换plist指定内容
 	 * @throws Exception 
 	 */
-	public void changePlist(String content,String saveLocalPath,String ossIpaPath,String ossPlistPath,UploadFile file,int gameId) throws Exception {
+	public void changePlist(String content,String ossIpaPath,String ossPlistPath,UploadFile file,int gameId) throws Exception {
 		OssConnect oss =  getOssConnectInfo(gameId);
 		String sb = oss.getDomain() + "/" + ossIpaPath;
 		String change = content.replaceAll("<string>http:.*</string>", "<string>"+sb+"</string>");//plist path
 		change = change.replaceAll("<string>com.*</string>", "<string>"+file.getPackName()+"</string>");
 		change = change.replaceAll("<string>六六.*</string>", "<string>"+file.getGame()+"</string>");
-		FileUtil.stringToFile(change,saveLocalPath);
 		uploadFileByByte(ossPlistPath,change,gameId);
-		log.info("plist 操作成功，本地保存路径->{},oss保存路径->{}",saveLocalPath,ossPlistPath);
+		log.info("oss plist 操作成功,oss保存路径->{}",ossPlistPath);
 	}
 	
+	public void changeLocalPlist(String content,String localIpaPath,UploadFile file) throws Exception {
+		String domain = switchMgr.getUseDomain(file.getGameId(),1);//以正式服使用为主 因为正式和测试通用一个本地plist
+		String sb = domain + IConsts.LOCALDOWN + localIpaPath.substring(localPath.length());
+		String change = content.replaceAll("<string>http:.*</string>", "<string>"+sb+"</string>");//plist path
+		change = change.replaceAll("<string>com.*</string>", "<string>"+file.getPackName()+"</string>");
+		change = change.replaceAll("<string>六六.*</string>", "<string>"+file.getGame()+"</string>");
+		String saveLocalPath = localIpaPath + ".plist";
+		FileUtil.stringToFile(change,saveLocalPath);
+		log.info("本地 plist 操作成功，本地保存路径->{}",saveLocalPath);
+	}
 }

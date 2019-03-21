@@ -295,8 +295,12 @@ public class QRCodeController {
 			log.debug("getIconLink recive param, gameId : {}" , gameId);
 			QRCode qr = qrDao.selectByLogicUse(Integer.parseInt(gameId),lUse,1);
 			if (qr == null) {
-				log.error("QRcode not fine,gameId : {}",gameId);
-				return new RespEntity(-2,"无可用二维码");
+				List<QRCode> qrs = qrDao.getQRs(Integer.parseInt(gameId), 1);
+				if (qrs.isEmpty()) {
+					log.error("QRcode not fine,gameId : {}",gameId);
+					return new RespEntity(-2,"无可用二维码");
+				}
+				qr = qrs.get(0);
 			}
 			if (!ossMgr.fileIsExist(qr.getOssPath(), Integer.parseInt(gameId))) {
 				log.error("qrcode not find in oss,gameId : {},ossPath : {}",gameId,qr.getOssPath());
@@ -342,12 +346,28 @@ public class QRCodeController {
 	//获得二维码中间图片
 	private InputStream getMiddelImg(int gameId,HttpServletRequest request) {
 		InputStream is = null;
-		try {
+		try {//可以改成动态更改 看图标是否经常改变 意义不大
 			ServletContext context = request.getSession().getServletContext();
 			String path = "WEB-INF/static/links/";
 			switch (gameId) {
-				case 66049:  {
+				case 66049:  {//蔚县
 					path += "icon-yx.png";
+					break;
+				}
+				case 65793:  {//云南
+					path += "icon-yn.png";
+					break;
+				}
+				case 262145:  {//山西
+					path += "icon-sx.png";
+					break;
+				}
+				case 393217:  {//通辽
+					path += "icon-tl.png";
+					break;
+				}
+				case 589825:  {//海南
+					path += "icon-hn.png";
 					break;
 				}
 				default : {

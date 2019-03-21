@@ -417,4 +417,17 @@ public class FileUtil {
 		}
 		return set;
 	}
+	
+	/**
+	 * 文件是否存在
+	 * @param path
+	 * @return
+	 */
+	public static boolean fileExist(String path) {
+		File file = new File(path);
+		if (file.exists() && file.isFile()) {
+			return true;
+		}
+		return false;
+	}
 }

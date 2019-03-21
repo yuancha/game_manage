@@ -51,8 +51,6 @@ public class OssController {
 	@Autowired 
 	private RedisTem redis;
 	@Autowired
-	private DownController downcontr;
-	@Autowired
 	private GameControlDao gameDao;
 	@Autowired
 	private OssConnectDao ossDao;
@@ -183,21 +181,27 @@ public class OssController {
 				return new RespEntity(-2, "oss上不存在该文件");
 			}
 			
-			String packName = file.getPackName();
+			String localPath = file.getLocalPath();
+			if (!FileUtil.fileExist(localPath)) {
+				log.error("本地不存在该文件, localPath : {}",localPath);
+				return new RespEntity(-2, "本地不存在该文件");
+			}
+			
 			int type = file.getType();
 			
 			//ios版本 需要操作plist
 			String link = ossPath;
 			if (type == IConsts.UpFileType.Ios.getType()) {
-//				String gmPy = file.getPackName().split("\\.")[1];
-//				String plistPath = localPath + packName + "/" + gmPy + ".plist";// plist模板路径
 				String plistPath = "config/template.plist"; // plist模板路径
 				String plistStr = FileUtil.fileToString(plistPath,"utf-8");
 				if (StringUtil.isEmpty(plistStr)) {
 					return new RespEntity(-2,"plist 读取错误");
 				}
-				ossMgr.changePlist(plistStr,file.getLocalPath()+".plist",ossPath,ossPath+".plist",file,gameId);
+				//oss plist上传
+				ossMgr.changePlist(plistStr,ossPath,ossPath+".plist",file,gameId);
 				link = ossPath+".plist";
+				//本地plist保存
+				ossMgr.changeLocalPlist(plistStr,localPath,file);
 			}
 			
 			//保存到mysql
@@ -208,13 +212,9 @@ public class OssController {
 			dl.setLink(link);
 			dl.setTargetId(id);
 			
-			String downlink = downcontr.getLink(dl,gameId);
-			if ("error".equals(downlink)) {
-				return new RespEntity(-2, "保存连接错误，downlink : "+downlink);
-			}
 			downDao.saveLink(dl);
-			redis.setPre(RedisConsts.PRE_LINK_KEY, dlid, downlink);
-			log.info("refureshPack downlink success,downlink : {}",downlink);
+			//删除redis存储连接
+			redis.del(RedisConsts.PRE_LINK_KEY, dlid);
 			
 			file.setState(IConsts.UpFileState.online.getState());
 			uploadDao.updateState(tableName,IConsts.UpFileState.online.getState(), IConsts.UpFileState.up2oss.getState(),file);//先更改之前线上状态信息

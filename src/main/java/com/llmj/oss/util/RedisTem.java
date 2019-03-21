@@ -160,4 +160,35 @@ public class RedisTem {
 			returnResource(jedisPool, jedis);
 		}
 	}
+	
+	/**
+	 * <p>
+	 * 通过key 和 field 获取指定的 value
+	 * </p>
+	 * @throws Exception 
+	 * 
+	 */
+	public String hget(String key, String field) throws Exception {
+		Jedis jedis = null;
+		String res = null;
+		try {
+			jedis = getJedis();
+			res = jedis.hget(key, field);
+		} finally {
+			returnResource(jedisPool, jedis);
+		}
+		return res;
+	}
+	
+	public Long hset(String key, String field, String value) throws Exception {
+		Jedis jedis = null;
+		Long res = null;
+		try {
+			jedis = getJedis();
+			res = jedis.hset(key, field, value);
+		} finally {
+			returnResource(jedisPool, jedis);
+		}
+		return res;
+	}
 }

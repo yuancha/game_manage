@@ -83,6 +83,7 @@ function getListByAjax(data){
 							<input type='hidden' class='link' value='"+ obj.link+ "'>\
 							<input type='hidden' class='id' value='"+ obj.id+ "'>\
 							<input type='hidden' class='oss' value='"+ obj.ossPath+ "'>\
+							<input type='hidden' class='local' value='"+ obj.localPath+ "'>\
 							<input type='hidden' class='logicUse' value='"+ obj.logicUse+ "'>\
 							<input type='hidden' class='gameId' value='"+ obj.gameId+ "'>\
 							</tr>";
@@ -139,6 +140,7 @@ $(document).on('click','.btn_look',function() {
 	var qrcode_id 		= $(this).parents('tr').find('.id').val();
 	var qrcode_link 	= $(this).parents('tr').find('.link').val();
 	var qrcode_oss 	= $(this).parents('tr').find('.oss').val();
+	var qrcode_local 	= $(this).parents('tr').find('.local').val();
 	var qrcode_content 	= $(this).parents('tr').find('.content').text();
 	var qrcode_logicUse = $(this).parents('tr').find('.logicUse').val();
 	var qrcode_game_id 	= $(this).parents('tr').find('.gameId').val();
@@ -148,6 +150,7 @@ $(document).on('click','.btn_look',function() {
 			<p>游戏ID："+qrcode_game_id+"</p>\
 			<p>链接："+qrcode_link+"</p>\
 			<p>oss路径："+qrcode_oss+"</p>\
+			<p>本地路径："+qrcode_local+"</p>\
 			<p>描述："+qrcode_content+"</p>\
 			<p>逻辑服使用："+qrcode_logicUse+"</p>\
 			<input type='hidden' id='show_qrcode_link' value='"+qrcode_link+"'>\

@@ -1,6 +1,7 @@
 package com.llmj.oss.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -25,6 +26,8 @@ public class ViewResolverConfiguration {
     	
     	@Autowired
     	private GlobalConfig global;
+    	@Value("${upload.local.basePath}")
+    	private String localPath;
     	
         @Bean
         public ViewResolver viewResolver() {
@@ -39,7 +42,7 @@ public class ViewResolverConfiguration {
         /* 路径拦截 */
 		@Override
 		public void addInterceptors(InterceptorRegistry registry) {
-			registry.addInterceptor(new UrlInterceptor(global)).addPathPatterns("/**").excludePathPatterns("/static/**");
+			registry.addInterceptor(new UrlInterceptor(global)).addPathPatterns("/**").excludePathPatterns("/static/**",IConsts.LOCALDOWN+"**");
 		}
 
 		@Bean
@@ -80,6 +83,7 @@ public class ViewResolverConfiguration {
         public void addResourceHandlers(ResourceHandlerRegistry registry) {
             //registry.addResourceHandler("/img/**").addResourceLocations("/WEB-INF/img/");
             registry.addResourceHandler("/static/**").addResourceLocations("/WEB-INF/static/");
+            registry.addResourceHandler(IConsts.LOCALDOWN+"**").addResourceLocations("file:"+localPath);
         }
     }
 }
