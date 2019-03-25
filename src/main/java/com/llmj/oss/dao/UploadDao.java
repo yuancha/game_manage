@@ -44,4 +44,10 @@ public interface UploadDao {
 	
 	@Select("select * from ${tableName} where packName = #{packName} and type = #{type} and state = #{state}")
 	List<UploadFile> selectOnline(@Param("tableName") String tableName,@Param("packName") String packName,@Param("state") int state,@Param("type") int type);
+	
+	@Select("select * from ${tableName} where gameId=#{gameId} and localPath=#{localPath}")
+	UploadFile selectByLocalPath(@Param("gameId") int gameId,@Param("tableName") String tableName,@Param("localPath") String localPath);
+	
+	@Delete("delete from ${tableName} where id=#{id}")
+	void deleteFile(@Param("id") int id,@Param("tableName") String tableName);
 }

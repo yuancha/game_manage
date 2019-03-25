@@ -10,18 +10,21 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.llmj.oss.config.IConsts;
+import com.llmj.oss.config.RedisConsts;
 import com.llmj.oss.config.RespCode;
 import com.llmj.oss.dao.GameControlDao;
 import com.llmj.oss.dao.UploadDao;
 import com.llmj.oss.mail.DingDingNotice;
 import com.llmj.oss.manager.AliOssManager;
 import com.llmj.oss.manager.PackManager;
+import com.llmj.oss.manager.SwitchManager;
 import com.llmj.oss.model.GameControl;
 import com.llmj.oss.model.PackageName;
 import com.llmj.oss.model.RespEntity;
 import com.llmj.oss.model.UploadFile;
 import com.llmj.oss.util.DateUtil;
 import com.llmj.oss.util.FileUtil;
+import com.llmj.oss.util.RedisTem;
 import com.llmj.oss.util.StringUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +50,10 @@ public class UploadController {
 	private AliOssManager ossMgr;
 	@Autowired
 	private GameControlDao gameDao;
+	@Autowired
+	private SwitchManager switchMgr;
+	@Autowired 
+	private RedisTem redis;
 	
 	//本地存放路径
 	@Value("${upload.local.basePath}")
@@ -122,7 +129,6 @@ public class UploadController {
             if (gc == null || gc.getOpen() == 0) {
             	return new RespEntity(-2,"游戏不存在，或是已关闭");
             }
-            
             //最终保存
             String dateStr = DateUtil.getDateStr();
             String ossPath = "";
@@ -142,15 +148,18 @@ public class UploadController {
             
             path = Paths.get(filePath);
             Files.write(path, bytes);
-            
             //上传到oss 测试路径
-            ossMgr.uploadFileByByte(ossPath,bytes,gameId);
+            tmpMap.put("ossPath", "");
+            if (switchMgr.getOssSwitch(gameId)) {//oss 服务正常
+            	ossMgr.uploadFileByByte(ossPath,bytes,gameId);
+            	tmpMap.put("ossPath", ossPath);
+            }
             tmpMap.put("gameId", gameId);
-            tmpMap.put("ossPath", ossPath);
             tmpMap.put("fileName", filename);
-            //日志信息存储
+            //数据信息存储
             int tableId = saveUploadLog(tmpMap);
-            
+            //redis存储 用于文件管理
+            saveToRedis(gameId,saveName,tableId);
             //TODO 某种通知方式
         } catch (Exception e) {
             log.error("singleFileUpload error,Exception -> {}",e);
@@ -173,6 +182,16 @@ public class UploadController {
     	uploadDao.saveFile(info,IConsts.UpFileTable.test.getTableName());
     	log.info("upload file success -> info : {}",StringUtil.objToJson(info));
     	return info.getId();
+    }
+    
+    private void saveToRedis(int gameId,String saveName,int tableId) {
+    	String prekey = RedisConsts.PRE_FILE_KEY + gameId;
+    	try {
+			redis.lpushPre(prekey, RedisConsts.FILE_LIST_KEY, saveName);
+			redis.hsetPrefix(prekey, RedisConsts.FILE_Map_KEY+"test", saveName, String.valueOf(tableId));
+		} catch (Exception e) {
+			log.error("saveToRedis error,exception : {} ",e);
+		}
     }
     
     /**

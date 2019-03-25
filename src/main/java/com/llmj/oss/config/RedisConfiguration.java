@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import lombok.extern.slf4j.Slf4j;
+import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 @Configuration
@@ -40,7 +41,11 @@ public class RedisConfiguration {
 		config.setMaxWaitMillis(maxWaitMillis);// 等待时间
 		config.setTestOnBorrow(true);//在borrow一个jedis实例时，是否提前进行validate操作；如果为true，则得到的jedis实例均是可用的；  
 		pool = new JedisPool(config, host, port, timeout, password, database);
-		log.info("JedisPool注入成功！！redis地址：" + host + ":" + port + " database:" + database);
+		Jedis jedis = pool.getResource();
+		if (jedis != null) {
+			log.info("JedisPool注入成功！！redis地址：" + host + ":" + port + " database:" + database);
+			jedis.close();
+		}
         return pool;  
     }  
     

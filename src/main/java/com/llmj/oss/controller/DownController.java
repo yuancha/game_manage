@@ -192,14 +192,19 @@ public class DownController {
         		return;
         	}
         	//直接转发oss
-        	String link = ossMgr.ossDomain(info.getGameId()) + "/" + info.getOssPath();
+        	/*String link = ossMgr.ossDomain(info.getGameId()) + "/" + info.getOssPath();
         	if (!switchMgr.getOssSwitch(info.getGameId())) {
         		String domain = switchMgr.getUseDomain(info.getGameId(),Integer.parseInt(state));
         		if (!StringUtil.isEmpty(domain)) {
         			link = domain + IConsts.LOCALDOWN + info.getLocalPath().substring(localPath.length());
         		}
-        	} 
-        	response.sendRedirect(link);
+        	} */
+        	String domain = switchMgr.getUseDomain(info.getGameId(),Integer.parseInt(state));
+    		if (StringUtil.isEmpty(domain)) {
+    			log.error("domain 获取错误，数据为空");
+    			return;
+    		}
+        	response.sendRedirect(domain + IConsts.LOCALDOWN + info.getLocalPath().substring(localPath.length()));
 		} catch (Exception e) {
 			log.error("singleFileDown error, Exception -> {}",e);
 		}

@@ -228,7 +228,7 @@ function getFilesInfoByAjax(data){
                 for(var i in data){
                
                	 $('#app_box').append("<tr>\
-               		<td class='middle-align'>"+filePathSplit(data[i].ossPath)+"</td>\
+               		<td class='middle-align'>"+filePathSplit(data[i].localPath)+"</td>\
                        <td class='middle-align'>"+stateToStr(data[i].state)+"</td>\
                        <td>\
                            <a href='#' class='btn btn-secondary btn-single btn-sm ev_look'>查看</a>\
@@ -250,7 +250,7 @@ function getFilesInfoByAjax(data){
                 
               //上线数据详情
               if (result.online) {
-            	  $('#online_osspath').text(filePathSplit(result.online.ossPath));  
+            	  $('#online_osspath').text(filePathSplit(result.online.localPath));  
                   $('#online_version').text(result.online.vision);
                   $('#online_operTime').text(result.online.operTime);
                   $('#online_upTime').text(result.online.upTime);

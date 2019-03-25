@@ -191,4 +191,93 @@ public class RedisTem {
 		}
 		return res;
 	}
+	
+	public String hgetPrefix(String prefix, String key, String field) throws Exception {
+		Jedis jedis = null;
+		String res = null;
+		String bkey = prefix + KEY_SPLIT + key;
+		try {
+			jedis = getJedis();
+			res = jedis.hget(bkey, field);
+		} finally {
+			returnResource(jedisPool, jedis);
+		}
+		return res;
+	}
+	
+	public void hsetPrefix(String prefix, String key, String field, String value) throws Exception {
+		Jedis jedis = null;
+		String bkey = prefix + KEY_SPLIT + key;
+		try {
+			jedis = getJedis();
+			jedis.hset(bkey, field, value);
+		} finally {
+			returnResource(jedisPool, jedis);
+		}
+	}
+	
+	public Long hdelPrefix(String prefix, String key, String field) throws Exception {
+		Jedis jedis = null;
+		Long res = null;
+		String bkey = prefix + KEY_SPLIT + key;
+		try {
+			jedis = getJedis();
+			res = jedis.hdel(bkey, field);
+		} finally {
+			returnResource(jedisPool, jedis);
+		}
+		return res;
+	}
+	
+	public Long lpushPre(String prefix, String key, String... str) throws Exception {
+		Jedis jedis = null;
+		Long res = null;
+		try {
+			jedis = getJedis();
+			res = jedis.lpush(prefix + KEY_SPLIT + key, str);
+		} finally {
+			returnResource(jedisPool, jedis);
+		}
+		return res;
+	}
+	
+	public int llenPrefix(String prefix, String key) throws Exception {
+		Jedis jedis = null;
+		int res = 0;
+		try {
+			jedis = getJedis();
+			res = jedis.llen(prefix + KEY_SPLIT + key).intValue();
+		} finally {
+			returnResource(jedisPool, jedis);
+		}
+		return res;
+	}
+	
+	public List<String> lrangePre(String prefix, String key, long start, long end) throws Exception {
+		Jedis jedis = null;
+		List<String> res = null;
+		try {
+			jedis = getJedis();
+			res = jedis.lrange(prefix + KEY_SPLIT + key, start, end);
+		} finally {
+			returnResource(jedisPool, jedis);
+		}
+		return res;
+	}
+	
+	public Long lremWithPrefix(String prefix, String key, long count, String value) throws Exception {
+		return lrem(prefix + KEY_SPLIT + key, count, value);
+	}
+	
+	public Long lrem(String key, long count, String value) throws Exception {
+		Jedis jedis = null;
+		Long res = null;
+		try {
+			jedis = getJedis();
+			res = jedis.lrem(key, count, value);
+		} finally {
+			returnResource(jedisPool, jedis);
+		}
+		return res;
+	}
 }

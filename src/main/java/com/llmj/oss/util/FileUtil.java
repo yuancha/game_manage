@@ -37,9 +37,13 @@ import net.dongliu.apk.parser.bean.UseFeature;
 public class FileUtil {
 
 	public static void main(String[] args) {
-		File file = new File("F://upload//ffylmj_formal_20190215_01.ipa");
-		Map<String, Object> map = FileUtil.readIPA(file);
-		System.out.println(map);
+		String path = "F:/save/abc/111.txt";
+		try {
+			FileUtil.deleteFileParentsDir(path);
+			System.out.println("执行成功");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 	}
 
@@ -430,4 +434,51 @@ public class FileUtil {
 		}
 		return false;
 	}
+	
+	/**
+	 * 删除文件所在的文件夹
+	 */
+	public static void deleteFileParentsDir(String path) throws Exception {
+		File file = new File(path);
+		if (file.exists()) {
+			File parents = file.getParentFile();
+			deleteDirectory(parents.getAbsolutePath());
+		}
+	}
+
+	/**
+	 * 删除文件夹下所有文件
+	 */
+	public static boolean deleteDirectory(String sPath) {  
+	    //如果sPath不以文件分隔符结尾，自动添加文件分隔符  
+	    if (!sPath.endsWith(File.separator)) {  
+	        sPath = sPath + File.separator;  
+	    }  
+	    File dirFile = new File(sPath);  
+	    //如果dir对应的文件不存在，或者不是一个目录，则退出  
+	    if (!dirFile.exists() || !dirFile.isDirectory()) {  
+	        return false;  
+	    }  
+	    boolean flag = true;  
+	    //删除文件夹下的所有文件(包括子目录)  
+	    File[] files = dirFile.listFiles();  
+	    for (int i = 0; i < files.length; i++) {  
+	        //删除子文件  
+	        if (files[i].isFile()) {  
+	            flag = deleteFile(files[i].getAbsolutePath());  
+	            if (!flag) break;  
+	        } //删除子目录  
+	        else {  
+	            flag = deleteDirectory(files[i].getAbsolutePath());  
+	            if (!flag) break;  
+	        }  
+	    }  
+	    if (!flag) return false;  
+	    //删除当前目录  
+	    if (dirFile.delete()) {  
+	        return true;  
+	    } else {  
+	        return false;  
+	    }  
+	} 
 }

@@ -19,7 +19,7 @@ spring:
     password: j7xlHKNfu
     database: 0
     pool:
-      max-active: 20
+      max-active: 1000
       max-idle: 20
       max-wait: 1000 
   

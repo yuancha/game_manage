@@ -23,6 +23,7 @@ import com.llmj.oss.dao.OssConnectDao;
 import com.llmj.oss.dao.UploadDao;
 import com.llmj.oss.manager.AliOssManager;
 import com.llmj.oss.manager.PackManager;
+import com.llmj.oss.manager.SwitchManager;
 import com.llmj.oss.model.DownLink;
 import com.llmj.oss.model.GameControl;
 import com.llmj.oss.model.OssConnect;
@@ -54,6 +55,8 @@ public class OssController {
 	private GameControlDao gameDao;
 	@Autowired
 	private OssConnectDao ossDao;
+	@Autowired
+	private SwitchManager switchMgr;
 	
 	//本地存放路径
 	@Value("${upload.local.basePath}")
@@ -143,11 +146,13 @@ public class OssController {
 			//删除oss对应文件 plist
 			int gameId = file.getGameId();
 			String ossPath = file.getOssPath();
-			ossMgr.removeFile(ossPath,gameId);
-			if (file.getType() == IConsts.UpFileType.Ios.getType()) {
-				//删除ios对应plist文件
-				ossMgr.removeFile(ossPath + ".plist",gameId);
-				file.setOssPath("");
+			if (!StringUtil.isEmpty(ossPath)) {
+				ossMgr.removeFile(ossPath,gameId);
+				if (file.getType() == IConsts.UpFileType.Ios.getType()) {
+					//删除ios对应plist文件
+					ossMgr.removeFile(ossPath + ".plist",gameId);
+					file.setOssPath("");
+				}
 			}
 			file.setState(IConsts.UpFileState.delete.getState());
 			uploadDao.delFile(tableName,file);
@@ -174,32 +179,52 @@ public class OssController {
 			}
 			if (file.getState() == IConsts.UpFileState.online.getState())
 				return new RespEntity(-2, "已是线上版本");
+			
 			int gameId = file.getGameId();
-			String ossPath = file.getOssPath();
-			if (!ossMgr.fileIsExist(ossPath,gameId)) {
-				log.error("oss上不存在该文件, ossPath : {}",ossPath);
-				return new RespEntity(-2, "oss上不存在该文件");
-			}
-			
-			String localPath = file.getLocalPath();
-			if (!FileUtil.fileExist(localPath)) {
-				log.error("本地不存在该文件, localPath : {}",localPath);
-				return new RespEntity(-2, "本地不存在该文件");
-			}
-			
 			int type = file.getType();
 			
-			//ios版本 需要操作plist
-			String link = ossPath;
+			String ossPath = file.getOssPath();
+			String localPath = file.getLocalPath();
+			if (switchMgr.getOssSwitch(gameId)) {//oss 服务正常
+				if (StringUtil.isEmpty(ossPath)) {
+					return new RespEntity(-2, "oss路径错误");
+				}
+				if (!ossMgr.fileIsExist(ossPath,gameId)) {
+					log.error("oss上不存在该文件, ossPath : {}",ossPath);
+					return new RespEntity(-2, "oss上不存在该文件");
+				}
+			} else {
+				if (!FileUtil.fileExist(localPath)) {
+					log.error("本地不存在该文件, localPath : {}",localPath);
+					return new RespEntity(-2, "本地不存在该文件");
+				}
+			}
+			
+			String link = "";
+			if (switchMgr.getOssSwitch(gameId)) {//oss 服务正常
+				link = ossPath;
+				//ios版本 需要操作plist
+				if (type == IConsts.UpFileType.Ios.getType()) {
+					String plistPath = "config/template.plist"; // plist模板路径
+					String plistStr = FileUtil.fileToString(plistPath,"utf-8");
+					if (StringUtil.isEmpty(plistStr)) {
+						return new RespEntity(-2,"plist 读取错误");
+					}
+					//oss plist上传
+					ossMgr.changePlist(plistStr,ossPath,ossPath+".plist",file,gameId);
+					link = ossPath+".plist";
+					//本地plist保存
+					ossMgr.changeLocalPlist(plistStr,localPath,file);
+				}
+			} 
+			
+			//本地始终保存一份
 			if (type == IConsts.UpFileType.Ios.getType()) {
 				String plistPath = "config/template.plist"; // plist模板路径
 				String plistStr = FileUtil.fileToString(plistPath,"utf-8");
 				if (StringUtil.isEmpty(plistStr)) {
 					return new RespEntity(-2,"plist 读取错误");
 				}
-				//oss plist上传
-				ossMgr.changePlist(plistStr,ossPath,ossPath+".plist",file,gameId);
-				link = ossPath+".plist";
 				//本地plist保存
 				ossMgr.changeLocalPlist(plistStr,localPath,file);
 			}
@@ -238,36 +263,57 @@ public class OssController {
 		try {
 			UploadFile file = uploadDao.selectById(id,tableName);
 			if (file.getState() == IConsts.UpFileState.delete.getState()) return new RespEntity(RespCode.SERVER_ERROR);
-			//获得oss path
-			String oldOssPath = file.getOssPath();
-			//替换path
-			String newOssPath ="";
-			if (oldOssPath.indexOf("/test/") > 0) {
-				newOssPath = oldOssPath.replace("/test/", "/online/");
-			} else if(oldOssPath.indexOf("/online/") > 0) {
-				newOssPath = oldOssPath.replace("/online/", "/test/");
-			} else {
-				return new RespEntity(-2,"初始路径错误，path ："+oldOssPath);
-			}
 			int gameId = file.getGameId();
-			//oss 检查文件是否存在
-			if (ossMgr.fileIsExist(newOssPath,gameId)) {
-				return new RespEntity(-2,"文件已存在，path:"+newOssPath);
-			}
+
 			//oss 复制操作
-			ossMgr.copyFile(oldOssPath, newOssPath,gameId);
 			String targetTable = getTableName(Math.abs(state - 1));
-			//insert file
-			file.setOssPath(newOssPath);
+			if (switchMgr.getOssSwitch(gameId)) {//oss 服务正常
+				//获得oss path
+				String oldOssPath = file.getOssPath();
+				//替换path
+				String newOssPath ="";
+				if (oldOssPath.indexOf("/test/") > -1) {
+					newOssPath = oldOssPath.replace("/test/", "/online/");
+				} else if(oldOssPath.indexOf("/online/") > -1) {
+					newOssPath = oldOssPath.replace("/online/", "/test/");
+				} else {
+					return new RespEntity(-2,"初始路径错误，path ："+oldOssPath);
+				}
+				
+				//oss 检查文件是否存在
+				if (ossMgr.fileIsExist(newOssPath,gameId)) {
+					return new RespEntity(-2,"文件已存在，path:"+newOssPath);
+				}
+				ossMgr.copyFile(oldOssPath, newOssPath,gameId);
+				file.setOssPath(newOssPath);
+				log.info("copy file success,packageName:{},sourcePath:{},targetPath:{}",file.getPackName(),oldOssPath,newOssPath);
+            } else {
+            	if (uploadDao.selectByLocalPath(gameId,targetTable,file.getLocalPath()) != null) {
+            		return new RespEntity(-2,"文件已存在");
+            	}
+            	file.setOssPath("");
+            }
 			file.setState(IConsts.UpFileState.up2oss.getState());
 			uploadDao.copyFile(file, targetTable);
-			log.info("copy file success,packageName:{},sourcePath:{},targetPath:{}",file.getPackName(),oldOssPath,newOssPath);
+			//保存到redis
+			saveToRedis(gameId,file);
 		} catch (Exception e) {
 			log.error("copyFile error,Exception - > {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);
 		}
 		
 		return new RespEntity(RespCode.SUCCESS);
+	}
+	
+	private void saveToRedis(int gameId, UploadFile file) {
+		String prekey = RedisConsts.PRE_FILE_KEY + gameId;
+		try {
+			String[] tmp = file.getLocalPath().split("/");
+			String filename = tmp[tmp.length - 1];
+			redis.hsetPrefix(prekey, RedisConsts.FILE_Map_KEY + "online", filename.substring(0, filename.lastIndexOf(".")), String.valueOf(file.getId()));
+		} catch (Exception e) {
+			log.error("saveToRedis error,exception : {} ", e);
+		}
 	}
 	
 	@PostMapping("/connects") 
