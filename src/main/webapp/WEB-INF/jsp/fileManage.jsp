@@ -109,7 +109,7 @@
                         <h1 class="title"><span id="showState"></span><input type="hidden" value="${gameState}" id="app_state">&nbsp;&nbsp;游戏包</h1>
                         <p class="description">
                             <button class="btn btn-secondary" id='app_android'>Android</button>
-                            <button class="btn btn-primary" id='app_iOS'>iOS</button>
+                            <button class="btn btn-gray" id='app_iOS'>iOS</button>
                         </p>
                     </div>
                     
@@ -291,7 +291,7 @@
  			$('.page-title').find('.active').find('a').html(name);
  			getFilesInfoByAjax(data);
  		})
- 		
+ 		 
  		</script>
 
 </body></html>

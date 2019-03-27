@@ -62,6 +62,10 @@ $(document).on('click','.ev_look',function(){
 //游戏包系统切换
 
 $('#app_android,#app_iOS').on('click',function(){
+	$(this).removeClass('btn-gray').siblings().removeClass('btn-secondary');
+	$(this).addClass('btn-secondary').siblings().addClass('btn-gray');
+
+	
 	var gameId  = $('#gameId').val();
 	var gameType = $(this).attr('id');
 	if(gameType == "app_android"){
