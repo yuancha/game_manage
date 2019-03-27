@@ -28,6 +28,8 @@ public class ViewResolverConfiguration {
     	private GlobalConfig global;
     	@Value("${upload.local.basePath}")
     	private String localPath;
+    	@Value("${upload.local.logo}")
+    	private String logoPath;
     	
         @Bean
         public ViewResolver viewResolver() {
@@ -42,7 +44,8 @@ public class ViewResolverConfiguration {
         /* 路径拦截 */
 		@Override
 		public void addInterceptors(InterceptorRegistry registry) {
-			registry.addInterceptor(new UrlInterceptor(global)).addPathPatterns("/**").excludePathPatterns("/static/**",IConsts.LOCALDOWN+"**");
+			registry.addInterceptor(new UrlInterceptor(global)).addPathPatterns("/**")
+					.excludePathPatterns("/static/**",IConsts.LOCALDOWN+"**",IConsts.LOGOPATH+"**");
 		}
 
 		@Bean
@@ -84,6 +87,7 @@ public class ViewResolverConfiguration {
             //registry.addResourceHandler("/img/**").addResourceLocations("/WEB-INF/img/");
             registry.addResourceHandler("/static/**").addResourceLocations("/WEB-INF/static/");
             registry.addResourceHandler(IConsts.LOCALDOWN+"**").addResourceLocations("file:"+localPath);
+            registry.addResourceHandler(IConsts.LOGOPATH+"**").addResourceLocations("file:"+logoPath);
         }
     }
 }

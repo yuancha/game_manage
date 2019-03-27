@@ -229,6 +229,15 @@
 											</select>
 										</div>
 			                    	</div>
+			                    	<div class="form-group">
+			                    		<label class="col-sm-4 control-label">中间是否带图标:</label>
+			                    		<div class="col-sm-6">
+											<select class="form-control" id="middelImg">
+												<option value="0">不带</option>
+												<option value="1">带</option>
+											</select>
+										</div>
+			                    	</div>
 		                    		<div class="form-group-separator"></div>
 			                         <div class="form-group">   	
 			                            <label class="col-sm-4 control-label">请填写描述:</label>		
@@ -266,11 +275,13 @@
     	getDomain();
     	
     	var gameId 	= $('#main-menu').find('li:nth-child(1)>a').attr('id');
+    	var name 		= $('#main-menu').find('li:nth-child(1)>a').find('span').text();
     	if (!gameId) {
 			console.log(gameId);
 			return;
 		}
     	$("#gameId").val(gameId);
+    	$('.page-title').find('.active').find('a').html(name);
 		var state = $("#app_state").val();
 		var data = '{"gameId":"'+gameId+'","state":"'+state+'"}';
 		

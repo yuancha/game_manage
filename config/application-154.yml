@@ -27,7 +27,8 @@ upload:
   local:
     basePath: F:/save/
     tmpsave: F:/save/temp/   
-    qrcode: F:/save/qrcode/ 
+    qrcode: F:/save/qrcode/
+    logo:  F:/save/showimg/
   oss:
     test: yctest/test/
     online: yctest/online/

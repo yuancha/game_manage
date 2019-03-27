@@ -112,6 +112,7 @@ public class QRCodeController {
 		try {
 			int gameId = model.getGameId();
 			int state = model.getState();
+			int middel = model.getMiddelImg();
 			QRCode qr = new QRCode();
 			qr.setContent(model.getDesc());
 			qr.setGameId(gameId);
@@ -122,7 +123,10 @@ public class QRCodeController {
 				log.error("无效的域名，domain : {}",domain);
 				return new RespEntity(-2,"无效域名");
 			}
-			InputStream is = getMiddelImg(gameId,request);
+			InputStream is = null;
+			if (middel == 1) {
+				is = getMiddelImg(gameId,request);
+			}
 			String link = saveQr(qr,domain,is);
 			if (!link.equals("")) {
 				log.error("链接已存在，link ： {}",link);
@@ -190,7 +194,9 @@ public class QRCodeController {
 			qr.setOssPath(qrSavePath);
 			
 			//保存到本地
-			is.reset();//重复利用
+			if (is != null) {
+				is.reset();//重复利用
+			}
 			QRCodeUtil.encode(link,qrcodePath,qrName,is);
 			qr.setLocalPath(qrcodePath + qrName + ".png");
 		} finally {

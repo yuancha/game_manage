@@ -96,6 +96,8 @@ public class DownController {
 				model.addAttribute("p2", obj.get("p2"));
 				model.addAttribute("p3", obj.get("p3"));
 				model.addAttribute("icon", obj.get("icon"));
+				model.addAttribute("logo", obj.get("logo"));
+				model.addAttribute("ios", obj.get("ios"));
 			}
 			
 			String link = redis.getPre(RedisConsts.PRE_LINK_KEY, linkid);

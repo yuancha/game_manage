@@ -72,7 +72,6 @@ public class AliOssManager {
     		OssConnect oss =  getOssConnectInfo(gameId);
     		ossClient = getClient(oss);
     		PutObjectResult  result = ossClient.putObject(oss.getBucketName(), ossPath, new File(localPath));
-    		//TODO result判断是否成功
         	log.debug("上传文件成功，"+ossPath);
         	success = true;
     	} finally {
@@ -89,7 +88,6 @@ public class AliOssManager {
     		OssConnect oss =  getOssConnectInfo(gameId);
     		ossClient = getClient(oss);
     		ObjectMetadata  result = ossClient.getObject(new GetObjectRequest(oss.getBucketName(), ossPath), new File(localPath));
-    		//TODO result判断是否成功
         	log.debug("下载文件成功，"+ossPath);
         	success = true;
     	} finally {
@@ -123,7 +121,6 @@ public class AliOssManager {
     		OssConnect oss =  getOssConnectInfo(gameId);
     		ossClient = getClient(oss);
     		PutObjectResult  result = ossClient.putObject(oss.getBucketName(), ossPath, new ByteArrayInputStream(content));
-    		//TODO result判断是否成功
         	log.debug("上传byte数据成功，"+ossPath);
         	success = true;
     	} finally {

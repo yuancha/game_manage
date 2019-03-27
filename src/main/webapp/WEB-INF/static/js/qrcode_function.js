@@ -19,7 +19,8 @@ $('#app_confirm').on('click',function(){
 	var state = $("#app_state").val();
 	var domain = $("#domain").val();
 	var desc = $("#desc").val();
-	var data = '{"gameId":"'+gameId+'","state":"'+state+'","domain":"'+domain+'","desc":"'+desc+'"}';
+	var middelImg = $("#middelImg").val();
+	var data = '{"gameId":"'+gameId+'","state":"'+state+'","domain":"'+domain+'","desc":"'+desc+'","middelImg":"'+middelImg+'"}';
 	createQrcode(data);
 });
 

@@ -8,4 +8,5 @@ public class RedisConsts {
 	public static String PRE_FILE_KEY  = "file_";	//fiel + gameId
 	public static String FILE_LIST_KEY  = "file_list";	//file name
 	public static String FILE_Map_KEY  = "file_map_";	//name tableid test/online
+	public static String ICON_PATH_KEY  = "icon_path";	//图标文件路径 
 }

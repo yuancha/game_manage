@@ -15,4 +15,5 @@ public class QrOperation {
 	private String desc;	//描述
 	private int state;		//正式 还是 测试
 	private String domain;	//选用域名
+	private int middelImg;	//0不带中间图片 1中间带图片
 }

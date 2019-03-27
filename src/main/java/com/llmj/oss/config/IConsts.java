@@ -3,6 +3,7 @@ package com.llmj.oss.config;
 public interface IConsts {
 	
 	public static final String LOCALDOWN="/localdown/";		//本地下载路径别名
+	public static final String LOGOPATH="/showimg/";		//本地logo路径别名
 	
 	enum UpFileType {
 

@@ -16,6 +16,11 @@
 <link type="image/x-icon" rel="Bookmark" href="http://llmj.cdn.xianyugame.com/down/hainan/ios/etongdai.ico"> -->
 <link rel="stylesheet" href="../static/links/com.css" type="text/css">
 <link rel="stylesheet" href="../static/links/m_size.css">
+<style>
+
+#logo{height:110px;background-color:#fff;-webkit-box-shadow:0 1px 2px rgba(0, 0, 0, 0.3);-moz-box-shadow:0 1px 2px rgba(0, 0, 0, 0.3);box-shadow:0 1px 2px rgba(0, 0, 0, 0.3);border-bottom:1px solid #fff;}
+
+</style>
 <script type="text/javascript">
 	function installApp(){
 		if(window.navigator.standalone){ // from Home Screen Icon
@@ -55,12 +60,23 @@
 		if (p3) {
 			document.getElementById("p3").innerText = p3;
 		}
+		var logo = document.getElementById("alogo").value;
+		if (logo) {
+			document.getElementById("logo").src = logo;
+		}
+		var ios = document.getElementById("aios").value;
+		if (ios) {
+			document.getElementById("ios").src = ios;
+		}
 	}
+	
+	
 	</script>
 </head>
 <body onload="installApp();">
     <header class="com_menu">
-        <h1 id="logo"></h1>
+        <!--  <h1 id="logo"></h1>  -->
+         <h1 style="background:#fff"><img id="logo" src="../static/links/66logo.png" style="width: 70px; height: 40px; margin-top: 20px;border: none;box-shadow: none;"></h1>
     </header>
 	<section class="ibd lvbd">
     <h1 id="h1">六六娱乐麻将约局神器</h1>
@@ -76,13 +92,15 @@
     <input type="hidden" th:value="${p2}" id="ap2"/>
     <input type="hidden" th:value="${p3}" id="ap3"/>
     <input type="hidden" th:value="${icon}" id="aicon"/>
+    <input type="hidden" th:value="${logo}" id="alogo"/>
+    <input type="hidden" th:value="${ios}" id="aios"/>
     <div><img id="icon" src="../static/links/icon-154.png" style="width: 80px; height: 80px; margin-top: 20px;"></div>
           <p class="tztool"> <a id="install" class="btn" href="">立即下载</a></p>
 			<section class="ios">
                 <p>
                     安装教程（iOS10用户必看）
                 </p>
-                <img class="common-center" src="../static/links/ios_guid.png">
+                <img class="common-center" src="../static/links/ios_guid.png" id = "ios">
 
             </section>
 	</section>
@@ -91,6 +109,4 @@
         <div class="bd">
         </div>
     </aside>
-
-
 </body></html>
