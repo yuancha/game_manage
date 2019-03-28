@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.llmj.oss.config.IConsts;
+import com.llmj.oss.config.RedisConsts;
 import com.llmj.oss.config.RespCode;
 import com.llmj.oss.dao.DomainDao;
 import com.llmj.oss.dao.GameControlDao;
@@ -24,10 +25,13 @@ import com.llmj.oss.model.RespEntity;
 import com.llmj.oss.model.oper.QrOperation;
 import com.llmj.oss.util.FileUtil;
 import com.llmj.oss.util.QRCodeUtil;
+import com.llmj.oss.util.RedisTem;
 import com.llmj.oss.util.StringUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.List;
 
@@ -54,6 +58,11 @@ public class QRCodeController {
     public String ossOnline;
     @Value("${upload.local.qrcode}")
     public String qrcodePath;
+    @Value("${upload.local.logo}")
+	private String logoPath;
+    
+    @Autowired 
+	private RedisTem redis;
 	
 	@Autowired
 	private QrcodeDao qrDao;
@@ -123,11 +132,7 @@ public class QRCodeController {
 				log.error("无效的域名，domain : {}",domain);
 				return new RespEntity(-2,"无效域名");
 			}
-			InputStream is = null;
-			if (middel == 1) {
-				is = getMiddelImg(gameId,request);
-			}
-			String link = saveQr(qr,domain,is);
+			String link = saveQr(qr,domain,middel,request);
 			if (!link.equals("")) {
 				log.error("链接已存在，link ： {}",link);
 				return new RespEntity(-2,"链接已存在,"+link);
@@ -170,7 +175,7 @@ public class QRCodeController {
 		return new RespEntity(RespCode.SUCCESS);
 	}*/
 	
-	private String saveQr(QRCode qr,String domain,InputStream is) throws Exception {
+	private String saveQr(QRCode qr,String domain,int middle,HttpServletRequest request) throws Exception {
 		int gameId = qr.getGameId();
 		int state = qr.getState();
 		String link = domain + "?gameId="+gameId+"&gameState="+state;
@@ -178,9 +183,13 @@ public class QRCodeController {
 		if (qrDao.selectByLink(link) != null) {
 			return link;
 		}
-		
+		InputStream is = null;
+		InputStream is2 = null;
 		try {
 			qr.setLink(link);
+			if (middle == 1) {
+				is = getMiddelImg(gameId, request);
+			}
 			byte[] tmp = QRCodeUtil.encode(link,is);
 			/*String arryStr = Arrays.toString(tmp);
 			arryStr = arryStr.substring(1, arryStr.length() - 1);*/
@@ -194,14 +203,17 @@ public class QRCodeController {
 			qr.setOssPath(qrSavePath);
 			
 			//保存到本地
-			if (is != null) {
-				is.reset();//重复利用
+			if (middle == 1) {
+				is2 = getMiddelImg(gameId, request);
 			}
-			QRCodeUtil.encode(link,qrcodePath,qrName,is);
+			QRCodeUtil.encode(link,qrcodePath,qrName,is2);
 			qr.setLocalPath(qrcodePath + qrName + ".png");
 		} finally {
 			if (is != null) {
 				is.close();
+			}
+			if (is2 != null) {
+				is2.close();
 			}
 		}
 		return "";
@@ -352,36 +364,17 @@ public class QRCodeController {
 	//获得二维码中间图片
 	private InputStream getMiddelImg(int gameId,HttpServletRequest request) {
 		InputStream is = null;
-		try {//可以改成动态更改 看图标是否经常改变 意义不大
-			ServletContext context = request.getSession().getServletContext();
-			String path = "WEB-INF/static/links/";
-			switch (gameId) {
-				case 66049:  {//蔚县
-					path += "icon-yx.png";
-					break;
-				}
-				case 65793:  {//云南
-					path += "icon-yn.png";
-					break;
-				}
-				case 262145:  {//山西
-					path += "icon-sx.png";
-					break;
-				}
-				case 393217:  {//通辽
-					path += "icon-tl.png";
-					break;
-				}
-				case 589825:  {//海南
-					path += "icon-hn.png";
-					break;
-				}
-				default : {
-					path += "icon-154.png";
-					break;
-				}
+		try {
+			String path = redis.hgetPrefix(RedisConsts.PRE_HTML_KEY, RedisConsts.ICON_PATH_KEY, String.valueOf(gameId));
+			if (StringUtil.isEmpty(path)) {
+				ServletContext context = request.getSession().getServletContext();
+				path = "WEB-INF/static/links/icon-154.png";
+				is = context.getResourceAsStream(path);
+			} else {
+				path = logoPath + path;
+				File file = new File(path);
+				is = new FileInputStream(file);
 			}
-			is = context.getResourceAsStream(path);
 		} catch (Exception e) {
 			log.error("getMiddelImg error,Exception -> {}",e);
 		}
