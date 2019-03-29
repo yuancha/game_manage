@@ -60,6 +60,8 @@ public class QRCodeController {
     public String qrcodePath;
     @Value("${upload.local.logo}")
 	private String logoPath;
+    @Value("${upload.local.basePath}")
+	private String localPath;
     
     @Autowired 
 	private RedisTem redis;
@@ -320,11 +322,25 @@ public class QRCodeController {
 				}
 				qr = qrs.get(0);
 			}
-			if (!ossMgr.fileIsExist(qr.getOssPath(), Integer.parseInt(gameId))) {
+			/*if (!ossMgr.fileIsExist(qr.getOssPath(), Integer.parseInt(gameId))) {
 				log.error("qrcode not find in oss,gameId : {},ossPath : {}",gameId,qr.getOssPath());
 				return new RespEntity(-2,"oss 上二维码不存在");
 			}
-			String link = switchMgr.getQrcodeLink(qr);
+			String link = switchMgr.getQrcodeLink(qr);*/
+			if (!FileUtil.fileExist(qr.getLocalPath())) {
+				log.error("qrcode not find in server,gameId : {},qrInfo : {}",gameId,StringUtil.objToJson(qr));
+				return new RespEntity(-2,"二维码不存在");
+			}
+			String domain = switchMgr.getUseDomain(qr.getGameId(),qr.getState());
+			String link= "";
+    		if (!StringUtil.isEmpty(domain)) {
+    			link = domain + IConsts.LOCALDOWN + qr.getLocalPath().substring(localPath.length());
+    		}
+    		if (StringUtil.isEmpty(link)) {
+				log.error("getQrIconLink error,domain : {} ,path:{},basePath:{}",domain,qr.getLocalPath(),localPath);
+    			return new RespEntity(-2,"无可用二维码");
+    		}
+    		log.info("online qrcode,gameId : {}, qrlink :{]",gameId,link);
 			res.setData(link);
 		} catch (Exception e) {
 			log.error("qrCodeRefresh error,Exception -> {}",e);
