@@ -65,10 +65,11 @@ public class DownController {
 			
 	@GetMapping("/link")
 	public String downLink(Model model,HttpServletRequest request) {
+		String gameState = request.getParameter("gameState");
+		String gameId = request.getParameter("gameId");
 		try {
-			String gameState = request.getParameter("gameState");
-			String gameId = request.getParameter("gameId");
-			
+			gameState = gameState.trim();
+			gameId = gameId.trim();
 			String userAgent = request.getHeader("user-agent").toLowerCase();
 			String html = "";
 			String linkid = "";
@@ -115,7 +116,7 @@ public class DownController {
 			log.debug("获得动态链接，gameId:{},gameState:{},link:{}",gameId,gameState,link);
 			return html;
 		} catch (Exception e) {
-			log.error("downLink error,Exception -> {}",e);
+			log.error("downLink error,gameId,gameState,Exception -> {}",gameId,gameState,e);
 		}
 		return "error";
 	}
