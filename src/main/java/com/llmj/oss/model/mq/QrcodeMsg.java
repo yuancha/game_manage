@@ -15,5 +15,9 @@ public class QrcodeMsg extends BaseMsg{
 	 * 二维码链接
 	 */
 	private String qrLink;
+	/**
+	 * 二维码对应下载连接
+	 */
+	private String downlink;
 	
 }

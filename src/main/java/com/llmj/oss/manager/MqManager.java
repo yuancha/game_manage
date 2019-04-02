@@ -96,7 +96,7 @@ public class MqManager {
 	    channel.basicPublish(strName, "", null, message.getBytes());
 	}	
     
-    public void sendQrLinkToLogic(int gameId,String link) throws IOException {
+    public void sendQrLinkToLogic(int gameId,String qrlink,String downlink) throws IOException {
     	String mqName = channelMap.get(gameId);
     	if (mqName == null) {
     		log.error("mqname not find,gameId : {}",gameId);
@@ -105,7 +105,8 @@ public class MqManager {
     	QrcodeMsg msg = new QrcodeMsg();
     	msg.setGameID(gameId);
     	msg.setQueueName(mqName);
-    	msg.setQrLink(link);
+    	msg.setQrLink(qrlink);
+    	msg.setDownlink(downlink);
     	String json = StringUtil.objToJson(msg);
     	sendMessage(mqName,json);
     	log.info("mq 通知成功，mqName：{},gameId:{},json:{}",mqName,gameId,json);

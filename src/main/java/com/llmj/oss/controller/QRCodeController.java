@@ -297,8 +297,8 @@ public class QRCodeController {
 			//String qrLink = switchMgr.getQrcodeLink(qr);
 			String qrLink = link.substring(0,link.indexOf("/",8)) + IConsts.LOCALDOWN + qr.getLocalPath().substring(localPath.length());
 			//刷新到逻辑服
-			mqMgr.sendQrLinkToLogic(gameId,qrLink);
-			log.info("online qrcode,gameId : {}, qrlink :{}",gameId,qrLink);
+			mqMgr.sendQrLinkToLogic(gameId,qrLink,link);
+			log.info("online qrcode,gameId : {}, qrlink :{},downlink:{}",gameId,qrLink,link);
 		} catch (Exception e) {
 			log.error("qrCodeRefresh error,Exception -> {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);
@@ -342,8 +342,9 @@ public class QRCodeController {
 				log.error("getQrIconLink error,domain : {} ,path:{},basePath:{}",domain,qr.getLocalPath(),localPath);
     			return new RespEntity(-2,"无可用二维码");
     		}
-    		log.info("online qrcode,gameId : {}, qrlink :{}",gameId,link);
+    		log.info("online qrcode,gameId : {}, qrlink :{},downlink:{}",gameId,link,qr.getLink());
 			res.setData(link);
+			res.setOnline(qr.getLink());
 		} catch (Exception e) {
 			log.error("qrCodeRefresh error,Exception -> {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);
