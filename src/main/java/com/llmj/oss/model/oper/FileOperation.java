@@ -16,4 +16,5 @@ public class FileOperation {
 	private int gameState;	//状态 0test 1正式
 	private int page;
 	private int limit;
+	private String notes;	//备注说明
 }

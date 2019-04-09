@@ -141,6 +141,7 @@
                                 <thead>
                                     <tr>
                                     	<th width="30%"  style="text-align: center">二维码</th>
+                                    	<th width="30%"  style="text-align: center">下载链接</th>
                                         <th width="30%"  style="text-align: center">描述</th>
                                         <th width="30%"  style="text-align: center">状态</th>
                                         <th style="text-align: center">操作</th>

@@ -36,5 +36,5 @@ public class UploadFile implements Serializable {
 	private String localPath; 	//本地存放路径
 	private String ossPath;		//oss存放路径
 	//下载路径标识
-	
+	private String notes;	//备注说明
 }

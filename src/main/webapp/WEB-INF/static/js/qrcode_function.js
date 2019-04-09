@@ -25,7 +25,6 @@ $('#app_confirm').on('click',function(){
 });
 
 function createQrcode(data){
-		console.log(data);
 		$.ajax({
 			 //几个参数需要注意一下
 	      type: "POST",//方法类型
@@ -69,24 +68,28 @@ function getListByAjax(data){
         	   var tb = $("#mytb tbody");
 				var arry = result.data;
 				var trHTML = "";
+				var state = $("#app_state").val();
 				for (var i = 0; i < arry.length; i++) {
 					var obj = arry[i];
 					//var bytes = obj.photo.split(",");
 					//var str = arrayBufferToBase64(bytes);
 					trHTML += "<tr>\
 							<td style='vertical-align: middle;'><img src='"+obj.ossPath+"'></td>\
+							<td style='vertical-align: middle;'>"+ obj.link+ "</td>\
 							<td style='vertical-align: middle;' class='content'>"+ obj.content+ "</td>\
 							<td style='vertical-align: middle;'>"+ stateToStr(obj.logicUse)+ "</td>\
 							<td style='vertical-align: middle;'>\
-							<button class='btn btn-secondary btn-single btn-sm btn_look'>查看</button>\
-							<button class='btn btn-turquoise btn-single btn-sm btn_refresh'>刷新</button>\
-							</td>\
-							<input type='hidden' class='link' value='"+ obj.link+ "'>\
+							<button class='btn btn-secondary btn-single btn-sm btn_look'>查看</button>"
+					if (state == 1) {
+						trHTML += "<button class='btn btn-turquoise btn-single btn-sm btn_refresh'>应用</button>";
+					}
+					trHTML +="</td>\
 							<input type='hidden' class='id' value='"+ obj.id+ "'>\
 							<input type='hidden' class='oss' value='"+ obj.ossPath+ "'>\
 							<input type='hidden' class='local' value='"+ obj.localPath+ "'>\
 							<input type='hidden' class='logicUse' value='"+ obj.logicUse+ "'>\
 							<input type='hidden' class='gameId' value='"+ obj.gameId+ "'>\
+							<input type='hidden' class='link' value='"+ obj.link+ "'>\
 							</tr>";
 				}
 				tb.append(trHTML);
@@ -163,68 +166,69 @@ $(document).on('click','.btn_look',function() {
 
 //删除
 $(document).on('click','#btn_del',function() {
-	
-	var link = $(this).parents('.modal-content').find('#show_qrcode_link').val();
-	var data = '{"domain":"'+link+'"}'
-	$.ajax({
-		type : "POST",//方法类型
-		dataType : "json",//预期服务器返回的数据类型
-		contentType : "application/json; charset=utf-8",
-		url : "/qrCode/del",//url
-		data : data,
-		success : function(result) {
-			if (result.code == 0) {
-				$('#app_box').children().remove();
-				var gameId  = $('#gameId').val();
-				var state = $("#app_state").val();
-				var data = '{"gameId":"'+gameId+'","state":"'+state+'"}';
-				getListByAjax(data);
-				alert(result.message);
-				//window.location.reload();
-				$('#btn_close_1').click();
-			} else {
-				alert(result.message);
+	if (window.confirm('确定删除吗？')) {
+		var link = $(this).parents('.modal-content').find('#show_qrcode_link').val();
+		var data = '{"domain":"'+link+'"}'
+		$.ajax({
+			type : "POST",//方法类型
+			dataType : "json",//预期服务器返回的数据类型
+			contentType : "application/json; charset=utf-8",
+			url : "/qrCode/del",//url
+			data : data,
+			success : function(result) {
+				if (result.code == 0) {
+					$('#app_box').children().remove();
+					var gameId  = $('#gameId').val();
+					var state = $("#app_state").val();
+					var data = '{"gameId":"'+gameId+'","state":"'+state+'"}';
+					getListByAjax(data);
+					alert(result.message);
+					//window.location.reload();
+					$('#btn_close_1').click();
+				} else {
+					alert(result.message);
+				}
+			},
+			error : function() {
+				alert("异常！");
 			}
-		},
-		error : function() {
-			alert("异常！");
-		}
-	});
+		});
+	}
 });
 
 
 
 //刷新
 $(document).on('click','.btn_refresh',function() {
-	
-	var link = $(this).parents('tr').find('.link').val();
-	var gameId  = $('#gameId').val();
-	var state = $("#app_state").val();
-	var data = '{"gameId":"'+gameId+'","domain":"'+link+'","state":"'+state+'"}';
-	$.ajax({
-		type : "POST",//方法类型
-		dataType : "json",//预期服务器返回的数据类型
-		contentType : "application/json; charset=utf-8",
-		url : "/qrCode/refresh",//url
-		data : data,
-		success : function(result) {
-			if (result.code == 0) {
-				$('#app_box').children().remove();
-				var gameId  = $('#gameId').val();
-				var state = $("#app_state").val();
-				var data = '{"gameId":"'+gameId+'","state":"'+state+'"}';
-				getListByAjax(data);
-				alert(result.message);
-				//window.location.reload();
-			} else {
-				alert(result.message);
+	if (window.confirm('确定应用吗？')) {
+		var link = $(this).parents('tr').find('.link').val();
+		var gameId  = $('#gameId').val();
+		var state = $("#app_state").val();
+		var data = '{"gameId":"'+gameId+'","domain":"'+link+'","state":"'+state+'"}';
+		$.ajax({
+			type : "POST",//方法类型
+			dataType : "json",//预期服务器返回的数据类型
+			contentType : "application/json; charset=utf-8",
+			url : "/qrCode/refresh",//url
+			data : data,
+			success : function(result) {
+				if (result.code == 0) {
+					$('#app_box').children().remove();
+					var gameId  = $('#gameId').val();
+					var state = $("#app_state").val();
+					var data = '{"gameId":"'+gameId+'","state":"'+state+'"}';
+					getListByAjax(data);
+					alert("应用成功");
+					//window.location.reload();
+				} else {
+					alert(result.message);
+				}
+			},
+			error : function() {
+				alert("异常！");
 			}
-		},
-		error : function() {
-			alert("异常！");
-		}
-	});
-	
+		});
+	}
 });
 
 function arrayBufferToBase64( buffer ) {

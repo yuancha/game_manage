@@ -230,9 +230,9 @@ public class QRCodeController {
 			if (qr == null) {
 				return new RespEntity(RespCode.SUCCESS);
 			}
-			/*if (qr.getLogicUse() == lUse) {
-				return new RespEntity(-2,"已在逻辑服备份，请先刷新其它二维码备份后再删除");
-			}*/
+			if (qr.getLogicUse() == lUse) {
+				return new RespEntity(-2,"已在逻辑服备份，请先应用其它二维码备份后再删除");
+			}
 			qrDao.delQR(model.getDomain());
 			ossMgr.removeFile(qr.getOssPath(),qr.getGameId());
 			FileUtil.deleteFile(qr.getLocalPath());
@@ -285,10 +285,10 @@ public class QRCodeController {
 				log.error("qrcode not find,link ： {}",link);
 				return new RespEntity(-2,"数据错误");
 			}
-			if (old != null) {
-				if (old.getLink().equals(link)) {
+			if (old != null && !old.getLink().equals(link)) {
+				/*if (old.getLink().equals(link)) {
 					return new RespEntity(-2,"已经是备份状态");
-				}
+				}*/
 				old.setLogicUse(lNoUse);
 				qrDao.updateLogicUse(old);
 			}

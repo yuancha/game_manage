@@ -150,6 +150,8 @@
                                 <thead>
                                     <tr>
                                     	<th width="30%"  style="text-align: center">游戏包名称</th>
+                                        <th width="30%"  style="text-align: center">文件名</th>
+                                        <th width="30%"  style="text-align: center">备注</th>
                                         <th width="30%"  style="text-align: center">状态</th>
                                         <th style="text-align: center">操作</th>
                                     </tr>
@@ -246,11 +248,11 @@
                             消息框内容
                     </div>
                     
-                    <div class="modal-footer">
+                    <div class="modal-footer" id="btnShow">
                     	<button type="button" class="btn btn-white" data-dismiss="modal">关闭</button>
                     	<button type="button" class="btn btn-secondary" data-dismiss="modal" id="app_down">下载</button>
                         <button type="button" class="btn btn-danger" data-dismiss="modal" id="app_delete">删除</button>
-                        <button type="button" class="btn btn-info" data-dismiss="modal" id="app_copy">拷贝</button>
+                        <!-- <button type="button" class="btn btn-info" data-dismiss="modal" id="app_copy">发布</button> -->
                     </div>
                 </div>
             </div>
@@ -290,6 +292,9 @@
  			$('#gameId').val(gameId);
  			$('.page-title').find('.active').find('a').html(name);
  			getFilesInfoByAjax(data);
+ 			if (gameState == 0) {//测试数据
+ 				$("#btnShow").append('<button type="button" class="btn btn-info" data-dismiss="modal" id="app_copy">发布</button>');	
+ 			}
  		})
  		 
  		</script>

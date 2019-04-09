@@ -83,10 +83,12 @@ $('#app_android,#app_iOS').on('click',function(){
 
 //刷包
 $(document).on('click','.ev_refresh',function(){
-	var id 			= $(this).parents('tr').find('.app_id').val();
-	var gameState 	= $('#app_state').val();
-	var data 		= '{"id":"'+id+'","gameState":"'+gameState+'"}';
-	refreshFilesInfoByAjax(data); 
+	if (window.confirm('确定上线吗？')) {
+		var id 			= $(this).parents('tr').find('.app_id').val();
+		var gameState 	= $('#app_state').val();
+		var data 		= '{"id":"'+id+'","gameState":"'+gameState+'"}';
+		refreshFilesInfoByAjax(data); 
+	}
 });
 
 function refreshFilesInfoByAjax(data){
@@ -98,9 +100,7 @@ function refreshFilesInfoByAjax(data){
       url: "/oss/refreshPack" ,//url
       data: data,
       success: function (result) {
-          console.log(result);//打印服务端返回的数据(调试用)
           if (result.code == 0) {
-              alert("刷包成功");    
               var gameId  = $('#gameId').val();
           	  var gameType;
           	  if ($('#app_system').val() == "Android") {
@@ -111,6 +111,7 @@ function refreshFilesInfoByAjax(data){
           	  var gameState 	= $('#app_state').val();
           	  var data 		= '{"gameId":"'+gameId+'","gameType":"'+gameType+'","gameState":"'+gameState+'"}';
           	  getFilesInfoByAjax(data);
+          	  alert("操作成功"); 
           }else{
        	   	  alert(result.message);
           }
@@ -125,10 +126,12 @@ function refreshFilesInfoByAjax(data){
 
 //拷贝
 $(document).on('click','#app_copy',function(){
-	var id 			= $(this).parents('.modal-content').find('#show_app_id').val();
-	var gameState 	= $('#app_state').val();
-	var data 		= '{"id":"'+id+'","gameState":"'+gameState+'"}';
-	copyFilesInfoByAjax(data); 
+	if (window.confirm('确定发布吗？')) {
+		var id 			= $(this).parents('.modal-content').find('#show_app_id').val();
+		var gameState 	= $('#app_state').val();
+		var data 		= '{"id":"'+id+'","gameState":"'+gameState+'"}';
+		copyFilesInfoByAjax(data); 
+	}
 });
 
 function copyFilesInfoByAjax(data){
@@ -141,7 +144,7 @@ function copyFilesInfoByAjax(data){
        data: data,
        success: function (result) {
            if (result.code == 0) {
-               alert("拷贝成功");    
+               alert("发布成功");    
            }else {
         	   alert(result.message);
            }
@@ -154,10 +157,12 @@ function copyFilesInfoByAjax(data){
 
 //删除
 $(document).on('click','#app_delete',function(){
-	var id 		= $(this).parents('.modal-content').find('#show_app_id').val();
-	var gameState 	= $('#app_state').val();
-	var data 		= '{"id":"'+id+'","gameState":"'+gameState+'"}';
-	deleteFilesInfoByAjax(data); 
+	if (window.confirm('确定删除吗？')) {
+		var id 		= $(this).parents('.modal-content').find('#show_app_id').val();
+		var gameState 	= $('#app_state').val();
+		var data 		= '{"id":"'+id+'","gameState":"'+gameState+'"}';
+		deleteFilesInfoByAjax(data); 
+	}
 });
 
 function deleteFilesInfoByAjax(data){
@@ -233,10 +238,12 @@ function getFilesInfoByAjax(data){
                
                	 $('#app_box').append("<tr>\
                		<td class='middle-align'>"+filePathSplit(data[i].localPath)+"</td>\
+               		<td class='middle-align'>"+data[i].fileName+"</td>\
+               		<td class='middle-align'>"+data[i].notes+"</td>\
                        <td class='middle-align'>"+stateToStr(data[i].state)+"</td>\
                        <td>\
                            <a href='#' class='btn btn-secondary btn-single btn-sm ev_look'>查看</a>\
-                           <a href='#' class='btn btn-turquoise btn-single btn-sm ev_refresh'>刷包</a>\
+                           <a href='#' class='btn btn-turquoise btn-single btn-sm ev_refresh'>上线</a>\
                        </td>\
                        <input type='hidden' value="+data[i].id+" class='app_id' >\
                        <input type='hidden' value="+data[i].game+" class='app_game' >\

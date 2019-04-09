@@ -50,4 +50,7 @@ public interface UploadDao {
 	
 	@Delete("delete from ${tableName} where id=#{id}")
 	void deleteFile(@Param("id") int id,@Param("tableName") String tableName);
+	
+	@Update("update ${tableName} set notes=#{notes} where id=#{id}")
+	void updateNotes(@Param("tableName") String tableName,@Param("id") int id,@Param("notes") String notes);
 }

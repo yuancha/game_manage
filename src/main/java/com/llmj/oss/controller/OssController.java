@@ -406,4 +406,29 @@ public class OssController {
         }
         return new RespEntity(RespCode.SUCCESS);
     }
+    
+    @PostMapping("/notesUp") 
+    @ResponseBody
+    public RespEntity notesUp(@RequestBody FileOperation param) {
+
+        try {
+        	int id = param.getId();
+			int state = param.getGameState();
+			String notes = param.getNotes();
+			if (StringUtil.isEmpty(notes.trim())) {
+				return new RespEntity(-2,"备注错误");
+			}
+			String tableName = getTableName(state);
+			UploadFile file = uploadDao.selectById(id,tableName);
+			if (file == null || file.getState() == IConsts.UpFileState.delete.getState()) {
+				return new RespEntity(-2,"文件不存在");
+			}
+			uploadDao.updateNotes(tableName, id, notes);
+			log.debug("备注修改成功，id:{},state : {},notes:{}",id,state,notes);
+        } catch (Exception e) {
+            log.error("notesUp error,Exception -> {}",e);
+            return new RespEntity(RespCode.SERVER_ERROR);
+        }
+        return new RespEntity(RespCode.SUCCESS);
+    }
 }
