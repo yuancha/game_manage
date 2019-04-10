@@ -18,6 +18,7 @@ import com.llmj.oss.dao.GameControlDao;
 import com.llmj.oss.dao.QrcodeDao;
 import com.llmj.oss.manager.AliOssManager;
 import com.llmj.oss.manager.MqManager;
+import com.llmj.oss.manager.OpLogManager;
 import com.llmj.oss.manager.SwitchManager;
 import com.llmj.oss.model.GameControl;
 import com.llmj.oss.model.QRCode;
@@ -78,6 +79,8 @@ public class QRCodeController {
 	private SwitchManager switchMgr;
 	@Autowired
     private GameControlDao gameDao;
+	@Autowired
+	private OpLogManager logMgr;
 	
 	@GetMapping("")
 	public String qrCodeHome(Model model,HttpServletRequest request) {
@@ -141,6 +144,14 @@ public class QRCodeController {
 			}
 			qrDao.save(qr);
 			log.info("二维码保存成功，info - > {}",StringUtil.objToJson(qr));
+			
+			if (state == 1) {//正式数据才保存
+				String account = (String) request.getSession().getAttribute("account");
+				StringBuilder sb = new StringBuilder("二维码新增，游戏id：");
+				sb.append(qr.getGameId());
+				sb.append(",下载链接：").append(qr.getLink());
+				logMgr.opLogSave(account,OpLogManager.qr_log,sb.toString());
+			}
 		} catch (Exception e) {
 			log.error("qrCodeAdd error,Exception -> {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);
@@ -223,7 +234,7 @@ public class QRCodeController {
 	
 	@PostMapping("/del")
 	@ResponseBody
-	public RespEntity qrCodeDel(@RequestBody QrOperation model) {
+	public RespEntity qrCodeDel(@RequestBody QrOperation model,HttpServletRequest request) {
 		try {
 			String link = model.getDomain();
 			QRCode qr = qrDao.selectByLink(link);
@@ -237,6 +248,14 @@ public class QRCodeController {
 			ossMgr.removeFile(qr.getOssPath(),qr.getGameId());
 			FileUtil.deleteFile(qr.getLocalPath());
 			log.info("二维码删除成功，link : {}",model.getDomain());
+			
+			if (qr.getState() == 1) {//正式数据才保存
+				String account = (String) request.getSession().getAttribute("account");
+				StringBuilder sb = new StringBuilder("二维码删除，游戏id：");
+				sb.append(qr.getGameId());
+				sb.append(",下载链接：").append(qr.getLink());
+				logMgr.opLogSave(account,OpLogManager.qr_log,sb.toString());
+			}
 		} catch (Exception e) {
 			log.error("qrCodeDel error,Exception -> {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);
@@ -263,7 +282,7 @@ public class QRCodeController {
 	 */
 	@PostMapping("/refresh")
 	@ResponseBody
-	public RespEntity qrCodeRefresh(@RequestBody QrOperation model) {
+	public RespEntity qrCodeRefresh(@RequestBody QrOperation model,HttpServletRequest request) {
 		RespEntity res = new RespEntity();
 		try {
 			int state = model.getState();
@@ -299,6 +318,14 @@ public class QRCodeController {
 			//刷新到逻辑服
 			mqMgr.sendQrLinkToLogic(gameId,qrLink,link);
 			log.info("online qrcode,gameId : {}, qrlink :{},downlink:{}",gameId,qrLink,link);
+			
+			if (state == 1) {//正式数据才保存
+				String account = (String) request.getSession().getAttribute("account");
+				StringBuilder sb = new StringBuilder("二维码应用，游戏id：");
+				sb.append(qr.getGameId());
+				sb.append(",下载链接：").append(qr.getLink());
+				logMgr.opLogSave(account,OpLogManager.qr_log,sb.toString());
+			}
 		} catch (Exception e) {
 			log.error("qrCodeRefresh error,Exception -> {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);

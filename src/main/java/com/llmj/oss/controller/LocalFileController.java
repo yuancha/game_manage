@@ -16,6 +16,7 @@ import com.llmj.oss.config.RedisConsts;
 import com.llmj.oss.config.RespCode;
 import com.llmj.oss.dao.UploadDao;
 import com.llmj.oss.manager.AliOssManager;
+import com.llmj.oss.manager.OpLogManager;
 import com.llmj.oss.manager.SwitchManager;
 import com.llmj.oss.model.LocalFile;
 import com.llmj.oss.model.RespEntity;
@@ -55,6 +56,8 @@ public class LocalFileController {
 	private RedisTem redis;
 	@Autowired
 	private AliOssManager ossMgr;
+	@Autowired
+	private OpLogManager logMgr;
 	
 	@GetMapping("")
 	public String fileHome(Model model,HttpServletRequest request) {
@@ -130,7 +133,7 @@ public class LocalFileController {
 	
 	@PostMapping("/del")
 	@ResponseBody
-	public RespEntity fileDel(@RequestBody LocalFileOper model) {
+	public RespEntity fileDel(@RequestBody LocalFileOper model,HttpServletRequest request) {
 		try {
 			int gameId = model.getGameId();
 			String filename = model.getFileName();
@@ -181,6 +184,13 @@ public class LocalFileController {
 			//删除文件所在文件夹下文件
 			FileUtil.deleteFileParentsDir(path);
 			log.info("彻底删除文件成功，文件名: {},gameId:{}",filename,gameId);
+			
+			String account = (String) request.getSession().getAttribute("account");
+			StringBuilder sb = new StringBuilder("本地文件删除，游戏id：");
+			sb.append(gameId);
+			sb.append(",文件名：").append(filename);
+			sb.append(",路径：").append(path);
+			logMgr.opLogSave(account,OpLogManager.file_log,sb.toString());
 		} catch (Exception e) {
 			log.error("fileDel error,Exception -> {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);

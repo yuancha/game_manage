@@ -5,7 +5,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.web.servlet.HandlerInterceptor;
 
-import com.llmj.oss.model.User;
+import com.llmj.oss.util.StringUtil;
 
 public class UrlInterceptor implements HandlerInterceptor {
 	
@@ -25,13 +25,12 @@ public class UrlInterceptor implements HandlerInterceptor {
 			return flag;
 		}
 		
-		User user = (User) request.getSession().getAttribute("user");
-		if (user == null) {
+		String account = (String) request.getSession().getAttribute("account");
+		if (StringUtil.isEmpty(account)) {
 			response.sendRedirect(request.getContextPath()+"/");
 			flag = false;
 		} else {
-			request.getSession().setAttribute("user", user);
-			request.getSession().setAttribute("account", user.getAccount());
+			request.getSession().setAttribute("account", account);
 		}
 		
 		return flag;

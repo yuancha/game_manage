@@ -22,6 +22,7 @@ import com.llmj.oss.dao.GameControlDao;
 import com.llmj.oss.dao.OssConnectDao;
 import com.llmj.oss.dao.UploadDao;
 import com.llmj.oss.manager.AliOssManager;
+import com.llmj.oss.manager.OpLogManager;
 import com.llmj.oss.manager.PackManager;
 import com.llmj.oss.manager.SwitchManager;
 import com.llmj.oss.model.DownLink;
@@ -57,6 +58,8 @@ public class OssController {
 	private OssConnectDao ossDao;
 	@Autowired
 	private SwitchManager switchMgr;
+	@Autowired
+	private OpLogManager logMgr;
 	
 	//本地存放路径
 	@Value("${upload.local.basePath}")
@@ -132,7 +135,7 @@ public class OssController {
 	//删除文件
 	@PostMapping("/delFile")
 	@ResponseBody
-	public RespEntity delFile(@RequestBody FileOperation param) {
+	public RespEntity delFile(@RequestBody FileOperation param,HttpServletRequest request) {
 		try {
 			int id = param.getId();
 			int state = param.getGameState();
@@ -157,6 +160,15 @@ public class OssController {
 			file.setState(IConsts.UpFileState.delete.getState());
 			uploadDao.delFile(tableName,file);
 			log.info("delFile success,id:{},packName:{},type:{},state:{}",file.getId(),file.getPackName(),file.getType(),state);
+			
+			if (state == 1) {//正式数据才保存
+				String account = (String) request.getSession().getAttribute("account");
+				StringBuilder sb = new StringBuilder("app文件删除，游戏id：");
+				sb.append(file.getGameId());
+				sb.append(",文件名：").append(file.getFileName());
+				sb.append(",数据表id：").append(id);
+				logMgr.opLogSave(account,OpLogManager.app_log,sb.toString());
+			}
 		} catch (Exception e) {
 			log.error("delFile error,Exception - > {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);
@@ -167,7 +179,7 @@ public class OssController {
 	//一键刷包
 	@PostMapping("/refreshPack")
 	@ResponseBody
-	public RespEntity refreshPackage(@RequestBody FileOperation param) {
+	public RespEntity refreshPackage(@RequestBody FileOperation param,HttpServletRequest request) {
 		try {
 			int id = param.getId();
 			int state = param.getGameState();
@@ -245,6 +257,15 @@ public class OssController {
 			uploadDao.updateState(tableName,IConsts.UpFileState.online.getState(), IConsts.UpFileState.up2oss.getState(),file);//先更改之前线上状态信息
 			uploadDao.updateState1(tableName,file);	//再修改自己状态信息
 			log.info("refreshPack success,packfile info : {}",StringUtil.objToJson(file));
+			
+			if (state == 1) {//正式数据才保存
+				String account = (String) request.getSession().getAttribute("account");
+				StringBuilder sb = new StringBuilder("app文件上线，游戏id：");
+				sb.append(file.getGameId());
+				sb.append(",文件名：").append(file.getFileName());
+				sb.append(",数据表id：").append(id);
+				logMgr.opLogSave(account,OpLogManager.app_log,sb.toString());
+			}
 		} catch (Exception e) {
 			log.error("refreshPackage error,Exception ->{}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);
@@ -255,7 +276,7 @@ public class OssController {
 	//复制
 	@PostMapping("/copyFile")
 	@ResponseBody
-	public RespEntity copyFile(@RequestBody FileOperation param) {
+	public RespEntity copyFile(@RequestBody FileOperation param,HttpServletRequest request) {
 		
 		int id = param.getId();
 		int state = param.getGameState();
@@ -297,6 +318,13 @@ public class OssController {
 			uploadDao.copyFile(file, targetTable);
 			//保存到redis
 			saveToRedis(gameId,file);
+			
+			String account = (String) request.getSession().getAttribute("account");
+			StringBuilder sb = new StringBuilder("app文件发布，游戏id：");
+			sb.append(file.getGameId());
+			sb.append(",文件名：").append(file.getFileName());
+			sb.append(",数据表id：").append(id);
+			logMgr.opLogSave(account,OpLogManager.app_log,sb.toString());
 		} catch (Exception e) {
 			log.error("copyFile error,Exception - > {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);
@@ -332,13 +360,18 @@ public class OssController {
 	
 	@PostMapping("/add") 
     @ResponseBody
-    public RespEntity ossAdd(@RequestBody OssConnect model) {
+    public RespEntity ossAdd(@RequestBody OssConnect model,HttpServletRequest request) {
         try {
         	if (!chenkOssConnect(model)) {
         		return new RespEntity(-2,"有空数据");
         	}
         	ossDao.save(model);
         	log.info("ossAdd success,info : {}",StringUtil.objToJson(model));
+        	
+        	String account = (String) request.getSession().getAttribute("account");
+        	StringBuilder sb = new StringBuilder("oss连接新增，内容：");
+			sb.append(StringUtil.objToJson(model));
+			logMgr.opLogSave(account,OpLogManager.oss_log,sb.toString());
         } catch (Exception e) {
             log.error("ossAdd error,Exception -> {}",e);
             return new RespEntity(RespCode.SERVER_ERROR);
@@ -348,7 +381,7 @@ public class OssController {
     
     @PostMapping("/update") 
     @ResponseBody
-    public RespEntity ossUpdate(@RequestBody OssConnect model) {
+    public RespEntity ossUpdate(@RequestBody OssConnect model,HttpServletRequest request) {
 
         try {
         	if (!chenkOssConnect(model)) {
@@ -373,6 +406,13 @@ public class OssController {
         			}
         		}
         	}
+        	
+        	String account = (String) request.getSession().getAttribute("account");
+        	StringBuilder sb = new StringBuilder("oss连接修改，旧内容：");
+			sb.append(StringUtil.objToJson(old));
+			sb.append(",新内容:");
+			sb.append(StringUtil.objToJson(model));
+			logMgr.opLogSave(account,OpLogManager.oss_log,sb.toString());
         } catch (Exception e) {
             log.error("ossUpdate error,Exception -> {}",e);
             return new RespEntity(RespCode.SERVER_ERROR);
@@ -390,16 +430,26 @@ public class OssController {
     
     @PostMapping("/del") 
     @ResponseBody
-    public RespEntity ossDel(@RequestBody OssConnect model) {
+    public RespEntity ossDel(@RequestBody OssConnect model,HttpServletRequest request) {
 
         try {
         	int id = model.getId();
+        	OssConnect old = ossDao.selectById(id);
+        	if (old == null) {
+        		log.error("OssConnect not find,id : {}",id);
+        		return new RespEntity(-2,"数据未找到");
+        	}
         	//检查是否有game引用
         	if (!gameDao.selectByOssId(id).isEmpty()) {
         		return new RespEntity(-2,"有游戏引用，不可删除");
         	}
         	ossDao.delete(id);
         	log.info("del oss connect success,id : {}",id);
+        	
+        	String account = (String) request.getSession().getAttribute("account");
+        	StringBuilder sb = new StringBuilder("oss连接删除，内容：");
+			sb.append(StringUtil.objToJson(old));
+			logMgr.opLogSave(account,OpLogManager.oss_log,sb.toString());
         } catch (Exception e) {
             log.error("ossDel error,Exception -> {}",e);
             return new RespEntity(RespCode.SERVER_ERROR);

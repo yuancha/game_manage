@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.llmj.oss.config.RespCode;
 import com.llmj.oss.dao.PackageDao;
+import com.llmj.oss.manager.OpLogManager;
 import com.llmj.oss.manager.PackManager;
 import com.llmj.oss.model.PackageName;
 import com.llmj.oss.model.RespEntity;
@@ -37,6 +38,8 @@ public class PackageController {
 	private PackageDao packDao;
 	@Autowired
 	private PackManager packMgr;
+	@Autowired
+	private OpLogManager logMgr;
 	
 	@GetMapping("")
 	public String packHome(Model model,HttpServletRequest request) {
@@ -60,11 +63,16 @@ public class PackageController {
 	
 	@PostMapping("/add")
 	@ResponseBody
-	public RespEntity packAdd(@RequestBody PackOperation model) {
+	public RespEntity packAdd(@RequestBody PackOperation model,HttpServletRequest request) {
 		try {
 			PackageName pn = objChange(model);
 			packDao.savePack(pn);
 			log.info("pack add success,info : {}",StringUtil.objToJson(pn));
+			
+			String account = (String) request.getSession().getAttribute("account");
+			StringBuilder sb = new StringBuilder("包名新增，内容：");
+			sb.append(StringUtil.objToJson(pn));
+			logMgr.opLogSave(account,OpLogManager.pack_log,sb.toString());
 		} catch (Exception e) {
 			log.error("packAdd error,Exception -> {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);
@@ -74,7 +82,7 @@ public class PackageController {
 	
 	@PostMapping("/update")
 	@ResponseBody
-	public RespEntity packUpdate(@RequestBody PackOperation model) {
+	public RespEntity packUpdate(@RequestBody PackOperation model,HttpServletRequest request) {
 		try {
 			PackageName pn = objChange(model);
 			PackageName old = packDao.selectById(pn.getGameId());
@@ -83,6 +91,13 @@ public class PackageController {
 			}
 			packDao.updatePack(pn);
 			log.info("pack update success,info : {}",StringUtil.objToJson(pn));
+			
+			String account = (String) request.getSession().getAttribute("account");
+			StringBuilder sb = new StringBuilder("包名修改，旧内容：");
+			sb.append(StringUtil.objToJson(old));
+			sb.append(",新内容：");
+			sb.append(StringUtil.objToJson(pn));
+			logMgr.opLogSave(account,OpLogManager.pack_log,sb.toString());
 		} catch (Exception e) {
 			log.error("packUpdate error,Exception -> {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);
@@ -92,10 +107,19 @@ public class PackageController {
 	
 	@PostMapping("/del")
 	@ResponseBody
-	public RespEntity packDel(@RequestBody PackOperation model) {
+	public RespEntity packDel(@RequestBody PackOperation model,HttpServletRequest request) {
 		try {
+			PackageName old = packDao.selectById(model.getGameId());
+			if (old == null) {
+				return new RespEntity(-2,"数据错误");
+			}
 			packDao.delPack(model.getGameId());
 			log.info("pack del success,gameId : {}",model.getGameId());
+			
+			String account = (String) request.getSession().getAttribute("account");
+			StringBuilder sb = new StringBuilder("包名删除，内容：");
+			sb.append(StringUtil.objToJson(old));
+			logMgr.opLogSave(account,OpLogManager.pack_log,sb.toString());
 		} catch (Exception e) {
 			log.error("packDel error,Exception -> {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);

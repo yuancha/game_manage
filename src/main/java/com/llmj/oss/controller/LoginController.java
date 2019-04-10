@@ -75,7 +75,7 @@ public class LoginController {
 				//oldSession.invalidate();
 			}
 			
-			session.setAttribute("user", my);
+			session.setAttribute("account", my.getAccount());
 			sessionMap.put(account, session);
 			userDao.updateLoginTime(my);
 		} catch (Exception e) {

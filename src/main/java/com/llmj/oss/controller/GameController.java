@@ -2,6 +2,8 @@ package com.llmj.oss.controller;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,11 +16,11 @@ import com.llmj.oss.config.RedisConsts;
 import com.llmj.oss.config.RespCode;
 import com.llmj.oss.dao.GameControlDao;
 import com.llmj.oss.manager.MqManager;
+import com.llmj.oss.manager.OpLogManager;
 import com.llmj.oss.model.GameControl;
 import com.llmj.oss.model.RespEntity;
 import com.llmj.oss.util.RedisTem;
 import com.llmj.oss.util.StringUtil;
-import com.rabbitmq.client.Channel;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,6 +35,8 @@ public class GameController {
 	private RedisTem redis;
 	@Autowired 
 	private MqManager mqMgr;
+	@Autowired
+	private OpLogManager logMgr;
 	
     @GetMapping("")
     public String index() {
@@ -55,7 +59,7 @@ public class GameController {
     
     @PostMapping("/add") 
     @ResponseBody
-    public RespEntity gameAdd(@RequestBody GameControl model) {
+    public RespEntity gameAdd(@RequestBody GameControl model,HttpServletRequest request) {
         try {
         	gameDao.save(model);
         	log.info("add game success,info : {}",StringUtil.objToJson(model));
@@ -64,7 +68,10 @@ public class GameController {
         		//mq 变更
         		mqMgr.createChannel(model.getGameId(), qrChannel);
         	}
-        	
+        	String account = (String) request.getSession().getAttribute("account");
+        	StringBuilder sb = new StringBuilder("游戏管理新增，内容：");
+			sb.append(StringUtil.objToJson(model));
+			logMgr.opLogSave(account,OpLogManager.game_log,sb.toString());
         } catch (Exception e) {
             log.error("gameAdd error,Exception -> {}",e);
             return new RespEntity(RespCode.SERVER_ERROR);
@@ -74,7 +81,7 @@ public class GameController {
     
     @PostMapping("/update") 
     @ResponseBody
-    public RespEntity gameUpdate(@RequestBody GameControl model) {
+    public RespEntity gameUpdate(@RequestBody GameControl model,HttpServletRequest request) {
         try {
         	int gameId = model.getGameId();
         	GameControl old = gameDao.selectById(gameId);
@@ -95,6 +102,13 @@ public class GameController {
         		//域名变更 删除redis
         		redis.vagueDel(RedisConsts.PRE_LINK_KEY, gameId + "_*");
         	}
+        	
+        	String account = (String) request.getSession().getAttribute("account");
+        	StringBuilder sb = new StringBuilder("游戏管理修改，旧内容：");
+			sb.append(StringUtil.objToJson(old));
+			sb.append(",新内容:");
+			sb.append(StringUtil.objToJson(model));
+			logMgr.opLogSave(account,OpLogManager.game_log,sb.toString());
         } catch (Exception e) {
             log.error("gameUpdate error,Exception -> {}",e);
             return new RespEntity(RespCode.SERVER_ERROR);

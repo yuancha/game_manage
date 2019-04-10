@@ -16,6 +16,7 @@ import com.llmj.oss.dao.GameControlDao;
 import com.llmj.oss.dao.UploadDao;
 import com.llmj.oss.mail.DingDingNotice;
 import com.llmj.oss.manager.AliOssManager;
+import com.llmj.oss.manager.OpLogManager;
 import com.llmj.oss.manager.PackManager;
 import com.llmj.oss.manager.SwitchManager;
 import com.llmj.oss.model.GameControl;
@@ -24,6 +25,7 @@ import com.llmj.oss.model.RespEntity;
 import com.llmj.oss.model.UploadFile;
 import com.llmj.oss.util.DateUtil;
 import com.llmj.oss.util.FileUtil;
+import com.llmj.oss.util.HttpClientUtil;
 import com.llmj.oss.util.RedisTem;
 import com.llmj.oss.util.StringUtil;
 
@@ -35,6 +37,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 @Controller
 @Slf4j(topic = "ossLogger")
@@ -54,6 +58,8 @@ public class UploadController {
 	private SwitchManager switchMgr;
 	@Autowired 
 	private RedisTem redis;
+	@Autowired
+	private OpLogManager logMgr;
 	
 	//本地存放路径
 	@Value("${upload.local.basePath}")
@@ -73,7 +79,7 @@ public class UploadController {
      */
     @PostMapping("/uploadFile") 
     @ResponseBody
-    public RespEntity singleFileUpload(@RequestParam("file") MultipartFile file) {
+    public RespEntity singleFileUpload(@RequestParam("file") MultipartFile file,HttpServletRequest request) {
         if (file.isEmpty()) {
             return new RespEntity(RespCode.FILE_ERROR);
         }
@@ -161,6 +167,8 @@ public class UploadController {
             //redis存储 用于文件管理
             saveToRedis(gameId,saveName,tableId);
             //TODO 某种通知方式
+            
+            upFileLog(request,tmpMap);
         } catch (Exception e) {
             log.error("singleFileUpload error,Exception -> {}",e);
             return new RespEntity(RespCode.SERVER_ERROR);
@@ -191,6 +199,21 @@ public class UploadController {
 			redis.hsetPrefix(prekey, RedisConsts.FILE_Map_KEY+"test", saveName, String.valueOf(tableId));
 		} catch (Exception e) {
 			log.error("saveToRedis error,exception : {} ",e);
+		}
+    }
+    
+    private void upFileLog(HttpServletRequest request,Map<String,Object> tmpMap) {
+    	try {
+            String account = (String) request.getSession().getAttribute("account");
+        	if (StringUtil.isEmpty(account)) {
+        		account = HttpClientUtil.getIpAddr(request);
+        	} 
+            
+            StringBuilder sb = new StringBuilder("app文件上传，保存内容：");
+			sb.append(StringUtil.objToJson(tmpMap));
+			logMgr.opLogSave(account,OpLogManager.up_log,sb.toString());
+		} catch (Exception e) {
+			log.error("upFileLog error,Exception - > {}",e);
 		}
     }
     
