@@ -91,8 +91,13 @@ public class LoginController {
 	public String goHome(Model model,HttpServletRequest request) {
 		
 		try {
-			User user = (User) request.getSession().getAttribute("user");
-			
+			String account = (String) request.getSession().getAttribute("account");
+			User user = userDao.selectUseByAccount(account);
+			if (user == null) {
+				log.error("user not find,account : {}",account); 
+				model.addAttribute("message", "账户未找到");
+				return "error";
+			}
 			List<Power> powers = new ArrayList<>();
 			if (user.getRole() == IConsts.RoleType.admin.getType()) {
 				powers = userDao.selectPowers();

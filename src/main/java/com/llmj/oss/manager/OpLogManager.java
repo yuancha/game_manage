@@ -29,6 +29,7 @@ public class OpLogManager {
 						up_log			= 5,			//文件上传
 						app_log			= 6,			//文件管理
 						qr_log			= 7,			//二维码管理
+						domain_log		= 8,			//域名管理
 						some_log 		= 100;
 	
     @Autowired

@@ -17,6 +17,6 @@ public class Domain implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private String domain;
-	private int type;	//域名类型 0web 1oss
+	private int type;	//0有效 1停用
 	private String content;
 }

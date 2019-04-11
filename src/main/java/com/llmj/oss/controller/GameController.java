@@ -14,9 +14,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.llmj.oss.config.RedisConsts;
 import com.llmj.oss.config.RespCode;
+import com.llmj.oss.dao.DomainDao;
 import com.llmj.oss.dao.GameControlDao;
 import com.llmj.oss.manager.MqManager;
 import com.llmj.oss.manager.OpLogManager;
+import com.llmj.oss.model.Domain;
 import com.llmj.oss.model.GameControl;
 import com.llmj.oss.model.RespEntity;
 import com.llmj.oss.util.RedisTem;
@@ -37,6 +39,8 @@ public class GameController {
 	private MqManager mqMgr;
 	@Autowired
 	private OpLogManager logMgr;
+	@Autowired
+	private DomainDao domainDao;
 	
     @GetMapping("")
     public String index() {
@@ -111,6 +115,96 @@ public class GameController {
 			logMgr.opLogSave(account,OpLogManager.game_log,sb.toString());
         } catch (Exception e) {
             log.error("gameUpdate error,Exception -> {}",e);
+            return new RespEntity(RespCode.SERVER_ERROR);
+        }
+        return new RespEntity(RespCode.SUCCESS);
+    }
+    
+    @GetMapping("/dm")
+    public String domainIndex() {
+        return "domain";
+    }
+    
+    @PostMapping("/dm/list") 
+    @ResponseBody
+    public RespEntity domainlist() {
+    	RespEntity result = new RespEntity(RespCode.SUCCESS);
+        try {
+        	List<Domain> list = domainDao.getAll();
+        	result.setData(list);
+        } catch (Exception e) {
+            log.error("domainlist error,Exception -> {}",e);
+            return new RespEntity(RespCode.SERVER_ERROR);
+        }
+        return result;
+    }
+    
+    @PostMapping("/dm/add") 
+    @ResponseBody
+    public RespEntity domainAdd(@RequestBody Domain model,HttpServletRequest request) {
+        try {
+        	String domain = model.getDomain().trim();
+        	Domain tmp = domainDao.selectById(domain);
+        	if (tmp != null) {
+        		 return new RespEntity(-2,"域名存在");
+        	}
+        	domainDao.save(model);
+        	log.debug("域名保存成功，内容:{}",StringUtil.objToJson(model));
+        	
+        	String account = (String) request.getSession().getAttribute("account");
+        	StringBuilder sb = new StringBuilder("域名管理新增，内容：");
+			sb.append(StringUtil.objToJson(model));
+			logMgr.opLogSave(account,OpLogManager.domain_log,sb.toString());
+        } catch (Exception e) {
+            log.error("domainAdd error,Exception -> {}",e);
+            return new RespEntity(RespCode.SERVER_ERROR);
+        }
+        return new RespEntity(RespCode.SUCCESS);
+    }
+    
+    @PostMapping("/dm/update") 
+    @ResponseBody
+    public RespEntity domainUpdate(@RequestBody Domain model,HttpServletRequest request) {
+        try {
+        	String domain = model.getDomain().trim();
+        	Domain tmp = domainDao.selectById(domain);
+        	if (tmp == null) {
+        		return new RespEntity(-2,"数据错误");
+        	}
+        	domainDao.updateDomain(model);
+        	log.debug("域名修改成功,info : {}",StringUtil.objToJson(model));
+        	
+        	String account = (String) request.getSession().getAttribute("account");
+        	StringBuilder sb = new StringBuilder("域名管理修改，旧内容：");
+			sb.append(StringUtil.objToJson(tmp));
+			sb.append(",新内容:");
+			sb.append(StringUtil.objToJson(model));
+			logMgr.opLogSave(account,OpLogManager.domain_log,sb.toString());
+        } catch (Exception e) {
+            log.error("domainUpdate error,Exception -> {}",e);
+            return new RespEntity(RespCode.SERVER_ERROR);
+        }
+        return new RespEntity(RespCode.SUCCESS);
+    }
+    
+    @PostMapping("/dm/del") 
+    @ResponseBody
+    public RespEntity domainDel(@RequestBody Domain model,HttpServletRequest request) {
+        try {
+        	String domain = model.getDomain().trim();
+        	Domain tmp = domainDao.selectById(domain);
+        	if (tmp == null) {
+        		return new RespEntity(-2,"数据错误");
+        	}
+        	domainDao.delDomain(model);
+        	log.debug("域名删除成功，info : {}",StringUtil.objToJson(tmp));
+        	
+        	String account = (String) request.getSession().getAttribute("account");
+        	StringBuilder sb = new StringBuilder("域名管理删除，内容：");
+			sb.append(StringUtil.objToJson(tmp));
+			logMgr.opLogSave(account,OpLogManager.domain_log,sb.toString());
+        } catch (Exception e) {
+            log.error("domainDel error,Exception -> {}",e);
             return new RespEntity(RespCode.SERVER_ERROR);
         }
         return new RespEntity(RespCode.SUCCESS);

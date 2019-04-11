@@ -28,4 +28,7 @@ public interface UserDao {
 	
 	@Select("select * from power where id = #{id}")
 	Power selectPowersById(@Param("id") int id);
+	
+	@Select("select * from user where account=#{acc}")
+	User selectUseByAccount(@Param("acc") String account);
 }
