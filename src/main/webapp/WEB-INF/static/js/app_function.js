@@ -13,6 +13,8 @@ $('#main-menu').find('a').on('click',function(){
 	
 	var gameId 		= $(this).attr('id');
 	var gameType 	= "0";
+	$('#app_android').removeClass('btn-gray').siblings().removeClass('btn-secondary');
+	$('#app_android').addClass('btn-secondary').siblings().addClass('btn-gray');
 	var gameState 	= $('#app_state').val();
 	var data 		= '{"gameId":"'+gameId+'","gameType":"'+gameType+'","gameState":"'+gameState+'"}';
 	$('#gameId').val(gameId);

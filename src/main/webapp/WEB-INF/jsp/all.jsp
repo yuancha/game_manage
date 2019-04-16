@@ -153,8 +153,7 @@
                             <div class="panel-heading">
                                	 游戏包列表
                             </div>
-                            <input type='hidden' class='app_system' value=''>
-                            <p>当前系统：<span id="app_system">Android</span></p>
+                            <input type='hidden' id='app_system' value=''>
                             <p class="description">
                             	<button class="btn btn-secondary" id='app_android'>Android</button>&nbsp;&nbsp;&nbsp;&nbsp;<span id="pnandroid">安卓包名</span>&nbsp;&nbsp;&nbsp;&nbsp;
                             	<button class="btn btn-gray" id='app_iOS'>iOS</button>&nbsp;&nbsp;&nbsp;&nbsp;<span id="pnios">ios包名</span>
@@ -290,7 +289,7 @@
         <!-- JavaScripts initializations and stuff -->
         <script src="../static/js/xenon/xenon-custom.js"></script>
         <script src="../static/js/public.js?v=2"></script>
-    	<script src="../static/js/app_function.js?v=7"></script>
+    	<script src="../static/js/app_function.js?v=5"></script>
     	<script src="../static/js/qrcode_function.js?v=1"></script>
  		<script>
  		$(document).ready(function(){
