@@ -1,9 +1,9 @@
 
 //首次进入区分正式服和测试服标识
 if($('#app_state').val() == 0){
-	$('#showState').text("测试服");
+	$('#showState').text("测试数据");
 }else if($('#app_state').val() == 1){
-	$('#showState').text("正式服");
+	$('#showState').text("线上数据");
 }
 
 

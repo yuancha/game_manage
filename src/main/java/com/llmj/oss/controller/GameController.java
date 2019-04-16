@@ -120,6 +120,7 @@ public class GameController {
         return new RespEntity(RespCode.SUCCESS);
     }
     
+    //类型0开启 1停止
     @GetMapping("/dm")
     public String domainIndex() {
         return "domain";
@@ -148,6 +149,17 @@ public class GameController {
         	if (tmp != null) {
         		 return new RespEntity(-2,"域名存在");
         	}
+        	
+        	Domain use = domainDao.selectByType(0);//正在使用的
+        	if (use != null) {
+        		model.setType(1);//有正在使用就不允许再创建开发的
+        	}
+        	
+        	if (model.getType() == 0) {
+        		//开启状态
+        		//TODO 修改二维码通知逻辑服
+        		System.out.println("逻辑变更");
+        	}
         	domainDao.save(model);
         	log.debug("域名保存成功，内容:{}",StringUtil.objToJson(model));
         	
@@ -171,6 +183,18 @@ public class GameController {
         	if (tmp == null) {
         		return new RespEntity(-2,"数据错误");
         	}
+        	
+        	if (tmp.getType() != 0 && model.getType() == 0) {
+        		//域名变更
+        		Domain use = domainDao.selectByType(0);//正在使用的.
+        		if (use != null) {
+        			use.setType(1);
+            		domainDao.updateDomain(use);
+        		}
+        		//TODO 二维码一些列变化
+        		System.out.println("逻辑变更");
+        	}
+        	
         	domainDao.updateDomain(model);
         	log.debug("域名修改成功,info : {}",StringUtil.objToJson(model));
         	
@@ -196,6 +220,10 @@ public class GameController {
         	if (tmp == null) {
         		return new RespEntity(-2,"数据错误");
         	}
+        	
+        	if (tmp.getType() == 0) {
+        		return new RespEntity(-2,"启用其它域名后方可删除");
+        	}
         	domainDao.delDomain(model);
         	log.debug("域名删除成功，info : {}",StringUtil.objToJson(tmp));
         	
@@ -208,5 +236,10 @@ public class GameController {
             return new RespEntity(RespCode.SERVER_ERROR);
         }
         return new RespEntity(RespCode.SUCCESS);
+    }
+    
+    private void domainChange() {
+    	//删除所有开启游戏 再用二维码
+    	//生成所有游戏二维码 通知逻辑服
     }
 }

@@ -79,12 +79,21 @@ public class UploadController {
      */
     @PostMapping("/uploadFile") 
     @ResponseBody
-    public RespEntity singleFileUpload(@RequestParam("file") MultipartFile file,HttpServletRequest request) {
+    public RespEntity singleFileUpload(@RequestParam("file") MultipartFile file,HttpServletRequest request,@RequestParam("upstate") Integer state) {
         if (file.isEmpty()) {
             return new RespEntity(RespCode.FILE_ERROR);
         }
-
+        
         try {
+        	String account = (String) request.getSession().getAttribute("account");
+        	String osspthstr = ossMgr.ossTest;
+        	String tbname = IConsts.UpFileTable.test.getTableName();
+        	
+        	if (!StringUtil.isEmpty(account) && state == 1) {//账号不为空方可上传正式文件
+        		osspthstr = ossMgr.ossOnline;
+        		tbname = IConsts.UpFileTable.online.getTableName();
+        	}
+        	
             String filename = file.getOriginalFilename();
             String[] tmpary = filename.split("\\.");
             if (tmpary == null || tmpary.length < 2) {
@@ -127,7 +136,7 @@ public class UploadController {
             PackageName pn = packMgr.isContainPackage(packName,type);
             if (packName == null || pn == null) {
             	log.error("文件非法，packName : {}",packName);
-            	return new RespEntity(RespCode.FILE_ERROR);
+            	return new RespEntity(-2,"文件包错误，"+packName);
             }
             
             int gameId = pn.getGameId();
@@ -144,11 +153,11 @@ public class UploadController {
             if (suffix.equalsIgnoreCase("ipa")) {
             	FileUtil.makeDir(basePath + IConsts.UpFileType.Ios.getDesc() + "/" + packName + "/" + dateStr);
             	filePath = basePath + IConsts.UpFileType.Ios.getDesc() + "/" + packName + "/" + dateStr + "/" +  saveName + ".ipa";
-            	ossPath = ossMgr.ossTest + IConsts.UpFileType.Ios.getDesc() + "/" + packName + "/" +  saveName + ".ipa";
+            	ossPath = osspthstr + IConsts.UpFileType.Ios.getDesc() + "/" + packName + "/" +  saveName + ".ipa";
             } else {
             	FileUtil.makeDir(basePath + IConsts.UpFileType.Android.getDesc() + "/" + packName + "/" + dateStr);
             	filePath = basePath + IConsts.UpFileType.Android.getDesc() + "/" + packName + "/" + dateStr + "/" +  saveName + ".apk";
-            	ossPath = ossMgr.ossTest + IConsts.UpFileType.Android.getDesc() + "/" + packName + "/" +  saveName + ".apk";
+            	ossPath = osspthstr + IConsts.UpFileType.Android.getDesc() + "/" + packName + "/" +  saveName + ".apk";
             }
             tmpMap.put("localPath", filePath);
             
@@ -162,6 +171,7 @@ public class UploadController {
             }
             tmpMap.put("gameId", gameId);
             tmpMap.put("fileName", filename);
+            tmpMap.put("tbname", tbname);
             //数据信息存储
             int tableId = saveUploadLog(tmpMap);
             //redis存储 用于文件管理
@@ -187,7 +197,7 @@ public class UploadController {
     	info.setState(IConsts.UpFileState.up2oss.getState());
     	info.setFileName(map.get("fileName").toString());
     	info.setGameId(Integer.parseInt(map.get("gameId").toString()));
-    	uploadDao.saveFile(info,IConsts.UpFileTable.test.getTableName());
+    	uploadDao.saveFile(info,map.get("tbname").toString());
     	log.info("upload file success -> info : {}",StringUtil.objToJson(info));
     	return info.getId();
     }

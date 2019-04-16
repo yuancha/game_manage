@@ -30,7 +30,7 @@ public interface UploadDao {
 	@Select("select * from ${tableName} where id=#{id}")
 	UploadFile selectById(@Param("id") int id,@Param("tableName") String tableName);
 	
-	@Select("select * from ${tableName} where packName = #{packName} and type = #{type} and state != #{state} order by upTime desc")
+	@Select("select * from ${tableName} where packName = #{packName} and type = #{type} and state = 1 order by upTime desc")
 	List<UploadFile> getFiles(@Param("tableName") String tableName,@Param("packName") String packName,@Param("state") int state,@Param("type") int type);
 	
 	@Update("update ${tableName} set state=#{file.state},operTime=now() where id=#{file.id}")

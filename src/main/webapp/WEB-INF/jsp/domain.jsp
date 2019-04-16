@@ -148,7 +148,7 @@
 			$('#domain').val("");
 			$("#domain").attr("readonly",false);
 			$('#content').val("");
-			$("#type option[value='"+0+"']").prop("selected","selected");
+			$("#type option[value='"+1+"']").prop("selected","selected");
 		}
 		
 		//update

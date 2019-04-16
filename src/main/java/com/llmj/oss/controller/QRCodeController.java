@@ -20,6 +20,7 @@ import com.llmj.oss.manager.AliOssManager;
 import com.llmj.oss.manager.MqManager;
 import com.llmj.oss.manager.OpLogManager;
 import com.llmj.oss.manager.SwitchManager;
+import com.llmj.oss.model.Domain;
 import com.llmj.oss.model.GameControl;
 import com.llmj.oss.model.QRCode;
 import com.llmj.oss.model.RespEntity;
@@ -34,6 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -142,7 +144,15 @@ public class QRCodeController {
 				log.error("链接已存在，link ： {}",link);
 				return new RespEntity(-2,"链接已存在,"+link);
 			}
+			if (state == 1) {//正式数据通知逻辑服
+				qr.setLogicUse(lUse);
+				//String qrLink = switchMgr.getQrcodeLink(qr);
+				String qrLink = domain.substring(0,domain.indexOf("/",8)) + IConsts.LOCALDOWN + qr.getLocalPath().substring(localPath.length());
+				//刷新到逻辑服
+				mqMgr.sendQrLinkToLogic(gameId,qrLink,qr.getLink());
+			}
 			qrDao.save(qr);
+			
 			log.info("二维码保存成功，info - > {}",StringUtil.objToJson(qr));
 			
 			if (state == 1) {//正式数据才保存
@@ -241,9 +251,9 @@ public class QRCodeController {
 			if (qr == null) {
 				return new RespEntity(RespCode.SUCCESS);
 			}
-			if (qr.getLogicUse() == lUse) {
+			/*if (qr.getLogicUse() == lUse) {
 				return new RespEntity(-2,"已在逻辑服备份，请先应用其它二维码备份后再删除");
-			}
+			}*/
 			qrDao.delQR(model.getDomain());
 			ossMgr.removeFile(qr.getOssPath(),qr.getGameId());
 			FileUtil.deleteFile(qr.getLocalPath());
@@ -268,7 +278,9 @@ public class QRCodeController {
 	public RespEntity qrCodeDomain() {
 		RespEntity res = new RespEntity();
 		try {
-			res.setData(domainDao.selectByType(0));
+			List<Domain> ary = new ArrayList<>();
+			ary.add(domainDao.selectByType(0));
+			res.setData(ary);
 		} catch (Exception e) {
 			log.error("qrCodeDomain error,Exception -> {}",e);
 			return new RespEntity(RespCode.SERVER_ERROR);

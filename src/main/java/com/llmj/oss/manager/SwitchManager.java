@@ -75,12 +75,12 @@ public class SwitchManager {
      */
     public String getUseDomain(int gameId,int state) throws Exception {
     	String domain = "";
-    	List<Domain> domains = domainDao.selectByType(0);
-    	if (domains == null || domains.isEmpty()) {
+    	Domain domains = domainDao.selectByType(0);
+    	if (domains == null) {
     		log.error("域名数据表为空");
     		return domain;
     	}
-    	String tmp = domains.get(0).getDomain();
+    	String tmp = domains.getDomain();
     	if (state == 1) {
     		QRCode code = qrDao.selectByLogicUse(gameId,1,state);
     		//正式服 获得正式服二维码使用 的域名

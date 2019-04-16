@@ -135,4 +135,19 @@ public class PackageController {
 		pn.setIos(model.getIos());
 		return pn;
 	}
+	
+	@PostMapping("/get")
+	@ResponseBody
+	public RespEntity packGet(@RequestBody PackOperation model) {
+		RespEntity res = new RespEntity(RespCode.SUCCESS);
+		try {
+			int gameId = model.getGameId();
+			PackageName pn = packDao.selectById(gameId);
+			res.setData(pn);
+		} catch (Exception e) {
+			log.error("packAdd error,Exception -> {}",e);
+			return new RespEntity(RespCode.SERVER_ERROR);
+		}
+		return res;
+	}
 }

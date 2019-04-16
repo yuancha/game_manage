@@ -64,8 +64,8 @@ function getListByAjax(data){
       success: function (result) {
           console.log(result);//打印服务端返回的数据(调试用)
           if (result.code == 0) {
-        	  $("#mytb tbody").empty();
-        	   var tb = $("#mytb tbody");
+        	  $("#qrtb tbody").empty();
+        	   var tb = $("#qrtb tbody");
 				var arry = result.data;
 				var trHTML = "";
 				var state = $("#app_state").val();
@@ -73,24 +73,23 @@ function getListByAjax(data){
 					var obj = arry[i];
 					//var bytes = obj.photo.split(",");
 					//var str = arrayBufferToBase64(bytes);
-					trHTML += "<tr>\
-							<td style='vertical-align: middle;'><img src='"+obj.ossPath+"'></td>\
-							<td style='vertical-align: middle;'>"+ obj.link+ "</td>\
-							<td style='vertical-align: middle;' class='content'>"+ obj.content+ "</td>\
-							<td style='vertical-align: middle;'>"+ stateToStr(obj.logicUse)+ "</td>\
-							<td style='vertical-align: middle;'>\
-							<button class='btn btn-secondary btn-single btn-sm btn_look'>查看</button>"
+					trHTML += "<tr>"+
+							"<td style='vertical-align: middle;'><img src='"+obj.ossPath+"'></td>"+
+							"<td style='vertical-align: middle;'>"+ obj.link+ "</td>"+
+							"<td style='vertical-align: middle;' class='content'>"+ obj.content+ "</td>"+
+							"<td style='vertical-align: middle;'>"+
+							"<button class='btn btn-secondary btn-single btn-sm btn_look'>查看</button>";
 					if (state == 1) {
 						trHTML += "<button class='btn btn-turquoise btn-single btn-sm btn_refresh'>应用</button>";
 					}
-					trHTML +="</td>\
-							<input type='hidden' class='id' value='"+ obj.id+ "'>\
-							<input type='hidden' class='oss' value='"+ obj.ossPath+ "'>\
-							<input type='hidden' class='local' value='"+ obj.localPath+ "'>\
-							<input type='hidden' class='logicUse' value='"+ obj.logicUse+ "'>\
-							<input type='hidden' class='gameId' value='"+ obj.gameId+ "'>\
-							<input type='hidden' class='link' value='"+ obj.link+ "'>\
-							</tr>";
+					trHTML +="</td>"+
+							"<input type='hidden' class='id' value='"+ obj.id+ "'>"+
+							"<input type='hidden' class='oss' value='"+ obj.ossPath+ "'>"+
+							"<input type='hidden' class='local' value='"+ obj.localPath+ "'>"+
+							"<input type='hidden' class='logicUse' value='"+ obj.logicUse+ "'>"+
+							"<input type='hidden' class='gameId' value='"+ obj.gameId+ "'>"+
+							"<input type='hidden' class='link' value='"+ obj.link+ "'>"+
+							"</tr>";
 				}
 				tb.append(trHTML);
           }else{
@@ -139,8 +138,8 @@ function getDomain(){
 
 //查看
 $(document).on('click','.btn_look',function() {
-	$('#modal-1').modal('show', {backdrop: 'fade'});
-	//$('#modal-1').find('.modal-body').children().remove();
+	$('#modal-qr-info').modal('show', {backdrop: 'fade'});
+	$('#modal-qr-info').find('.modal-body').children().remove();
 	var qrcode_id 		= $(this).parents('tr').find('.id').val();
 	var qrcode_link 	= $(this).parents('tr').find('.link').val();
 	var qrcode_oss 	= $(this).parents('tr').find('.oss').val();
@@ -150,7 +149,7 @@ $(document).on('click','.btn_look',function() {
 	var qrcode_game_id 	= $(this).parents('tr').find('.gameId').val();
 
 	
-	$('#modal-1').find('.modal-body').html("\
+	$('#modal-qr-info').find('.modal-body').html("\
 			<p>游戏ID："+qrcode_game_id+"</p>\
 			<p>链接："+qrcode_link+"</p>\
 			<p>oss路径："+qrcode_oss+"</p>\
@@ -177,7 +176,7 @@ $(document).on('click','#btn_del',function() {
 			data : data,
 			success : function(result) {
 				if (result.code == 0) {
-					$('#app_box').children().remove();
+					$('#qr_box').children().remove();
 					var gameId  = $('#gameId').val();
 					var state = $("#app_state").val();
 					var data = '{"gameId":"'+gameId+'","state":"'+state+'"}';
@@ -213,7 +212,7 @@ $(document).on('click','.btn_refresh',function() {
 			data : data,
 			success : function(result) {
 				if (result.code == 0) {
-					$('#app_box').children().remove();
+					$('#qr_box').children().remove();
 					var gameId  = $('#gameId').val();
 					var state = $("#app_state").val();
 					var data = '{"gameId":"'+gameId+'","state":"'+state+'"}';

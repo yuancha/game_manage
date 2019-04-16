@@ -19,13 +19,35 @@ $('#main-menu').find('a').on('click',function(){
 	var name 		= $(this).find('span').text();
 	$('.page-title').find('.active').find('a').html(name);
 	getFilesInfoByAjax(data); 
+	getPackName(gameId);
 });
 
-
+function getPackName(gameId){
+	var data = '{"gameId":"'+gameId+'"}';
+	$.ajax({
+      type: "POST",//方法类型
+      dataType: "json",//预期服务器返回的数据类型
+      contentType: "application/json; charset=utf-8",
+      url: "/package/get" ,//url
+      data: data,
+      success: function (result) {
+          if (result.code == 0) {
+        	  var obj = result.data;
+        	  $('#pnandroid').text(obj.android);
+        	  $('#pnios').text(obj.ios);
+          }else{
+       	   	  alert(result.message);
+          }
+      },
+      error : function() {
+          alert("异常！");
+      }
+  });
+}
 
 $(document).on('click','.ev_look',function(){
-	$('#modal-2').modal('show', {backdrop: 'fade'});
-	$('#modal-2').find('.modal-body').children().remove();
+	$('#modal-app').modal('show', {backdrop: 'fade'});
+	$('#modal-app').find('.modal-body').children().remove();
 	var app_localPath 	= $(this).parents('tr').find('.app_localPath').val();
 	var app_operTime 	= $(this).parents('tr').find('.app_operTime').val();
 	var app_ossPath 	= $(this).parents('tr').find('.app_ossPath').val();
@@ -43,7 +65,7 @@ $(document).on('click','.ev_look',function(){
 	}else if(app_type == 1){
 		var type = "苹果";
 	}
-	$('#modal-2').find('.modal-body').html("\
+	$('#modal-app').find('.modal-body').html("\
 			<p>上传名称："+up_name+"</p>\
 			<p>名称："+app_game+"</p>\
 			<p>包名："+app_packName+"</p>\
@@ -70,10 +92,10 @@ $('#app_android,#app_iOS').on('click',function(){
 	var gameType = $(this).attr('id');
 	if(gameType == "app_android"){
 		gameType   = "0";
-		$('#app_system').text("Android");
+		$('#app_system').val(0);
 	}else if(gameType == "app_iOS"){
 		gameType   = "1";
-		$('#app_system').text("iOS");
+		$('#app_system').val(1);
 	}
 	var gameState = $('#app_state').val();
 	var data 		= '{"gameId":"'+gameId+'","gameType":"'+gameType+'","gameState":"'+gameState+'"}';
@@ -102,12 +124,7 @@ function refreshFilesInfoByAjax(data){
       success: function (result) {
           if (result.code == 0) {
               var gameId  = $('#gameId').val();
-          	  var gameType;
-          	  if ($('#app_system').val() == "Android") {
-          		gameType = 0;
-          	  } else {
-          		gameType = 1;
-          	  }
+          	  var gameType = $('#app_system').val();
           	  var gameState 	= $('#app_state').val();
           	  var data 		= '{"gameId":"'+gameId+'","gameType":"'+gameType+'","gameState":"'+gameState+'"}';
           	  getFilesInfoByAjax(data);
@@ -178,12 +195,7 @@ function deleteFilesInfoByAjax(data){
           if (result.code == 0) {
               alert("删除成功");    
               var gameId  = $('#gameId').val();
-              var gameType;
-          	  if ($('#app_system').val() == "Android") {
-          		gameType = 0;
-          	  } else {
-          		gameType = 1;
-          	  }
+              var gameType = $('#app_system').val();
           	  var gameState 	= $('#app_state').val();
           	  var data 		= '{"gameId":"'+gameId+'","gameType":"'+gameType+'","gameState":"'+gameState+'"}';
           	  getFilesInfoByAjax(data);
@@ -207,7 +219,7 @@ $(document).on('click','#app_down',function(){
            '</form>').appendTo('body').submit().remove();
 });
 
-function stateToStr(state) {
+function stateToStr1(state) {
 	if (state == 2) {
 		return "线上";
 	}
@@ -235,12 +247,11 @@ function getFilesInfoByAjax(data){
                 var data = result.data;
                 if (data.length == 0) return; 
                 for(var i in data){
-               
                	 $('#app_box').append("<tr>\
                		<td class='middle-align'>"+filePathSplit(data[i].localPath)+"</td>\
                		<td class='middle-align'>"+data[i].fileName+"</td>\
-               		<td class='middle-align'>"+data[i].notes+"</td>\
-                       <td class='middle-align'>"+stateToStr(data[i].state)+"</td>\
+               		<td class='middle-align'><input type='text' value='"+data[i].notes+"' onblur='editNotes("+data[i].id+");' id='note_"+data[i].id+"'></td>\
+                       <td class='middle-align'>"+stateToStr1(data[i].state)+"</td>\
                        <td>\
                            <a href='#' class='btn btn-secondary btn-single btn-sm ev_look'>查看</a>\
                            <a href='#' class='btn btn-turquoise btn-single btn-sm ev_refresh'>上线</a>\
@@ -275,6 +286,32 @@ function getFilesInfoByAjax(data){
     });
 }
 
-
+function editNotes(id) {
+	var noteid = "note_"+id;
+	var notes = $("#"+noteid).val();
+	var data = '{"id":"'+id+'","gameState":"'+$('#app_state').val()+'","notes":"'+notes+'"}';
+	$.ajax({
+		 //几个参数需要注意一下
+     type: "POST",//方法类型
+     dataType: "json",//预期服务器返回的数据类型
+     contentType: "application/json; charset=utf-8",
+     url: "/oss/notesUp" ,//url
+     data: data,
+     success: function (result) {
+         if (result.code == 0) {
+             var gameId  = $('#gameId').val();
+             var gameType = $('#app_system').val();
+         	  var gameState 	= $('#app_state').val();
+         	  var data 		= '{"gameId":"'+gameId+'","gameType":"'+gameType+'","gameState":"'+gameState+'"}';
+         	  getFilesInfoByAjax(data);
+         }else{
+       	  alert(result.message);
+         }
+     },
+     error : function() {
+         alert("异常！");
+     }
+	});
+}
 
 

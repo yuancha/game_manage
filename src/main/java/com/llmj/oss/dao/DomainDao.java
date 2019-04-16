@@ -22,7 +22,7 @@ public interface DomainDao {
 	Domain selectById(@Param("domain") String domain);
 	
 	@Select("select * from domain_tb where type=#{type}")
-	List<Domain> selectByType(@Param("type") int type);
+	Domain selectByType(@Param("type") int type);
 	
 	@Select("select * from domain_tb")
 	List<Domain> getAll();

@@ -1,5 +1,6 @@
 package com.llmj.oss.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -82,7 +83,7 @@ public class OssController {
 			model.addAttribute("gameState", state);
 			model.addAttribute("gameOpens", gameDao.selectOpens());
 			
-			return "fileManage";
+			return "all";
 		} catch (Exception e) {
 			model.addAttribute("message", e.toString());
 			log.error("fileManage error,Exception -> {}",e);
@@ -101,7 +102,7 @@ public class OssController {
 	@PostMapping("/getFilesInfo")
 	@ResponseBody
 	public RespEntity getFilesInfo(@RequestBody FileOperation param) {
-		List<UploadFile> data = null;
+		List<UploadFile> data = new ArrayList<>();
 		RespEntity resp = new RespEntity();
 		try {
 			int gameId = param.getGameId();
@@ -122,8 +123,9 @@ public class OssController {
 			}
 			if (!online.isEmpty()) {
 				resp.setOnline(online.get(0));
+				data.add(online.get(0));
 			}
-			data = uploadDao.getFiles(tableName,packName, IConsts.UpFileState.delete.getState(), type);
+			data.addAll(uploadDao.getFiles(tableName,packName, IConsts.UpFileState.delete.getState(), type));
 			resp.setData(data);
 		} catch (Exception e) {
 			log.error("getFilesInfo error,Exception -> {}",e);
@@ -465,9 +467,9 @@ public class OssController {
         	int id = param.getId();
 			int state = param.getGameState();
 			String notes = param.getNotes();
-			if (StringUtil.isEmpty(notes.trim())) {
+			/*if (StringUtil.isEmpty(notes.trim())) {
 				return new RespEntity(-2,"备注错误");
-			}
+			}*/
 			String tableName = getTableName(state);
 			UploadFile file = uploadDao.selectById(id,tableName);
 			if (file == null || file.getState() == IConsts.UpFileState.delete.getState()) {
