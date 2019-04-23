@@ -11,14 +11,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.llmj.oss.config.IConsts;
-import com.llmj.oss.config.RedisConsts;
 import com.llmj.oss.config.RespCode;
 import com.llmj.oss.dao.DomainDao;
 import com.llmj.oss.dao.GameControlDao;
 import com.llmj.oss.dao.QrcodeDao;
-import com.llmj.oss.manager.AliOssManager;
 import com.llmj.oss.manager.MqManager;
 import com.llmj.oss.manager.OpLogManager;
+import com.llmj.oss.manager.QrcodeManager;
 import com.llmj.oss.manager.SwitchManager;
 import com.llmj.oss.model.Domain;
 import com.llmj.oss.model.GameControl;
@@ -26,19 +25,13 @@ import com.llmj.oss.model.QRCode;
 import com.llmj.oss.model.RespEntity;
 import com.llmj.oss.model.oper.QrOperation;
 import com.llmj.oss.util.FileUtil;
-import com.llmj.oss.util.QRCodeUtil;
-import com.llmj.oss.util.RedisTem;
 import com.llmj.oss.util.StringUtil;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
 /**
@@ -66,15 +59,10 @@ public class QRCodeController {
     @Value("${upload.local.basePath}")
 	private String localPath;
     
-    @Autowired 
-	private RedisTem redis;
-	
 	@Autowired
 	private QrcodeDao qrDao;
 	@Autowired
 	private DomainDao domainDao;
-	@Autowired
-	private AliOssManager ossMgr;
 	@Autowired
 	private MqManager mqMgr;
 	@Autowired 
@@ -83,6 +71,8 @@ public class QRCodeController {
     private GameControlDao gameDao;
 	@Autowired
 	private OpLogManager logMgr;
+	@Autowired
+	private QrcodeManager qrMgr;
 	
 	@GetMapping("")
 	public String qrCodeHome(Model model,HttpServletRequest request) {
@@ -139,19 +129,11 @@ public class QRCodeController {
 				log.error("无效的域名，domain : {}",domain);
 				return new RespEntity(-2,"无效域名");
 			}
-			String link = saveQr(qr,domain,middel,request);
+			String link = qrMgr.saveQr(qr,domain,middel,request);
 			if (!link.equals("")) {
 				log.error("链接已存在，link ： {}",link);
 				return new RespEntity(-2,"链接已存在,"+link);
 			}
-			if (state == 1) {//正式数据通知逻辑服
-				qr.setLogicUse(lUse);
-				//String qrLink = switchMgr.getQrcodeLink(qr);
-				String qrLink = domain.substring(0,domain.indexOf("/",8)) + IConsts.LOCALDOWN + qr.getLocalPath().substring(localPath.length());
-				//刷新到逻辑服
-				mqMgr.sendQrLinkToLogic(gameId,qrLink,qr.getLink());
-			}
-			qrDao.save(qr);
 			
 			log.info("二维码保存成功，info - > {}",StringUtil.objToJson(qr));
 			
@@ -198,50 +180,6 @@ public class QRCodeController {
 		return new RespEntity(RespCode.SUCCESS);
 	}*/
 	
-	private String saveQr(QRCode qr,String domain,int middle,HttpServletRequest request) throws Exception {
-		int gameId = qr.getGameId();
-		int state = qr.getState();
-		String link = domain + "?gameId="+gameId+"&gameState="+state;
-		
-		if (qrDao.selectByLink(link) != null) {
-			return link;
-		}
-		InputStream is = null;
-		InputStream is2 = null;
-		try {
-			qr.setLink(link);
-			if (middle == 1) {
-				is = getMiddelImg(gameId, request);
-			}
-			byte[] tmp = QRCodeUtil.encode(link,is);
-			/*String arryStr = Arrays.toString(tmp);
-			arryStr = arryStr.substring(1, arryStr.length() - 1);*/
-			qr.setPhoto("");
-			//qr.setPhoto(arryStr);
-			
-			//保存到oss
-			String qrName = StringUtil.getUUIDStr();
-			String qrSavePath = qrOssPath(state,qrName);
-			ossMgr.uploadFileByByte(qrSavePath, tmp,gameId);
-			qr.setOssPath(qrSavePath);
-			
-			//保存到本地
-			if (middle == 1) {
-				is2 = getMiddelImg(gameId, request);
-			}
-			QRCodeUtil.encode(link,qrcodePath,qrName,is2);
-			qr.setLocalPath(qrcodePath + qrName + ".png");
-		} finally {
-			if (is != null) {
-				is.close();
-			}
-			if (is2 != null) {
-				is2.close();
-			}
-		}
-		return "";
-	}
-	
 	@PostMapping("/del")
 	@ResponseBody
 	public RespEntity qrCodeDel(@RequestBody QrOperation model,HttpServletRequest request) {
@@ -254,10 +192,8 @@ public class QRCodeController {
 			/*if (qr.getLogicUse() == lUse) {
 				return new RespEntity(-2,"已在逻辑服备份，请先应用其它二维码备份后再删除");
 			}*/
-			qrDao.delQR(model.getDomain());
-			ossMgr.removeFile(qr.getOssPath(),qr.getGameId());
-			FileUtil.deleteFile(qr.getLocalPath());
-			log.info("二维码删除成功，link : {}",model.getDomain());
+			
+			qrMgr.qrCodeDel(qr);
 			
 			if (qr.getState() == 1) {//正式数据才保存
 				String account = (String) request.getSession().getAttribute("account");
@@ -407,35 +343,4 @@ public class QRCodeController {
 		return "error";
 	}
 	
-	
-	private String qrOssPath(int state,String name) {
-		String base = "";
-		if (state == 0) {
-			base = ossTest;
-		} else {
-			base = ossOnline;
-		}
-		base += "qrcode/"+name+".png";
-		return base;
-	}
-	
-	//获得二维码中间图片
-	private InputStream getMiddelImg(int gameId,HttpServletRequest request) {
-		InputStream is = null;
-		try {
-			String path = redis.hgetPrefix(RedisConsts.PRE_HTML_KEY, RedisConsts.ICON_PATH_KEY, String.valueOf(gameId));
-			if (StringUtil.isEmpty(path)) {
-				ServletContext context = request.getSession().getServletContext();
-				path = "WEB-INF/static/links/icon-154.png";
-				is = context.getResourceAsStream(path);
-			} else {
-				path = logoPath + path;
-				File file = new File(path);
-				is = new FileInputStream(file);
-			}
-		} catch (Exception e) {
-			log.error("getMiddelImg error,Exception -> {}",e);
-		}
-		return is;
-	}
 }

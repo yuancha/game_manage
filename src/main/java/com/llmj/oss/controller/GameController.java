@@ -18,8 +18,10 @@ import com.llmj.oss.dao.DomainDao;
 import com.llmj.oss.dao.GameControlDao;
 import com.llmj.oss.manager.MqManager;
 import com.llmj.oss.manager.OpLogManager;
+import com.llmj.oss.manager.QrcodeManager;
 import com.llmj.oss.model.Domain;
 import com.llmj.oss.model.GameControl;
+import com.llmj.oss.model.QRCode;
 import com.llmj.oss.model.RespEntity;
 import com.llmj.oss.util.RedisTem;
 import com.llmj.oss.util.StringUtil;
@@ -41,6 +43,8 @@ public class GameController {
 	private OpLogManager logMgr;
 	@Autowired
 	private DomainDao domainDao;
+	@Autowired
+	private QrcodeManager qrMgr;
 	
     @GetMapping("")
     public String index() {
@@ -152,14 +156,9 @@ public class GameController {
         	
         	Domain use = domainDao.selectByType(0);//正在使用的
         	if (use != null) {
-        		model.setType(1);//有正在使用就不允许再创建开发的
+        		model.setType(1);//有正在使用就不允许再创建开放的
         	}
         	
-        	if (model.getType() == 0) {
-        		//开启状态
-        		//TODO 修改二维码通知逻辑服
-        		System.out.println("逻辑变更");
-        	}
         	domainDao.save(model);
         	log.debug("域名保存成功，内容:{}",StringUtil.objToJson(model));
         	
@@ -167,6 +166,15 @@ public class GameController {
         	StringBuilder sb = new StringBuilder("域名管理新增，内容：");
 			sb.append(StringUtil.objToJson(model));
 			logMgr.opLogSave(account,OpLogManager.domain_log,sb.toString());
+			
+			if (model.getType() == 0) {
+        		//开启状态
+        		//修改二维码通知逻辑服
+        		domainChangeOper(domain);
+        		StringBuilder sb1 = new StringBuilder("域名管理替换，内容：");
+    			sb1.append(StringUtil.objToJson(model));
+    			logMgr.opLogSave(account,OpLogManager.domain_log,sb1.toString());
+        	}
         } catch (Exception e) {
             log.error("domainAdd error,Exception -> {}",e);
             return new RespEntity(RespCode.SERVER_ERROR);
@@ -184,6 +192,7 @@ public class GameController {
         		return new RespEntity(-2,"数据错误");
         	}
         	
+        	String account = (String) request.getSession().getAttribute("account");
         	if (tmp.getType() != 0 && model.getType() == 0) {
         		//域名变更
         		Domain use = domainDao.selectByType(0);//正在使用的.
@@ -191,19 +200,22 @@ public class GameController {
         			use.setType(1);
             		domainDao.updateDomain(use);
         		}
-        		//TODO 二维码一些列变化
-        		System.out.println("逻辑变更");
+        		//二维码一些列变化
+        		domainChangeOper(domain);
+        		StringBuilder sb1 = new StringBuilder("域名管理替换，内容：");
+    			sb1.append(StringUtil.objToJson(model));
+    			logMgr.opLogSave(account,OpLogManager.domain_log,sb1.toString());
         	}
         	
         	domainDao.updateDomain(model);
         	log.debug("域名修改成功,info : {}",StringUtil.objToJson(model));
         	
-        	String account = (String) request.getSession().getAttribute("account");
         	StringBuilder sb = new StringBuilder("域名管理修改，旧内容：");
 			sb.append(StringUtil.objToJson(tmp));
 			sb.append(",新内容:");
 			sb.append(StringUtil.objToJson(model));
 			logMgr.opLogSave(account,OpLogManager.domain_log,sb.toString());
+			
         } catch (Exception e) {
             log.error("domainUpdate error,Exception -> {}",e);
             return new RespEntity(RespCode.SERVER_ERROR);
@@ -238,8 +250,44 @@ public class GameController {
         return new RespEntity(RespCode.SUCCESS);
     }
     
-    private void domainChange() {
-    	//删除所有开启游戏 再用二维码
-    	//生成所有游戏二维码 通知逻辑服
+    private void domainChangeOper(String domain) {
+    	try {
+    		List<GameControl> list = gameDao.selectOpens();
+    		for (GameControl game : list) {
+    			if (game == null || game.getOpen() == 0) {
+    				continue;
+    			}
+    			int gameId = game.getGameId();
+    			
+    			QRCode qr = qrMgr.getUseQrcode(gameId,1,1);
+    			if (qr != null) {
+    				//删除二维码
+        			qrMgr.qrCodeDel(qr);
+        			log.debug("gameId ： {} - > 二维码正式数据删除成功",gameId);
+    			}
+    			
+    			//新增二维码
+    			QRCode createOn = new QRCode();
+    			createOn.setContent("域名变更自动生成");
+    			createOn.setGameId(gameId);
+    			createOn.setState(1);
+    			qrMgr.saveQr(createOn, domain, 0, null);
+    			log.debug("gameId ： {} - > 二维码正式数据新增成功",gameId);
+    			
+    			QRCode testqr = qrMgr.getUseQrcode(gameId,0,0);
+    			if (testqr != null) {
+    				qrMgr.qrCodeDel(testqr);
+        			log.debug("gameId ： {} - > 二维码测试数据删除成功",gameId);
+    			}
+    			QRCode createTest = new QRCode();
+    			createTest.setContent("域名变更自动生成");
+    			createTest.setGameId(gameId);
+    			createTest.setState(0);
+    			qrMgr.saveQr(createTest, domain, 0, null);
+    			log.debug("gameId ： {} - > 二维码测试数据新增成功",gameId);
+    		}
+		} catch (Exception e) {
+			log.error("domainChangeOper Exception - > {}",e);
+		}
     }
 }

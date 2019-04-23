@@ -56,6 +56,7 @@ public class LoginController {
 	public RespEntity login(Model model,HttpServletRequest request,@RequestBody User user) {
 		
 		try {
+			loginLock.lock();
 			String account = user.getAccount();
 			String pwd = user.getPassword();
 			
@@ -65,7 +66,6 @@ public class LoginController {
 				return new RespEntity(-2,"账号或密码错误");
 			}
 			
-			loginLock.lock();
 			HttpSession session = request.getSession();
 			String sessionId = session.getId();
 			
