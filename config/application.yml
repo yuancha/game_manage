@@ -3,6 +3,8 @@ server:
   servlet:
     session:
       timeout: 11120s
+  tomcat:
+    basedir: /data/temp
   
 spring:
   profiles:
