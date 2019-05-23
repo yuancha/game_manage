@@ -154,9 +154,9 @@
                                	 游戏包列表
                             </div>
                             <input type='hidden' id='app_system' value=''>
-                            <p class="description">
+                            <p class="description" id="wukongvip">
                             	<button class="btn btn-secondary" id='app_android'>Android</button>&nbsp;&nbsp;&nbsp;&nbsp;<span id="pnandroid">安卓包名</span>&nbsp;&nbsp;&nbsp;&nbsp;
-                            	<button class="btn btn-gray" id='app_iOS'>iOS</button>&nbsp;&nbsp;&nbsp;&nbsp;<span id="pnios">ios包名</span>
+                            	<button class="btn btn-gray" id='app_iOS'>iOS</button>&nbsp;&nbsp;&nbsp;&nbsp;<span id="pnios">ios包名</span>&nbsp;&nbsp;&nbsp;&nbsp;
                         	</p>
                             <table class="table" style="text-align: center">
                                 <thead>
@@ -289,7 +289,7 @@
         <!-- JavaScripts initializations and stuff -->
         <script src="../static/js/xenon/xenon-custom.js"></script>
         <script src="../static/js/public.js?v=2"></script>
-    	<script src="../static/js/app_function.js?v=5"></script>
+    	<script src="../static/js/app_function.js?v=6"></script>
     	<script src="../static/js/qrcode_function.js?v=1"></script>
  		<script>
  		$(document).ready(function(){
@@ -318,6 +318,11 @@
  	    	
  	    	//包名
  	    	getPackName(gameId);
+ 	    	
+ 	    	//悟空vip链接
+ 	    	if (gameState == 1) {//正式数据
+ 				getVipLink(gameId);
+ 			}
  		})
  		 
  		</script>

@@ -1,7 +1,5 @@
 package com.llmj.oss.manager;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -100,5 +98,17 @@ public class SwitchManager {
     	//TODO 系列操作
     	//删除redis 下载链接
     	//通知所有逻辑服 二维码地址连接改变
+    }
+    
+    /**
+     * 悟空vip ios签名总开关
+     * 无或0 为开 1为关
+     */
+    public boolean VipLinkSwitch() throws Exception {
+    	String flag = redis.get(RedisConsts.VIP_LINK_SWITCH_KEY);
+    	if (StringUtil.isEmpty(flag) || Integer.parseInt(flag) == 0) {
+    		return true;
+    	}
+    	return false;
     }
 }

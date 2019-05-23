@@ -35,7 +35,7 @@
 	function downLink() {
 		var link = document.getElementById("link").value;
 		var install = document.getElementById("install");
-		install.href = "itms-services://?action=download-manifest&url="+link;
+		install.href = link;
 		var icon = document.getElementById("aicon").value;
 		if (icon) {
 			document.getElementById("icon").src = icon;

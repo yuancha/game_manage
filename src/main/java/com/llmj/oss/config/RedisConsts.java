@@ -9,4 +9,7 @@ public class RedisConsts {
 	public static String FILE_LIST_KEY  = "file_list";	//file name
 	public static String FILE_Map_KEY  = "file_map_";	//name tableid test/online
 	public static String ICON_PATH_KEY  = "icon_path";	//图标文件路径 
+	
+	public static String VIP_LINK_SWITCH_KEY = "vip_link_switch";	//vip_link 是否开发开关 0或无默认开 1管
+	public static String VIP_LINK_KEY = "vip_link";		//ios vip链接地址存储 map存储
 }

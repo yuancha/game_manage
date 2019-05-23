@@ -22,6 +22,9 @@ $('#main-menu').find('a').on('click',function(){
 	$('.page-title').find('.active').find('a').html(name);
 	getFilesInfoByAjax(data); 
 	getPackName(gameId);
+	if (gameState == 1) {//正式数据
+		getVipLink(gameId);
+	}
 });
 
 function getPackName(gameId){
@@ -315,5 +318,64 @@ function editNotes(id) {
      }
 	});
 }
-
-
+/*
+ *	获得悟空vip链接 
+ */
+function getVipLink(gameId) {
+	var data = "gameId="+gameId;
+	$.ajax({
+		 //几个参数需要注意一下
+    type: "POST",//方法类型
+    dataType: "json",//预期服务器返回的数据类型
+    //contentType: "application/json; charset=utf-8",
+    url: "/down/getVipLink" ,//url
+    data: data,
+    success: function (result) {
+        if (result.code == 0) {
+            var viplink = result.data;
+            if($('#viplinkDiv').length > 0){
+            	$("#viplink").val(viplink);
+            }else{
+            	$('#wukongvip').append("<div id='viplinkDiv' style='display:inline-block'><span style='color:#000;font-size:15px;'>悟空vip签名链接 </span>" +
+                		"<input type='text' value='"+viplink+"' id='viplink' style='width:250px;'> " +
+                				"<button onclick='upVipLink();'>保存</button></div>");
+            }
+            
+        }else{
+      	  alert(result.message);
+        }
+    },
+    error : function() {
+        alert("异常！");
+    }
+	});
+}
+/*
+ * 更新悟空vip链接
+ */
+function upVipLink() {
+	
+	if (window.confirm('确定保存吗？')) {
+		var data = "gameId="+$('#gameId').val()+"&link="+$('#viplink').val();
+		console.log(data);
+		$.ajax({
+			 //几个参数需要注意一下
+	    type: "POST",//方法类型
+	    dataType: "json",//预期服务器返回的数据类型
+	    //contentType: "application/json; charset=utf-8",
+	    url: "/down/upVipLink" ,//url
+	    data: data,
+	    success: function (result) {
+	        if (result.code == 0) {
+	            
+	        }else{
+	      	  alert(result.message);
+	        }
+	    },
+	    error : function() {
+	        alert("异常！");
+	    }
+		});
+	}
+	
+}

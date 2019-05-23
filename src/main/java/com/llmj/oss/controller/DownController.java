@@ -8,21 +8,23 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.llmj.oss.config.IConsts;
 import com.llmj.oss.config.RedisConsts;
-import com.llmj.oss.dao.DomainDao;
+import com.llmj.oss.config.RespCode;
 import com.llmj.oss.dao.DownDao;
 import com.llmj.oss.dao.GameControlDao;
 import com.llmj.oss.dao.OssConnectDao;
 import com.llmj.oss.dao.UploadDao;
-import com.llmj.oss.manager.AliOssManager;
+import com.llmj.oss.manager.OpLogManager;
 import com.llmj.oss.manager.SwitchManager;
 import com.llmj.oss.model.DownLink;
 import com.llmj.oss.model.GameControl;
 import com.llmj.oss.model.OssConnect;
+import com.llmj.oss.model.RespEntity;
 import com.llmj.oss.model.UploadFile;
 import com.llmj.oss.util.FileUtil;
 import com.llmj.oss.util.RedisTem;
@@ -50,10 +52,6 @@ public class DownController {
 	private UploadDao uploadDao;
 	@Autowired
 	private DownDao downDao;
-	@Autowired
-	private DomainDao domainDao;
-	@Autowired 
-	private AliOssManager ossMgr;
 	@Autowired 
 	private SwitchManager switchMgr;
 	@Autowired 
@@ -67,7 +65,12 @@ public class DownController {
 	public String downLink(Model model,HttpServletRequest request) {
 		String gameState = request.getParameter("gameState");
 		String gameId = request.getParameter("gameId");
+		
 		try {
+			if (StringUtil.isEmpty(gameId) || StringUtil.isEmpty(gameState)) {
+				log.error("downLink param error, gameId : {}, gameState : {}", gameId, gameState);
+				return "error";
+			}
 			gameState = gameState.trim();
 			gameId = gameId.trim();
 			String userAgent = request.getHeader("user-agent").toLowerCase();
@@ -79,8 +82,16 @@ public class DownController {
 				linkid = gameId + "_" + gameState + "_" + IConsts.UpFileType.Android.getType();
 			}else if(userAgent.indexOf("iphone") != -1 || userAgent.indexOf("ipad") != -1 || userAgent.indexOf("ipod") != -1){
 			   //苹果
-				html = "html/links/ios";
-				linkid = gameId + "_" + gameState + "_" + IConsts.UpFileType.Ios.getType();
+				//检查是否有悟空链接
+				String viplink = VIPLink(gameId);
+				if (StringUtil.isEmpty(viplink)) {
+					html = "html/links/ios";
+					linkid = gameId + "_" + gameState + "_" + IConsts.UpFileType.Ios.getType();
+				} else {
+					log.debug("wukong viplink : {} ,gameId : {}", viplink, gameId);
+					return "redirect:"+viplink;//重定向转发到悟空vip下载
+				}
+				
 			}else{
 				//userAgent.indexOf("micromessenger")!= -1 微信
 			    //电脑
@@ -110,6 +121,10 @@ public class DownController {
 					return "error";
 				}
 				redis.setPre(RedisConsts.PRE_LINK_KEY, linkid, link);
+			}
+			
+			if ("html/links/ios".equals(html)) {//iso
+				link = "itms-services://?action=download-manifest&url=" + link;
 			}
 			
 			model.addAttribute("downlink", link);
@@ -213,4 +228,56 @@ public class DownController {
 		}
 	}
 	
+	/*
+	 * 悟空vip链接修改
+	 */
+	@PostMapping("/upVipLink") 
+    @ResponseBody
+    public RespEntity upDateVipLink(HttpServletRequest request, @RequestParam("gameId") String gameId, @RequestParam("link") String link) {
+		log.debug("upDateVipLink, gameId : {}, link : {}", gameId, link);
+        try {
+        	redis.hset(RedisConsts.VIP_LINK_KEY, gameId, link);
+        	/*String account = (String) request.getSession().getAttribute("account");
+        	StringBuilder sb = new StringBuilder("oss连接删除，内容：");
+			sb.append(StringUtil.objToJson(old));
+			logMgr.opLogSave(account,OpLogManager.oss_log,sb.toString());*/
+        } catch (Exception e) {
+            log.error("upDateVipLink error,Exception -> {}",e);
+            return new RespEntity(RespCode.SERVER_ERROR);
+        }
+        return new RespEntity(RespCode.SUCCESS);
+    }
+	
+	/*
+	 * 悟空vip链接修改
+	 */
+	@PostMapping("/getVipLink") 
+    @ResponseBody
+    public RespEntity getVipLink(String gameId) {
+		RespEntity result = new RespEntity(RespCode.SUCCESS);
+        try {
+        	String link = VIPLink(gameId);
+        	result.setData(link);
+        } catch (Exception e) {
+            log.error("getVipLink error,Exception -> {}",e);
+            return new RespEntity(RespCode.SERVER_ERROR);
+        }
+        return result;
+    }
+	
+	/*
+	 * 获取悟空vip签名的链接
+	 */
+	private String VIPLink(String gameId) {
+		String link = "";
+		try {
+			if (switchMgr.VipLinkSwitch()) {
+				link = redis.hget(RedisConsts.VIP_LINK_KEY, gameId);
+				link = link == null ? "" : link;
+			}
+		} catch (Exception e) {
+			log.error("VIPLink error, e : {}", e);
+		}
+		return link;
+	}
 }
