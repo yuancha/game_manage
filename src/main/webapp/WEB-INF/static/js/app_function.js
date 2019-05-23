@@ -340,7 +340,6 @@ function getVipLink(gameId) {
                 		"<input type='text' value='"+viplink+"' id='viplink' style='width:250px;'> " +
                 				"<button onclick='upVipLink();'>保存</button></div>");
             }
-            
         }else{
       	  alert(result.message);
         }
@@ -357,7 +356,6 @@ function upVipLink() {
 	
 	if (window.confirm('确定保存吗？')) {
 		var data = "gameId="+$('#gameId').val()+"&link="+$('#viplink').val();
-		console.log(data);
 		$.ajax({
 			 //几个参数需要注意一下
 	    type: "POST",//方法类型
