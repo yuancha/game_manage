@@ -81,17 +81,16 @@ public class DownController {
 				html = "html/links/android";
 				linkid = gameId + "_" + gameState + "_" + IConsts.UpFileType.Android.getType();
 			}else if(userAgent.indexOf("iphone") != -1 || userAgent.indexOf("ipad") != -1 || userAgent.indexOf("ipod") != -1){
-			   //苹果
+				//苹果
 				//检查是否有悟空链接
 				String viplink = VIPLink(gameId);
-				if (StringUtil.isEmpty(viplink)) {
-					html = "html/links/ios";
-					linkid = gameId + "_" + gameState + "_" + IConsts.UpFileType.Ios.getType();
-				} else {
+				if (!StringUtil.isEmpty(viplink) && "1".equals(gameState)) {//链接不为空 并且是正式数据
 					log.debug("wukong viplink : {} ,gameId : {}", viplink, gameId);
 					return "redirect:"+viplink;//重定向转发到悟空vip下载
+				} else {
+					html = "html/links/ios";
+					linkid = gameId + "_" + gameState + "_" + IConsts.UpFileType.Ios.getType();
 				}
-				
 			}else{
 				//userAgent.indexOf("micromessenger")!= -1 微信
 			    //电脑
