@@ -29,7 +29,20 @@
 			event.initEvent("click", true, true);
 			document.getElementById("install").dispatchEvent(event);
 		}
+		if(isWeiXin()){
+	        var w = document.getElementById('weixin');
+	        weixin.style.display="block";
+	    } 
 		downLink();
+	}
+	
+	function isWeiXin(){
+	    var ua = window.navigator.userAgent.toLowerCase();
+	    if(ua.match(/MicroMessenger/i) == 'micromessenger'){
+	        return true;
+	    }else{
+	        return false;
+	    }
 	}
 	
 	function downLink() {
