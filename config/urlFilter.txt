@@ -6,3 +6,4 @@
 /error
 /qrCode/getIconLink
 /qrCode/icons
+/down/jump1Link

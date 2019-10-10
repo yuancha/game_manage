@@ -12,4 +12,6 @@ public class RedisConsts {
 	
 	public static String VIP_LINK_SWITCH_KEY = "vip_link_switch";	//vip_link 是否开发开关 0或无默认开 1管
 	public static String VIP_LINK_KEY = "vip_link";		//ios vip链接地址存储 map存储
+	
+	public static String JUMP1_DOMAIN = "jump1_domain";	//跳转1链接
 }

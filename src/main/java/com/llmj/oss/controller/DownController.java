@@ -73,62 +73,17 @@ public class DownController {
 			}
 			gameState = gameState.trim();
 			gameId = gameId.trim();
-			String userAgent = request.getHeader("user-agent").toLowerCase();
-			String html = "";
-			String linkid = "";
-			if(userAgent.indexOf("android") != -1){
-			    //安卓
-				html = "html/links/android";
-				linkid = gameId + "_" + gameState + "_" + IConsts.UpFileType.Android.getType();
-			}else if(userAgent.indexOf("iphone") != -1 || userAgent.indexOf("ipad") != -1 || userAgent.indexOf("ipod") != -1){
-				//苹果
-				//检查是否有悟空链接
-				String viplink = VIPLink(gameId);
-				if (!StringUtil.isEmpty(viplink) && "1".equals(gameState)) {//链接不为空 并且是正式数据
-					log.debug("wukong viplink : {} ,gameId : {}", viplink, gameId);
-					return "redirect:"+viplink;//重定向转发到悟空vip下载
-				} else {
-					html = "html/links/ios";
-					linkid = gameId + "_" + gameState + "_" + IConsts.UpFileType.Ios.getType();
-				}
-			}else{
-				//userAgent.indexOf("micromessenger")!= -1 微信
-			    //电脑
-				log.error("request info, userAgent -> {}",userAgent);
+			String jump1Domain = redis.getPre(RedisConsts.PRE_LINK_KEY, RedisConsts.JUMP1_DOMAIN);	//本地跳转链接
+			if (StringUtil.isEmpty(jump1Domain)) {
+				model.addAttribute("message", "1001");
+				log.error("本地域名跳转链接未找到， jump1DomainKey : {}", RedisConsts.JUMP1_DOMAIN);
 				return "error";
 			}
-			
-			String str = redis.getPre(RedisConsts.PRE_HTML_KEY, gameId);
-			JSONObject obj = JSON.parseObject(str);
-			if (obj != null) {
-				model.addAttribute("title", obj.get("title"));
-				model.addAttribute("h1", obj.get("h1"));
-				model.addAttribute("p1", obj.get("p1"));
-				model.addAttribute("p2", obj.get("p2"));
-				model.addAttribute("p3", obj.get("p3"));
-				model.addAttribute("icon", obj.get("icon"));
-				model.addAttribute("logo", obj.get("logo"));
-				model.addAttribute("ios", obj.get("ios"));
-			}
-			
-			String link = redis.getPre(RedisConsts.PRE_LINK_KEY, linkid);
-			if (StringUtil.isEmpty(link)) {
-				//连接配置 动态获取
-				link = getLink(linkid,Integer.parseInt(gameId),request,gameState);
-				if ("error".equals(link)) {
-					model.addAttribute("message", "server error!");
-					return "error";
-				}
-				redis.setPre(RedisConsts.PRE_LINK_KEY, linkid, link);
-			}
-			
-			if ("html/links/ios".equals(html)) {//iso
-				link = "itms-services://?action=download-manifest&url=" + link;
-			}
-			
-			model.addAttribute("downlink", link);
-			log.debug("获得动态链接，gameId:{},gameState:{},link:{}",gameId,gameState,link);
-			return html;
+			model.addAttribute("gameState", gameState);
+			model.addAttribute("gameId", gameId);
+			model.addAttribute("domain", jump1Domain);
+			log.debug("本地域名跳转链接，gameId:{},gameState:{},jumpDomain:{}",gameId,gameState,jump1Domain);
+			return "html/links/jump1";
 		} catch (Exception e) {
 			log.error("downLink error,gameId,gameState,Exception -> {}",gameId,gameState,e);
 		}
@@ -278,5 +233,79 @@ public class DownController {
 			log.error("VIPLink error, e : {}", e);
 		}
 		return link;
+	}
+	
+	@GetMapping("/jump1Link")
+	public String jump1DownLink(Model model,HttpServletRequest request) {
+		String gameState = request.getParameter("gameState");
+		String gameId = request.getParameter("gameId");
+		
+		try {
+			if (StringUtil.isEmpty(gameId) || StringUtil.isEmpty(gameState)) {
+				log.error("jump1DownLink param error, gameId : {}, gameState : {}", gameId, gameState);
+				return "error";
+			}
+			gameState = gameState.trim();
+			gameId = gameId.trim();
+			String userAgent = request.getHeader("user-agent").toLowerCase();
+			String html = "";
+			String linkid = "";
+			if(userAgent.indexOf("android") != -1){
+			    //安卓
+				html = "html/links/android";
+				linkid = gameId + "_" + gameState + "_" + IConsts.UpFileType.Android.getType();
+			}else if(userAgent.indexOf("iphone") != -1 || userAgent.indexOf("ipad") != -1 || userAgent.indexOf("ipod") != -1){
+				//苹果
+				//检查是否有悟空链接
+				String viplink = VIPLink(gameId);
+				if (!StringUtil.isEmpty(viplink) && "1".equals(gameState)) {//链接不为空 并且是正式数据
+					log.debug("wukong viplink : {} ,gameId : {}", viplink, gameId);
+					return "redirect:"+viplink;//重定向转发到悟空vip下载
+				} else {
+					html = "html/links/ios";
+					linkid = gameId + "_" + gameState + "_" + IConsts.UpFileType.Ios.getType();
+				}
+			}else{
+				//userAgent.indexOf("micromessenger")!= -1 微信
+			    //电脑
+				log.error("request info, userAgent -> {}",userAgent);
+				return "error";
+			}
+			
+			String str = redis.getPre(RedisConsts.PRE_HTML_KEY, gameId);
+			JSONObject obj = JSON.parseObject(str);
+			if (obj != null) {
+				model.addAttribute("title", obj.get("title"));
+				model.addAttribute("h1", obj.get("h1"));
+				model.addAttribute("p1", obj.get("p1"));
+				model.addAttribute("p2", obj.get("p2"));
+				model.addAttribute("p3", obj.get("p3"));
+				model.addAttribute("icon", obj.get("icon"));
+				model.addAttribute("logo", obj.get("logo"));
+				model.addAttribute("ios", obj.get("ios"));
+			}
+			
+			String link = redis.getPre(RedisConsts.PRE_LINK_KEY, linkid);
+			if (StringUtil.isEmpty(link)) {
+				//连接配置 动态获取
+				link = getLink(linkid,Integer.parseInt(gameId),request,gameState);
+				if ("error".equals(link)) {
+					model.addAttribute("message", "server error!");
+					return "error";
+				}
+				redis.setPre(RedisConsts.PRE_LINK_KEY, linkid, link);
+			}
+			
+			if ("html/links/ios".equals(html)) {//iso
+				link = "itms-services://?action=download-manifest&url=" + link;
+			}
+			
+			model.addAttribute("downlink", link);
+			log.debug("获得动态链接，gameId:{},gameState:{},link:{}",gameId,gameState,link);
+			return html;
+		} catch (Exception e) {
+			log.error("jump1DownLink error,gameId,gameState,Exception -> {}",gameId,gameState,e);
+		}
+		return "error";
 	}
 }

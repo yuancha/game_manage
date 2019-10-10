@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title></title>
+</head>
+<script>
+	
+	function jump1() {
+		var gameId = document.getElementById("gameId").value;
+		console.log(gameId);
+		var gameState = document.getElementById("gameState").value;
+		var domain = document.getElementById("domain").value;
+		window.location.href="http://"+domain+"/down/jump1Link?gameId="+gameId+"&gameState="+gameState;
+	}
+			
+</script>
+<body onload="jump1();">
+	<input type="hidden" th:value="${gameId}" id="gameId"/>
+    <input type="hidden" th:value="${gameState}" id="gameState"/>
+    <input type="hidden" th:value="${domain}" id="domain"/>
+</body>
+</html>
