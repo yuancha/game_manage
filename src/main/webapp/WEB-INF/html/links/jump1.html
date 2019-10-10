@@ -2,13 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Expires" content="0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-control" content="no-cache">
+<meta http-equiv="Cache" content="no-cache">
 <title></title>
 </head>
 <script>
 	
 	function jump1() {
 		var gameId = document.getElementById("gameId").value;
-		console.log(gameId);
 		var gameState = document.getElementById("gameState").value;
 		var domain = document.getElementById("domain").value;
 		window.location.href="http://"+domain+"/down/jump1Link?gameId="+gameId+"&gameState="+gameState;
