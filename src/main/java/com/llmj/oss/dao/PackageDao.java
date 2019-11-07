@@ -23,10 +23,10 @@ public interface PackageDao {
 	
 	/*根据安卓或是ios包名查找类*/
 	@Select("select * from package_name where ios=#{pack}")
-	PackageName selectByIos(@Param("pack") String pack);
+	List<PackageName> selectByIos(@Param("pack") String pack);
 	
 	@Select("select * from package_name where android=#{pack}")
-	PackageName selectByAndroid(@Param("pack") String pack);
+	List<PackageName> selectByAndroid(@Param("pack") String pack);
 	
 	@Select("select * from package_name order by gameId")
 	List<PackageName> getAll();
@@ -36,4 +36,7 @@ public interface PackageDao {
 	
 	@Delete("delete from package_name where gameId=#{gameId}")
 	void delPack(@Param("gameId") int gameId);
+	
+	@Select("select * from package_name where content=#{content}")
+	PackageName selectByGameName(@Param("content") String gameName);
 }

@@ -30,8 +30,8 @@ public interface UploadDao {
 	@Select("select * from ${tableName} where id=#{id}")
 	UploadFile selectById(@Param("id") int id,@Param("tableName") String tableName);
 	
-	@Select("select * from ${tableName} where packName = #{packName} and type = #{type} and state = 1 order by upTime desc")
-	List<UploadFile> getFiles(@Param("tableName") String tableName,@Param("packName") String packName,@Param("state") int state,@Param("type") int type);
+	@Select("select * from ${tableName} where gameId = #{gameId} and type = #{type} and state = 1 order by upTime desc")
+	List<UploadFile> getFiles(@Param("tableName") String tableName,@Param("gameId") int gameId,@Param("state") int state,@Param("type") int type);
 	
 	@Update("update ${tableName} set state=#{file.state},operTime=now() where id=#{file.id}")
 	void updateState1(@Param("tableName") String tableName,@Param("file") UploadFile file);
@@ -42,8 +42,8 @@ public interface UploadDao {
 	@Update("update ${tableName} set state=#{after} where state=#{before} and packName=#{file.packName} and type=#{file.type}")
 	void updateState(@Param("tableName") String tableName,@Param("before") int before,@Param("after") int after,@Param("file") UploadFile file);
 	
-	@Select("select * from ${tableName} where packName = #{packName} and type = #{type} and state = #{state}")
-	List<UploadFile> selectOnline(@Param("tableName") String tableName,@Param("packName") String packName,@Param("state") int state,@Param("type") int type);
+	@Select("select * from ${tableName} where gameId = #{gameId} and type = #{type} and state = #{state}")
+	List<UploadFile> selectOnline(@Param("tableName") String tableName,@Param("gameId") int gameId,@Param("state") int state,@Param("type") int type);
 	
 	@Select("select * from ${tableName} where gameId=#{gameId} and localPath=#{localPath}")
 	UploadFile selectByLocalPath(@Param("gameId") int gameId,@Param("tableName") String tableName,@Param("localPath") String localPath);

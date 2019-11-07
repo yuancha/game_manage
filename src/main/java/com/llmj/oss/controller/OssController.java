@@ -110,22 +110,17 @@ public class OssController {
 			int state = param.getGameState();
 			//log.debug("getFilesInfo param,gameId:{},type:{},state:{}",gameId,type,state);
 			
-			String packName = packMgr.getPackName(gameId,type);
-			if (StringUtil.isEmpty(packName)) {
-				return new RespEntity(RespCode.GAME_PACKAGE);
-			}
 			String tableName = getTableName(state);
-			
-			List<UploadFile> online = uploadDao.selectOnline(tableName,packName, IConsts.UpFileState.online.getState(), type);
+			List<UploadFile> online = uploadDao.selectOnline(tableName,gameId, IConsts.UpFileState.online.getState(), type);
 			if (online.size() > 1) {
-				log.error("线上版本数据出错，size : {},packName:{},type:{}",online.size(),packName,type);
+				log.error("线上版本数据出错，size : {},gameId:{},type:{}",online.size(),gameId,type);
 				return new RespEntity(-2,"线上版本数据出错");
 			}
 			if (!online.isEmpty()) {
 				resp.setOnline(online.get(0));
 				data.add(online.get(0));
 			}
-			data.addAll(uploadDao.getFiles(tableName,packName, IConsts.UpFileState.delete.getState(), type));
+			data.addAll(uploadDao.getFiles(tableName,gameId, IConsts.UpFileState.delete.getState(), type));
 			resp.setData(data);
 		} catch (Exception e) {
 			log.error("getFilesInfo error,Exception -> {}",e);

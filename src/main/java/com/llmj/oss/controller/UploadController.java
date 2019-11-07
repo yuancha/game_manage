@@ -132,11 +132,12 @@ public class UploadController {
             }
             FileUtil.deleteFile(filePath);	//删除临时存放
             String packName = (String) tmpMap.get("package");
+            String gameName = (String) tmpMap.get("name");
             //包名验证
-            PackageName pn = packMgr.isContainPackage(packName,type);
+            PackageName pn = packMgr.getPackInfo(packName,type, gameName);
             if (packName == null || pn == null) {
-            	log.error("文件非法，packName : {}",packName);
-            	return new RespEntity(-2,"文件包错误，"+packName);
+            	log.error("文件非法，未找到对应包信息, packName : {}, gameName : {}",packName, gameName);
+            	return new RespEntity(-2,"文件包信息错误，包名 ："+packName+ " 游戏名 : "+gameName);
             }
             
             int gameId = pn.getGameId();

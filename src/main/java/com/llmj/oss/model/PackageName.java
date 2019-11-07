@@ -17,7 +17,7 @@ public class PackageName implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	private int gameId;		//gameId
-	private String content;	//描述
+	private String content;	//游戏名称 作为唯一标识查找gameid 主要用ios查找
 	private String android;	//安卓包名
 	private String ios;	//ios包名
 }

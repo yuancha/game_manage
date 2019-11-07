@@ -1,5 +1,8 @@
 package com.llmj.oss.manager;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -39,47 +42,44 @@ public class PackManager {
 	 * @param gameId
 	 * @return
 	 */
-	public String getPackName(int gameId,int type) {
-		PackageName pn = packDao.selectById(gameId);
-		if (pn == null) {
-			return "";
-		}
-		if (type == IConsts.UpFileType.Android.getType()) {
-			return pn.getAndroid();
-		}
-		return pn.getIos();
-	}
+//	public String getPackName(int gameId,int type) {
+//		PackageName pn = packDao.selectById(gameId);
+//		if (pn == null) {
+//			return "";
+//		}
+//		if (type == IConsts.UpFileType.Android.getType()) {
+//			return pn.getAndroid();
+//		}
+//		return pn.getIos();
+//	}
 	
 	/**
-	 * 包名是否合理
+	 * 获得包信息
 	 * @param packName
 	 * @return
 	 */
-	public PackageName isContainPackage(String packName,int type) {
+	public PackageName getPackInfo(String packName,int type, String gameName) {
 		PackageName pn = null;
-		if (type == IConsts.UpFileType.Android.getType()) {
-			pn = packDao.selectByAndroid(packName);
-		} else {
-			pn = packDao.selectByIos(packName);
+		try {
+			
+			pn = packDao.selectByGameName(gameName);
+			
+			if (pn != null) {
+				return pn;
+			}
+			List<PackageName> list = new ArrayList<>();
+			if (type == IConsts.UpFileType.Android.getType()) {
+				list = packDao.selectByAndroid(packName);
+			} else {
+				list = packDao.selectByIos(packName);
+			}
+			if (list.size() == 1) {//只有一个
+				pn = list.get(0);
+			} 
+		} catch (Exception e) {
+			log.debug("查找包信息失败 e : {}", e);
 		}
 		return pn;
 	}
 	
-	/**
-	 * 根据包名获得游戏id
-	 * @param packName
-	 * @return
-	 */
-	public int getGameIdByPack(String packName,int type) {
-		PackageName pn = null;
-		if (type == IConsts.UpFileType.Android.getType()) {
-			pn = packDao.selectByAndroid(packName);
-		} else {
-			pn = packDao.selectByIos(packName);
-		}
-		if (pn == null) {
-			return 0;
-		}
-		return pn.getGameId();
-	}
 }

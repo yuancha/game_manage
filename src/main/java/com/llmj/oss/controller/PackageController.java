@@ -66,6 +66,14 @@ public class PackageController {
 	public RespEntity packAdd(@RequestBody PackOperation model,HttpServletRequest request) {
 		try {
 			PackageName pn = objChange(model);
+			String gameName = pn.getContent();
+			if (StringUtil.isEmpty(gameName)) {
+				return new RespEntity(-1, "游戏名称不能为空");
+			}
+			PackageName tmp = packDao.selectByGameName(gameName);
+			if (tmp != null) {
+				return new RespEntity(-1, "游戏名称已存在");
+			}
 			packDao.savePack(pn);
 			log.info("pack add success,info : {}",StringUtil.objToJson(pn));
 			

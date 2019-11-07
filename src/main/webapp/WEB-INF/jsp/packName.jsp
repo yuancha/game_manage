@@ -33,7 +33,7 @@
                 	<thead>
                 		<tr>
 						<th>游戏ID</th>
-						<th>游戏描述</th>
+						<th>游戏名称</th>
 						<th>android</th>
 						<th>iOS</th>
 						<th>操作</th>
@@ -71,16 +71,16 @@
                         <input type="text" name="gameId" class="form-control" id="gameId" placeholder="">
                     </div>
                     <div class="form-group">
-                        <label for="txt_parentdepartment">游戏描述</label>
-                        <input type="text" name="content" class="form-control" id="content" placeholder="">
+                        <label for="txt_parentdepartment">游戏名称</label>
+                        <input type="text" name="content" class="form-control" id="content" placeholder="安装包内游戏名称">
                     </div>
                     <div class="form-group">
                         <label for="txt_departmentlevel">android</label>
-                        <input type="text" name="android" class="form-control" id="android" placeholder="">
+                        <input type="text" name="android" class="form-control" id="android" placeholder="唯一">
                     </div>
                     <div class="form-group">
                         <label for="txt_statu">ios</label>
-                        <input type="text" name="ios" class="form-control" id="ios" placeholder="">
+                        <input type="text" name="ios" class="form-control" id="ios" placeholder="可以不唯一">
                     </div>
                 </div>
                 <div class="modal-footer">
