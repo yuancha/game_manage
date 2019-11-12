@@ -143,7 +143,7 @@
         							<br>
         							<input type="button" value="上传" onclick="upload()">
 							    </form>
-							    <iframe name="frame1" frameborder="0" height="40"></iframe>
+							    <iframe name="frame1" frameborder="0" height="40" width="500"></iframe>
 	                    	</div>
 	                    </div>
                   </div>

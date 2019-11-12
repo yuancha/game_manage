@@ -180,11 +180,16 @@ public class UploadController {
             //TODO 某种通知方式
             
             upFileLog(request,tmpMap);
+            StringBuilder succInfo = new StringBuilder();
+            succInfo.append("上传成功。");
+            succInfo.append(" 游戏id:").append(gameId);
+            succInfo.append(" 游戏名:").append(gameName);
+            succInfo.append(" 包名：").append(packName);
+            return new RespEntity(0, succInfo.toString());
         } catch (Exception e) {
             log.error("singleFileUpload error,Exception -> {}",e);
             return new RespEntity(RespCode.SERVER_ERROR);
         }
-        return new RespEntity(0,"上传成功");
     }
     
     private int saveUploadLog(Map<String,Object> map) {
