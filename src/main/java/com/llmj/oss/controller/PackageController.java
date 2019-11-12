@@ -97,6 +97,14 @@ public class PackageController {
 			if (old == null) {
 				return new RespEntity(-2,"数据错误");
 			}
+			
+			if (!old.getContent().equals(pn.getContent())) {//包名不一样 验证是否有重名
+				PackageName tmp = packDao.selectByGameName(pn.getContent());
+				if (tmp != null) {
+					return new RespEntity(-1, "游戏名称已存在");
+				}
+			}
+			
 			packDao.updatePack(pn);
 			log.info("pack update success,info : {}",StringUtil.objToJson(pn));
 			

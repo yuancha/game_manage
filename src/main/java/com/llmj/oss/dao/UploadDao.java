@@ -39,7 +39,7 @@ public interface UploadDao {
 	@Update("update ${tableName} set state=#{file.state},operTime=now(),ossPath=#{file.ossPath} where id=#{file.id}")
 	void delFile(@Param("tableName") String tableName,@Param("file") UploadFile file);
 	
-	@Update("update ${tableName} set state=#{after} where state=#{before} and packName=#{file.packName} and type=#{file.type}")
+	@Update("update ${tableName} set state=#{after} where state=#{before} and gameId=#{file.gameId} and type=#{file.type}")
 	void updateState(@Param("tableName") String tableName,@Param("before") int before,@Param("after") int after,@Param("file") UploadFile file);
 	
 	@Select("select * from ${tableName} where gameId = #{gameId} and type = #{type} and state = #{state}")
