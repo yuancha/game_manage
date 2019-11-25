@@ -247,6 +247,9 @@ public class DownController {
 			}
 			gameState = gameState.trim();
 			gameId = gameId.trim();
+			if (gameId.equals("500000") || gameId.equals("888888")) {
+				gameId = "201938";	//58阜阳 淮北 转向 发发安徽下载
+			}
 			String userAgent = request.getHeader("user-agent").toLowerCase();
 			String html = "";
 			String linkid = "";
